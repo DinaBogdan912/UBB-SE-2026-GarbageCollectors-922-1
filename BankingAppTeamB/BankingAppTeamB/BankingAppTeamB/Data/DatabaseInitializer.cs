@@ -13,7 +13,7 @@ namespace BankingAppTeamB.Data
         public static void Initialize()
         {
             string databasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database");
-            //if (!Directory.Exists(databasePath)) return;
+            if (!Directory.Exists(databasePath)) return;
             var scripts = Directory.GetFiles(databasePath, "*.sql");
             Array.Sort(scripts);
 
