@@ -143,5 +143,50 @@ namespace BankingAppTeamB.Services
             _exchangeRepository.DeleteAlert(id);
         }
 
+        public void CheckRateAlerts()
+        {
+            List<RateAlert> activeAlerts = _exchangeRepository.GetAllActiveAlerts();
+
+            foreach (RateAlert alert in activeAlerts)
+            {
+                var targetRate = alert.getTargetRate();
+                var currentRate = GetRate(alert.getBaseCurrency(), alert.getTargetCurrency());
+
+                if (alert.isBuyAlert())
+                {
+                    if (currentRate <= targetRate)
+                    {
+                        Console.WriteLine("The current rate is below the target rate for alert with id " + alert.Id);
+                    }
+                }
+                else
+                {
+                    if (currentRate > targetRate)
+                    {
+                        Console.WriteLine("The current rate is above the  target rate for alert with id: " +  alert.Id);
+                    }
+                }
+            }
+            
+            
+        }
+        
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
