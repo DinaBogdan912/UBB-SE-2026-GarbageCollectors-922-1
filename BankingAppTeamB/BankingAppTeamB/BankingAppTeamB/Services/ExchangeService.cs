@@ -1,0 +1,108 @@
+﻿using BankingAppTeamB.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankingAppTeamB.Services
+{
+    public class ExchangeService
+    {
+        private readonly IExchangeRepository _exchangeRepository;
+        private readonly TransactionPipelineService _transactionPipelineService;
+
+        private Dictionary<string, decimal> _cachedRates;
+        private DateTime _ratesLastFetched;
+
+        private readonly Dictionary<int, LockedRate> _lockedRates = new();
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(30);
+
+        public ExchangeService(IExchangeRepository exchangeRepository, TransactionPipelineService transactionPipelineService)
+        {
+            _exchangeRepository=exchangeRepository;
+            _transactionPipelineService=transactionPipelineService;
+        }
+
+        public Dictionary<string, decimal> GetLiveRates()
+        {
+            if (_cachedRates != null && DateTime.UtcNow - _ratesLastFetched < CacheDuration)
+                return _cachedRates;
+
+            Dictionary<string, decimal> rates = new Dictionary<string, decimal>
+            {
+                { "EUR/USD", 1.15m },
+                { "EUR/GBP", 0.86m },
+                { "EUR/RON", 5.09m },
+                { "USD/RON", 4.41m },
+                { "GBP/RON", 5.90m}
+            };
+
+            //compute the inverses to be easier if changes needed
+            List<string> keys =new List<string>(rates.Keys);
+            foreach(string pair in keys)
+            {
+                string[] parts = pair.Split('/');
+                string inverseKey = $"{parts[1]}/{parts[0]}";
+                rates[inverseKey] = 1 / rates[pair];
+            }
+
+            _cachedRates = rates;
+            _ratesLastFetched = DateTime.UtcNow;
+            return _cachedRates;
+        }
+
+        public decimal GetRate(string from, String to)
+        {
+            Dictionary<string, decimal> rates = GetLiveRates();
+            string key = $"{from}/{to}";
+
+            if(rates.ContainsKey(key))
+                return rates[key];
+
+            string inverseKey = $"{to}/{from}";
+            if (rates.ContainsKey(inverseKey))
+                return 1/ rates[inverseKey];
+
+            throw new Exception($"rate not found for pair {from}/{to}");
+        }
+
+        public LockedRate LockRate(int userId , string from, String to)
+        {
+            decimal rate = GetRate(from, to);
+
+            LockedRate lockedRate = new LockedRate
+            {
+                UserId = userId,
+                CurrencyPair = $"{from}/{to}",
+                Rate = rate,
+                LockedAt = DateTime.UtcNow
+            };
+            _lockedRates[userId]= lockedRate;
+            return lockedRate;
+        }
+
+        public bool IsRateLockValid(int userId) {
+            if (!_lockedRates.ContainsKey(userId))
+                return false;
+            return !_lockedRates[userId].IsExpired();
+        }
+
+        public decimal CalculateCommission(decimal amount)
+        {
+            decimal percentage = amount * 0.005m;
+            return Math.Max(0.50m, percentage);
+        }
+
+        public decimal CalculateTargetAmount(decimal sourceAmount,decimal rate)
+        {   
+            decimal commission= CalculateCommission(sourceAmount);
+            return sourceAmount * rate - commission;
+        }
+
+
+
+
+
+    }
+}
