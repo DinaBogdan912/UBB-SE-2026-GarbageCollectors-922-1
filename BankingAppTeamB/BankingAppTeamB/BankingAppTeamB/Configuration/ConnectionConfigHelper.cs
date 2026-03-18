@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace BankingAppTeamB.Configuration;
 
-public static class ConfigHelper
+public static class ConnectionConfigHelper
 {
     public static string GetConnectionString()
     {

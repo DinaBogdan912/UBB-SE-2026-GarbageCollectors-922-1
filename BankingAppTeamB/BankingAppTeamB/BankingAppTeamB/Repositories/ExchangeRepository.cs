@@ -10,7 +10,7 @@ public class ExchangeRepository  : IExchangeRepository
 {
     public ExchangeTransaction Add(ExchangeTransaction t)
     {
-        using var conn = new SqlConnection(ConfigHelper.GetConnectionString());
+        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
         
         var query = @" INSERT INTO ExchangeTransaction
@@ -42,7 +42,7 @@ public class ExchangeRepository  : IExchangeRepository
     {
         var list = new List<ExchangeTransaction>();
         
-        using var conn = new SqlConnection(ConfigHelper.GetConnectionString());
+        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
         
         var query = @"
@@ -78,7 +78,7 @@ public class ExchangeRepository  : IExchangeRepository
     public List<RateAlert> GetUserActiveAlerts(int userId)
     {
         var list = new List<RateAlert>();
-        using var conn = new SqlConnection(ConfigHelper.GetConnectionString());
+        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
         
         var query = @"
@@ -115,7 +115,7 @@ public class ExchangeRepository  : IExchangeRepository
     public List<RateAlert> GetAllActiveAlerts()
     {
         var list = new List<RateAlert>();
-        using var conn = new SqlConnection(ConfigHelper.GetConnectionString());
+        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
         
         var query = "SELECT * FROM RateAlert WHERE IsTriggered = 0";
@@ -133,7 +133,7 @@ public class ExchangeRepository  : IExchangeRepository
 
     public RateAlert AddAlert(RateAlert alert)
     {
-        using var conn = new SqlConnection(ConfigHelper.GetConnectionString());
+        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
         
         var query = @"
@@ -157,7 +157,7 @@ public class ExchangeRepository  : IExchangeRepository
 
     public void DeleteAlert(int id)
     {
-        using var conn = new SqlConnection(ConfigHelper.GetConnectionString());
+        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
         
         var cmd = new SqlCommand("DELETE FROM RateAlert WHERE Id = @id", conn);
@@ -168,7 +168,7 @@ public class ExchangeRepository  : IExchangeRepository
 
     public void MarkAlertTriggered(int id)
     {
-        using var conn = new SqlConnection(ConfigHelper.GetConnectionString());
+        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
         
         var cmd = new SqlCommand(
