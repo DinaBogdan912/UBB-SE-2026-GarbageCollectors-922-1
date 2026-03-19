@@ -1,4 +1,4 @@
-namespace BankingAppTeamB.Models
+namespace BankingAppTeamB.Models.DTOs
 {
     public class TransferDto
     {
