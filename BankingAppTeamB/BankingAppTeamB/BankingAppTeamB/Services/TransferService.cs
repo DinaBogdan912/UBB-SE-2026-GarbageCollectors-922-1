@@ -53,12 +53,12 @@ namespace BankingAppTeamB.Services
                 RecipientName = dto.RecipientName,
                 RecipientIBAN = dto.RecipientIBAN,
                 RecipientBankName = GetBankNameFromIBAN(dto.RecipientIBAN),
-                Amount = dto.Amount,
-                Currency = dto.Currency,
-                Fee = 0,
-                Reference = dto.Reference,
-                Status = "Completed",
-                CreatedAt = DateTime.UtcNow
+                Amount            = dto.Amount,
+                Currency          = dto.Currency,
+                Fee               = 0,
+                Reference         = dto.Reference,
+                Status            = "Completed",
+                CreatedAt         = DateTime.Now
             };
 
             transferRepo.Add(transfer);
