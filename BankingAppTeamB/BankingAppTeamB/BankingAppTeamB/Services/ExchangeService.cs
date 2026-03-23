@@ -1,14 +1,12 @@
-﻿using BankingAppTeamB.Models;
+﻿
+using BankingAppTeamB.Models;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BankingAppTeamB.Repositories;
-using Microsoft.IdentityModel.Tokens;
+
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Mocks;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace BankingAppTeamB.Services
@@ -174,12 +172,12 @@ namespace BankingAppTeamB.Services
 
         public RateAlert CreateAlert(int userId, string source, string target, decimal rate, bool isBuyAlert)
         {
-            if (source.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(source))
             {
                 throw new ArgumentException("source currency cannot be null or empty");
             }
 
-            if (target.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(target))
             {
                 throw new ArgumentException("target currency cannot be null or empty");
             }

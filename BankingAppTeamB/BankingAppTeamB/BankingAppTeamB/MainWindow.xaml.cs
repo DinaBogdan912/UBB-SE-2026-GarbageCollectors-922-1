@@ -1,4 +1,3 @@
-using Azure;
 using BankingAppTeamB.Services;
 using BankingAppTeamB.Views;
 using Microsoft.UI.Xaml;

@@ -77,7 +77,7 @@ namespace BankingAppTeamB.Services
                 RelatedEntityId = 0
             };
 
-            var transaction = pipelineService.RunPipeline(context);
+            var transaction = transactionPipelineService.RunPipeline(context);
 
             string receiptNumber = $"RCP-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()}";
 

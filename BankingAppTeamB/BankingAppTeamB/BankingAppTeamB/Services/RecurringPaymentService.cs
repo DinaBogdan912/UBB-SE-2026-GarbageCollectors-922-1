@@ -24,7 +24,7 @@ namespace BankingAppTeamB.Services
             {
                 RecurringFrequency.Weekly => from.AddDays(7),
                 RecurringFrequency.Monthly => from.AddMonths(1),
-                RecurringFrequency.Quarterly => from.AddMonths(3),
+                RecurringFrequency.BiWeekly => from.AddMonths(3),
                 _ => throw new ArgumentOutOfRangeException(nameof(frequency), $"Unknown frequency: {frequency}")
             };
         }
@@ -122,7 +122,7 @@ namespace BankingAppTeamB.Services
 
             foreach (var payment in dueSoon)
             {
-                Debug.WriteLine($"[RecurringPaymentService] NOTIFICATION STUB — Payment ID {payment.Id} for UserId {payment.UserId} is due on {payment.NextExecutionDate:yyyy-MM-dd HH:mm}");
+                Debug.WriteLine($"[RecurringPaymentService] NOTIFICATION STUB ï¿½ Payment ID {payment.Id} for UserId {payment.UserId} is due on {payment.NextExecutionDate:yyyy-MM-dd HH:mm}");
             }
 
             return dueSoon;
