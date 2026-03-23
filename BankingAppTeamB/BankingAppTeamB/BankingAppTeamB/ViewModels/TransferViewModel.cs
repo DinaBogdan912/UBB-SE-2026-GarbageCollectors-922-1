@@ -141,6 +141,10 @@ namespace BankingAppTeamB.ViewModels
         }
 
         public void LoadAccounts()
+            NextStepCommand = new RelayCommand(_ => ExecuteNextStep());
+        }
+
+        public async Task LoadAccountsAsync()
         {
             var userAccounts = UserSession.GetAccounts();
             Accounts.Clear();
@@ -267,7 +271,7 @@ namespace BankingAppTeamB.ViewModels
             if (preview.Rate == 1)
                 FxPreviewText = $"{Amount:F2} {Currency}";
             else
-                FxPreviewText = $"{Amount:F2} {SelectedAccount?.Currency} → {preview.ConvertedAmount:F2} {Currency} (rata: {preview.Rate:F4})";
+                FxPreviewText = $"{Amount:F2} {SelectedAccount?.Currency} → {preview.ConvertedAmount:F2} {Currency} (rate: {preview.Rate:F4})";
         }
 
         private void UpdateRequires2FA()
