@@ -5,19 +5,9 @@ namespace BankingAppTeamB.Mocks
 {
     public class AccountService
     {
-        public void DebitAccount(int accountId, decimal amount) { }
-        public void CreditAccount(int accountId, decimal amount) { }
-
-        public AccountService() { }
-
-        public bool IsAccountValid(int id)
-        {
-            return true;
-        }
-
-        public decimal GetBalance(int id)
-        {
-            return 0;
-        }
+        public static void DebitAccount(int accountId, decimal amount) { }
+        public static void CreditAccount(int accountId, decimal amount) { }
+        public static bool IsAccountValid(int accountId) => true;
+        public static decimal GetBalance(int accountId) => 10000m;
     }
 }
