@@ -107,12 +107,21 @@
                      PlaceholderText="e.g. 1.05" Width="150" />
 
             <ComboBox Header="Alert Type"
-                    SelectedValue="{Binding IsBuyAlert, Mode=TwoWay}"
-                    SelectedValuePath="Tag"
-                    Width="150">
+                      SelectedValue="{Binding IsBuyAlert, Mode=TwoWay}"
+                      SelectedValuePath="Tag"
+                      Width="150">
 
-                    <ComboBoxItem Content="Sell" Tag="False"/>
-                    <ComboBoxItem Content="Buy" Tag="True"/>
+                <ComboBoxItem Content="Sell">
+                    <ComboBoxItem.Tag>
+                        <x:Boolean>false</x:Boolean>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+
+                <ComboBoxItem Content="Buy">
+                    <ComboBoxItem.Tag>
+                        <x:Boolean>true</x:Boolean>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
 
             </ComboBox>
 

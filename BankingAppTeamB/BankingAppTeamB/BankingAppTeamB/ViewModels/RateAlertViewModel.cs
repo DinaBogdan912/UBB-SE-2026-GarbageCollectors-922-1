@@ -20,8 +20,9 @@ namespace BankingAppTeamB.ViewModels
         private string _targetCurrency = string.Empty;
         private string _targetRateText = string.Empty;
         private string _errorMessage = string.Empty;
+        private bool _isTriggered;
         private Dictionary<string, decimal> _liveRates = new();
-        private bool _isBuyAlert = false;
+        private bool _isBuyAlert;
 
         public ObservableCollection<RateAlert> Alerts
         {
@@ -64,6 +65,13 @@ namespace BankingAppTeamB.ViewModels
             get => _isBuyAlert;
             set => SetProperty(ref _isBuyAlert, value) ;
         }
+        
+        public bool IsTriggered
+        {
+            get => _isTriggered;
+            set => SetProperty(ref _isTriggered, value);
+        }
+        
         public AsyncRelayCommand RefreshRatesCommand { get; }
         public AsyncRelayCommand CreateAlertCommand { get; }
         public RelayCommand DeleteAlertCommand { get; }
@@ -95,7 +103,7 @@ namespace BankingAppTeamB.ViewModels
             {
                 var currentRate = _exchangeService.GetRate(alert.BaseCurrency, alert.TargetCurrency);
 
-                if (!alert.IsBuyAlert && currentRate > alert.TargetRate)
+                if (!alert.IsBuyAlert && currentRate >= alert.TargetRate)
                     alert.IsTriggered = true;
                 else if (alert.IsBuyAlert && currentRate <= alert.TargetRate)
                     alert.IsTriggered = true;

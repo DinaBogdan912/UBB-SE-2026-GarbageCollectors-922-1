@@ -43,8 +43,6 @@ namespace BankingAppTeamB.Models
         }
 
         public RateAlert(){}
-        
-        public bool isBuyAlert(){ return IsBuyAlert; }
 
         public void setBuyAlert(bool v) { IsBuyAlert = v; }
         public int getId() { return Id; }
