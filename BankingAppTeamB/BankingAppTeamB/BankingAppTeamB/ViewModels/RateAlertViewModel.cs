@@ -21,6 +21,7 @@ namespace BankingAppTeamB.ViewModels
         private string _targetRateText = string.Empty;
         private string _errorMessage = string.Empty;
         private Dictionary<string, decimal> _liveRates = new();
+        private bool _isBuyAlert = false;
 
         public ObservableCollection<RateAlert> Alerts
         {
@@ -58,6 +59,11 @@ namespace BankingAppTeamB.ViewModels
             set => SetProperty(ref _liveRates, value);
         }
 
+        public bool IsBuyAlert
+        {
+            get => _isBuyAlert;
+            set => SetProperty(ref _isBuyAlert, value) ;
+        }
         public AsyncRelayCommand RefreshRatesCommand { get; }
         public AsyncRelayCommand CreateAlertCommand { get; }
         public RelayCommand DeleteAlertCommand { get; }
@@ -122,7 +128,7 @@ namespace BankingAppTeamB.ViewModels
             try
             {
                 var newAlert = await Task.Run(() =>
-                    _exchangeService.CreateAlert(_userId, BaseCurrency, TargetCurrency, parsedRate, false));
+                    _exchangeService.CreateAlert(_userId, BaseCurrency, TargetCurrency, parsedRate, _isBuyAlert));
 
                 Alerts.Add(newAlert);
 
