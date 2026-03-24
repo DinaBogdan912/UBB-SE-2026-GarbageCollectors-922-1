@@ -26,11 +26,18 @@ namespace BankingAppTeamB.Services
         {
             if (category == null)
                 return billPaymentRepository.GetAllBillers();
+
             return billPaymentRepository.SearchBillers(string.Empty, category);
         }
+
         public List<Biller> SearchBillers(string query)
         {
             return billPaymentRepository.SearchBillers(query, null);
+        }
+
+        public List<Biller> SearchBillers(string query, string? category)
+        {
+            return billPaymentRepository.SearchBillers(query ?? string.Empty, category);
         }
 
         public List<SavedBiller> GetSavedBillers(int userId)
@@ -48,6 +55,7 @@ namespace BankingAppTeamB.Services
                 DefaultReference = defaultRef,
                 CreatedAt = DateTime.UtcNow
             };
+
             billPaymentRepository.SaveBiller(savedBiller);
         }
 
