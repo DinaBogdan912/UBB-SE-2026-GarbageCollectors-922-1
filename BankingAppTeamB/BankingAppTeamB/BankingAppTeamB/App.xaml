@@ -3,20 +3,16 @@
     x:Class="BankingAppTeamB.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:BankingAppTeamB"
     xmlns:converters="using:BankingAppTeamB.Converters">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+            <converters:DecimalFormatConverter x:Key="DecimalFormat" />
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility" />
             <converters:StepToVisibilityConverter x:Key="StepToVisibility" />
-            <converters:DecimalFormatConverter x:Key="DecimalFormat" />
-
         </ResourceDictionary>
     </Application.Resources>
 </Application>

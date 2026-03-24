@@ -11,11 +11,12 @@ namespace BankingAppTeamB
         {
             this.InitializeComponent();
             NavigationService.Frame = MainFrame;
-            NavView.SelectedItem = NavView.MenuItems[0];
         }
 
         private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
+            if (NavigationService.Frame == null) return;
+
             var item = args.SelectedItem as NavigationViewItem;
             if (item == null) return;
 
