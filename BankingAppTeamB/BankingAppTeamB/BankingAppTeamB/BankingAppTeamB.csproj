@@ -11,9 +11,11 @@
 		<Nullable>enable</Nullable>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	</PropertyGroup>
+
 	<ItemGroup>
 		<Manifest Include="$(ApplicationManifest)" />
 	</ItemGroup>
+
 	<ItemGroup>
 		<Content Include="Database\**\*.sql">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
