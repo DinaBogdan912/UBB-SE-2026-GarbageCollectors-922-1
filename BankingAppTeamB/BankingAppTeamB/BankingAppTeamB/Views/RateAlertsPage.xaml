@@ -94,13 +94,15 @@
         </Grid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16" Margin="0,0,0,16">
-            <TextBox Header="Base Currency" 
-                     Text="{Binding BaseCurrency, Mode=TwoWay}" 
-                     PlaceholderText="e.g. USD" Width="150" />
-
-            <TextBox Header="Target Currency" 
-                     Text="{Binding TargetCurrency, Mode=TwoWay}" 
-                     PlaceholderText="e.g. EUR" Width="150" />
+            <ComboBox Header="Base Currency"
+                 ItemsSource="{Binding AvailableCurrencies}"
+                 SelectedItem="{Binding BaseCurrency, Mode=TwoWay}"
+                   Width="150" />
+    
+             <ComboBox Header="Target Currency"
+                   ItemsSource="{Binding AvailableCurrencies}"
+                    SelectedItem="{Binding TargetCurrency, Mode=TwoWay}"
+                    Width="150" />
 
             <TextBox Header="Target Rate" 
                      Text="{Binding TargetRateText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 

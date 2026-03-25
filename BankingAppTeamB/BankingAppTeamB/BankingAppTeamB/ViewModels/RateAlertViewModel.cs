@@ -99,6 +99,16 @@ namespace BankingAppTeamB.ViewModels
             var rates = await Task.Run(() => _exchangeService.GetLiveRates());
             LiveRates = rates;
 
+            AvailableCurrencies.Clear();
+
+            var currencies = rates.Keys
+                .SelectMany(pair => pair.Split('/')) 
+                .Distinct()
+                .OrderBy(c => c);
+
+            foreach (var currency in currencies)
+                AvailableCurrencies.Add(currency);
+
             foreach (var alert in Alerts)
             {
                 var currentRate = _exchangeService.GetRate(alert.BaseCurrency, alert.TargetCurrency);
@@ -127,9 +137,22 @@ namespace BankingAppTeamB.ViewModels
                 return;
             }
 
-            if (!decimal.TryParse(TargetRateText, out decimal parsedRate) || parsedRate <= 0)
+
+            var text = TargetRateText.Trim();
+            if (text.Contains(',') && text.Contains('.'))
             {
-                ErrorMessage = "Target rate must be a valid number greater than zero.";
+                ErrorMessage = "Invalid number format.";
+                return;
+            }
+
+            text = text.Replace('.', ',');
+
+            if (!decimal.TryParse(text,
+                System.Globalization.NumberStyles.Number,
+                new System.Globalization.CultureInfo("ro-RO"),
+                out decimal parsedRate) || parsedRate <= 0)
+            {
+                ErrorMessage = "Target rate must be a valid number (ex: 1,2 or 1.2).";
                 return;
             }
 
@@ -168,6 +191,14 @@ namespace BankingAppTeamB.ViewModels
                     break;
                 }
             }
+        }
+
+        private ObservableCollection<string> _availableCurrencies = new();
+
+        public ObservableCollection<string> AvailableCurrencies
+        {
+            get => _availableCurrencies;
+            set => SetProperty(ref _availableCurrencies, value);
         }
     }
 }
