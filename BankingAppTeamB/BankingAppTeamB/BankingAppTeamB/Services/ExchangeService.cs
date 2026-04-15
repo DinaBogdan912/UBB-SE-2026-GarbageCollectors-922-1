@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BankingAppTeamB.Services
 {
-    public class ExchangeService
+    public class ExchangeService : IExchangeService
     {
         private readonly IExchangeRepository _exchangeRepository;
         private readonly TransactionPipelineService _transactionPipelineService;
@@ -201,7 +201,7 @@ namespace BankingAppTeamB.Services
                 else
                     alert.IsTriggered = currentRate >= targetRate;
             }
-            
+
         }
     }
 }

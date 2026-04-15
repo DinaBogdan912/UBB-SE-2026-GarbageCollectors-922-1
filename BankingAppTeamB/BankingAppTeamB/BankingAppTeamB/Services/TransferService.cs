@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace BankingAppTeamB.Services
 {
-    public class TransferService
+    public class TransferService : ITransferService
     {
         private readonly ITransferRepository transferRepo;
         private readonly IBeneficiaryRepository beneficiaryRepo;
@@ -53,12 +53,12 @@ namespace BankingAppTeamB.Services
                 RecipientName = dto.RecipientName,
                 RecipientIBAN = dto.RecipientIBAN,
                 RecipientBankName = GetBankNameFromIBAN(dto.RecipientIBAN),
-                Amount            = dto.Amount,
-                Currency          = dto.Currency,
-                Fee               = 0,
-                Reference         = dto.Reference,
-                Status            = TransferStatus.Completed,
-                CreatedAt         = DateTime.UtcNow
+                Amount = dto.Amount,
+                Currency = dto.Currency,
+                Fee = 0,
+                Reference = dto.Reference,
+                Status = TransferStatus.Completed,
+                CreatedAt = DateTime.UtcNow
             };
 
             transferRepo.Add(transfer);

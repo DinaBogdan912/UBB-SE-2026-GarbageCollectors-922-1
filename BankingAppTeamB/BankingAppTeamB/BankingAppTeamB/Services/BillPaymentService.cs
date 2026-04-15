@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace BankingAppTeamB.Services
 {
-    public class BillPaymentService
+    public class BillPaymentService : IBillPaymentService
     {
         private readonly IBillPaymentRepository billPaymentRepository;
         private readonly TransactionPipelineService transactionPipelineService;

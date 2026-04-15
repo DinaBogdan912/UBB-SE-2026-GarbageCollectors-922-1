@@ -8,7 +8,7 @@ using BankingAppTeamB.Models.DTOs;
 
 namespace BankingAppTeamB.Services
 {
-    public class BeneficiaryService
+    public class BeneficiaryService : IBeneficiaryService
     {
         private readonly IBeneficiaryRepository repo;
 
