@@ -10,17 +10,17 @@ using BankingAppTeamB.Mocks;
 
 namespace BankingAppTeamB.Services
 {
-    public class TransactionPipelineService
+    public class TransactionPipelineService : ITransactionPipelineService
     {
         private readonly ITransactionRepository transactionRepo;
         private readonly AccountService accountService;
 
-        
+
         public TransactionPipelineService(ITransactionRepository transactionRepo, AccountService accountService)
         {
             this.transactionRepo = transactionRepo;
             this.accountService = accountService;
-        } 
+        }
 
         // public TransactionPipelineService(ITransactionRepository transactionRepo)
         // {
@@ -36,7 +36,7 @@ namespace BankingAppTeamB.Services
                 return ValidationResult.Failure("Currency code must be exactly 3 characters.");
 
             if (!accountService.IsAccountValid(ctx.SourceAccountId))
-            // if (!AccountService.IsAccountValid(ctx.SourceAccountId))
+                // if (!AccountService.IsAccountValid(ctx.SourceAccountId))
                 return ValidationResult.Failure("Source account is invalid or does not exist.");
 
             return ValidationResult.Success();
@@ -108,11 +108,11 @@ namespace BankingAppTeamB.Services
             };
         }
 
-        
+
         public AccountService GetAccountService()
         {
             return accountService;
         }
-        
+
     }
 }

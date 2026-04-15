@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace BankingAppTeamB.Services
 {
-    public class RecurringPaymentService
+    public class RecurringPaymentService : IRecurringPaymentService
     {
         private readonly IRecurringPaymentRepository recurringPaymentRepository;
         private readonly BillPaymentService billPaymentService;

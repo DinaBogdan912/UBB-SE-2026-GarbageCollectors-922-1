@@ -6,7 +6,7 @@ using BankingAppTeamB.Services;
 
 namespace BankingAppTeamB.Services
 {
-    public class RecurringScheduler
+    public class RecurringScheduler : IRecurringScheduler
     {
         private readonly RecurringPaymentService recurringPaymentService;
         private readonly ExchangeService exchangeService;

@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace BankingAppTeamB.Services
 {
-    public class TwoFAService
+    public class TwoFAService : ITwoFAService
     {
         public bool Requires2FA(decimal amount)
         {

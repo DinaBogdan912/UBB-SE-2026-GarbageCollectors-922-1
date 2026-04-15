@@ -2,7 +2,7 @@
 
 namespace BankingAppTeamB.Services
 {
-    public static class NavigationService
+    public static class NavigationService : INavigationService
     {
         public static Frame? Frame { get; set; }
 

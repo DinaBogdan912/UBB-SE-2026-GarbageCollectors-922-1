@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace BankingAppTeamB.Services
 {
-    public class NotificationService
+    public class NotificationService : INotificationService
     {
         public void NotifyTransferCompleted(Transfer transfer)
         {
