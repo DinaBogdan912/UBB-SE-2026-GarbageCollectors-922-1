@@ -51,3 +51,7 @@ launchSettings.json
 *.assets.cache
 *.nuget.dgspec.json
 project.nuget.cache
+
+# App environment
+BankingAppTeamB\BankingAppTeamB\appsetting.json
+/BankingAppTeamB/BankingAppTeamB/BankingAppTeamB/appsettings.json
