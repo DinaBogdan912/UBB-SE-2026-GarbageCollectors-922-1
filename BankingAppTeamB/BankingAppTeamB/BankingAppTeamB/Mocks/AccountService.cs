@@ -3,7 +3,7 @@ using BankingAppTeamB.Models;
 
 namespace BankingAppTeamB.Mocks
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
         public void DebitAccount(int accountId, decimal amount) { }
         public void CreditAccount(int accountId, decimal amount) { }
