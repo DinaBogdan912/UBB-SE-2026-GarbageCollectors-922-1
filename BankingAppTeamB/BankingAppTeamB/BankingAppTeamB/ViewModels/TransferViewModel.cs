@@ -152,8 +152,16 @@ public class TransferViewModel : ViewModelBase
     public string ErrorMessage
     {
         get => errorMessage;
-        set => SetProperty(ref errorMessage, value);
+        set
+        {
+            if (SetProperty(ref errorMessage, value))
+            {
+                OnPropertyChanged(nameof(HasError));
+            }
+        }
     }
+
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
     private string amountText;
     public string AmountText
