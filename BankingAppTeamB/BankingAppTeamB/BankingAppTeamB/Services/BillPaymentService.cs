@@ -9,9 +9,9 @@ namespace BankingAppTeamB.Services
     public class BillPaymentService : IBillPaymentService
     {
         private readonly IBillPaymentRepository billPaymentRepository;
-        private readonly TransactionPipelineService transactionPipelineService;
+        private readonly ITransactionPipelineService transactionPipelineService;
 
-        public BillPaymentService(IBillPaymentRepository billPaymentRepository, TransactionPipelineService transactionPipelineService)
+        public BillPaymentService(IBillPaymentRepository billPaymentRepository, ITransactionPipelineService transactionPipelineService)
         {
             this.billPaymentRepository = billPaymentRepository;
             this.transactionPipelineService = transactionPipelineService;

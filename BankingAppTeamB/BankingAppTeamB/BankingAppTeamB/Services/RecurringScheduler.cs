@@ -8,11 +8,11 @@ namespace BankingAppTeamB.Services
 {
     public class RecurringScheduler : IRecurringScheduler
     {
-        private readonly RecurringPaymentService recurringPaymentService;
-        private readonly ExchangeService exchangeService;
+        private readonly IRecurringPaymentService recurringPaymentService;
+        private readonly IExchangeService exchangeService;
         private readonly System.Timers.Timer timer;
 
-        public RecurringScheduler(RecurringPaymentService recurringPaymentService, ExchangeService exchangeService, System.Timers.Timer timer)
+        public RecurringScheduler(IRecurringPaymentService recurringPaymentService, IExchangeService exchangeService, System.Timers.Timer timer)
         {
             this.recurringPaymentService = recurringPaymentService;
             this.exchangeService = exchangeService;

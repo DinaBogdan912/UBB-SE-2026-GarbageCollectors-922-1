@@ -14,7 +14,7 @@ namespace BankingAppTeamB.ViewModels
 {
     public class RecurringPaymentViewModel : ViewModelBase
     {
-        private readonly RecurringPaymentService _recurringPaymentService;
+        private readonly IRecurringPaymentService _recurringPaymentService;
 
         private ObservableCollection<RecurringPayment> _payments;
         private RecurringPayment? _selectedPayment;
@@ -33,7 +33,7 @@ namespace BankingAppTeamB.ViewModels
 
         private ObservableCollection<RecurringFrequency> _frequencies;
 
-        public RecurringPaymentViewModel(RecurringPaymentService recurringPaymentService)
+        public RecurringPaymentViewModel(IRecurringPaymentService recurringPaymentService)
         {
             _recurringPaymentService = recurringPaymentService;
 

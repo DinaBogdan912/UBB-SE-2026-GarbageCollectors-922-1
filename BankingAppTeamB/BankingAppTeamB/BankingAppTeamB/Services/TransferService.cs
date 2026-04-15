@@ -10,14 +10,14 @@ namespace BankingAppTeamB.Services
     {
         private readonly ITransferRepository transferRepo;
         private readonly IBeneficiaryRepository beneficiaryRepo;
-        private readonly TransactionPipelineService pipeline;
-        private readonly ExchangeService? exchangeService;
+        private readonly ITransactionPipelineService pipeline;
+        private readonly IExchangeService? exchangeService;
 
         public TransferService(
             ITransferRepository transferRepo,
             IBeneficiaryRepository beneficiaryRepo,
-            TransactionPipelineService pipeline,
-            ExchangeService? exchangeService = null)
+            ITransactionPipelineService pipeline,
+            IExchangeService? exchangeService = null)
         {
             this.transferRepo = transferRepo;
             this.beneficiaryRepo = beneficiaryRepo;

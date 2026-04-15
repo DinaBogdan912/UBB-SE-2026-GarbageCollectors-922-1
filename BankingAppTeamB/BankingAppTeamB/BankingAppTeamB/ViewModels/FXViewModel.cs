@@ -13,7 +13,7 @@ namespace BankingAppTeamB.ViewModels;
 
 public class FXViewModel : ViewModelBase
 {
-    private readonly ExchangeService _exchangeService;
+    private readonly IExchangeService _exchangeService;
 
 
     private int _currentStep;
@@ -180,7 +180,7 @@ public class FXViewModel : ViewModelBase
     private LockedRate? _lockedRate;
 
 
-    public FXViewModel(ExchangeService exchangeService)
+    public FXViewModel(IExchangeService exchangeService)
     {
         _exchangeService = exchangeService;
 

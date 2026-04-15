@@ -13,10 +13,10 @@ namespace BankingAppTeamB.Services
     public class TransactionPipelineService : ITransactionPipelineService
     {
         private readonly ITransactionRepository transactionRepo;
-        private readonly AccountService accountService;
+        private readonly IAccountService accountService;
 
 
-        public TransactionPipelineService(ITransactionRepository transactionRepo, AccountService accountService)
+        public TransactionPipelineService(ITransactionRepository transactionRepo, IAccountService accountService)
         {
             this.transactionRepo = transactionRepo;
             this.accountService = accountService;
@@ -109,7 +109,7 @@ namespace BankingAppTeamB.Services
         }
 
 
-        public AccountService GetAccountService()
+        public IAccountService GetAccountService()
         {
             return accountService;
         }

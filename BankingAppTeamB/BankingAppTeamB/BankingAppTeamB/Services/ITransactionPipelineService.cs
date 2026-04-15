@@ -7,7 +7,7 @@ namespace BankingAppTeamB.Services
     {
         AuthResult Authorize(PipelineContext ctx, string? twoFAToken = null);
         ExecutionResult Execute(PipelineContext ctx);
-        AccountService GetAccountService();
+        IAccountService GetAccountService();
         Transaction LogTransaction(Transaction tx);
         Transaction RunPipeline(PipelineContext ctx, string? twoFAToken = null);
         ValidationResult Validate(PipelineContext ctx);

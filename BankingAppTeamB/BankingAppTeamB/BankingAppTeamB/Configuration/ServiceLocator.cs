@@ -17,15 +17,12 @@ public static class ServiceLocator
     private static IExchangeRepository _exchangeRepository = new ExchangeRepository();
 
     //mock
-    private static AccountService _accountService = new AccountService();
-
-    private static TransactionPipelineService _pipelineService = new TransactionPipelineService(_transactionRepository, _accountService);
-
-    private static ExchangeService _exchangeService = new ExchangeService(_exchangeRepository, _pipelineService, _accountService);
-    private static TransferService _transferService = new TransferService(_transferRepository, _beneficiaryRepository, _pipelineService, _exchangeService);
-    private static BillPaymentService _billPaymentService = new BillPaymentService(_billPaymentRepository, _pipelineService);
-    private static RecurringPaymentService _recurringPaymentService = new RecurringPaymentService(_recurringPaymentRepository, _billPaymentService);
-
+    private static IAccountService _accountService = new AccountService();
+    private static ITransactionPipelineService _pipelineService = new TransactionPipelineService(_transactionRepository, _accountService);
+    private static IExchangeService _exchangeService = new ExchangeService(_exchangeRepository, _pipelineService, _accountService);
+    private static ITransferService _transferService = new TransferService(_transferRepository, _beneficiaryRepository, _pipelineService, _exchangeService);
+    private static IBillPaymentService _billPaymentService = new BillPaymentService(_billPaymentRepository, _pipelineService);
+    private static IRecurringPaymentService _recurringPaymentService = new RecurringPaymentService(_recurringPaymentRepository, _billPaymentService);
     //mock
     private static readonly Timer timer = new Timer(30000) //30secs
     {
@@ -33,13 +30,11 @@ public static class ServiceLocator
     };
     
     private static RecurringScheduler _recurringScheduler = new RecurringScheduler(_recurringPaymentService, _exchangeService, timer);
-    
-    public static TransferService TransferService => _transferService;
-    public static ExchangeService ExchangeService => _exchangeService;
-    public static BillPaymentService BillPaymentService => _billPaymentService;
-    public static RecurringPaymentService RecurringPaymentService => _recurringPaymentService;
-    public static RecurringScheduler RecurringScheduler => _recurringScheduler;
-
+    public static ITransferService TransferService => _transferService;
+    public static IExchangeService ExchangeService => _exchangeService;
+    public static IBillPaymentService BillPaymentService => _billPaymentService;
+    public static IRecurringPaymentService RecurringPaymentService => _recurringPaymentService;
+    public static IRecurringScheduler RecurringScheduler => _recurringScheduler;
     public static void Initialize()
     {
         _recurringScheduler.Start();

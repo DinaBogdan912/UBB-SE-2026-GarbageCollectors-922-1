@@ -15,7 +15,7 @@ namespace BankingAppTeamB.ViewModels
 {
     public class BillPayViewModel : ViewModelBase
     {
-        private readonly BillPaymentService _billPaymentService;
+        private readonly IBillPaymentService _billPaymentService;
 
         private int _currentStep;
         private ObservableCollection<Biller> _billers;
@@ -61,7 +61,7 @@ namespace BankingAppTeamB.ViewModels
 
         private bool _shouldSaveBiller;
 
-        public BillPayViewModel(BillPaymentService billPaymentService)
+        public BillPayViewModel(IBillPaymentService billPaymentService)
         {
             _billPaymentService = billPaymentService;
 

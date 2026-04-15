@@ -11,8 +11,8 @@ namespace BankingAppTeamB.Services
     public class ExchangeService : IExchangeService
     {
         private readonly IExchangeRepository _exchangeRepository;
-        private readonly TransactionPipelineService _transactionPipelineService;
-        private readonly AccountService _accountService;
+        private readonly ITransactionPipelineService _transactionPipelineService;
+        private readonly IAccountService _accountService;
 
         private Dictionary<string, decimal> _cachedRates;
         private DateTime _ratesLastFetched;
@@ -21,8 +21,8 @@ namespace BankingAppTeamB.Services
         private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(30);
 
         public ExchangeService(IExchangeRepository exchangeRepository,
-            TransactionPipelineService transactionPipelineService,
-            AccountService accountService)
+            ITransactionPipelineService transactionPipelineService,
+            IAccountService accountService)
         {
             _exchangeRepository = exchangeRepository;
             _transactionPipelineService = transactionPipelineService;
