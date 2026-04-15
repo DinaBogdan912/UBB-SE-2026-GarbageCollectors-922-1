@@ -113,11 +113,18 @@ namespace BankingAppTeamB.ViewModels
                 if (SetProperty(ref _errorMessage, value))
                 {
                     OnPropertyChanged(nameof(HasError));
+                    OnPropertyChanged(nameof(ErrorMessageVisibility));
                 }
             }
         }
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+        // Compute error visibility here as a property to bind the xaml to it
+        // (avoid view logic here)
+        public Microsoft.UI.Xaml.Visibility ErrorMessageVisibility => HasError ? 
+            Microsoft.UI.Xaml.Visibility.Visible : 
+            Microsoft.UI.Xaml.Visibility.Collapsed;
 
         public ObservableCollection<Account> Accounts
         {
