@@ -12,7 +12,7 @@ namespace BankingAppTeamB.ViewModels
 {
     public class RateAlertViewModel : ViewModelBase
     {
-        private readonly ExchangeService _exchangeService;
+        private readonly IExchangeService _exchangeService;
         private readonly int _userId;
 
         private ObservableCollection<RateAlert> _alerts = new();
@@ -76,7 +76,7 @@ namespace BankingAppTeamB.ViewModels
         public AsyncRelayCommand CreateAlertCommand { get; }
         public RelayCommand DeleteAlertCommand { get; }
 
-        public RateAlertViewModel(ExchangeService exchangeService, int userId)
+        public RateAlertViewModel(IExchangeService exchangeService, int userId)
         {
             _exchangeService = exchangeService;
             _userId = userId;

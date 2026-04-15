@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 public class TransferViewModel : ViewModelBase
 {
-    private readonly TransferService transferService;
+    private readonly ITransferService transferService;
 
-    public TransferViewModel(TransferService transferService)
+    public TransferViewModel(ITransferService transferService)
     {
         this.transferService = transferService ?? throw new ArgumentNullException(nameof(transferService));
 

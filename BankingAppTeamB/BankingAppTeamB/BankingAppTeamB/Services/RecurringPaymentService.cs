@@ -10,9 +10,9 @@ namespace BankingAppTeamB.Services
     public class RecurringPaymentService : IRecurringPaymentService
     {
         private readonly IRecurringPaymentRepository recurringPaymentRepository;
-        private readonly BillPaymentService billPaymentService;
+        private readonly IBillPaymentService billPaymentService;
 
-        public RecurringPaymentService(IRecurringPaymentRepository recurringPaymentRepository, BillPaymentService billPaymentService)
+        public RecurringPaymentService(IRecurringPaymentRepository recurringPaymentRepository, IBillPaymentService billPaymentService)
         {
             this.recurringPaymentRepository = recurringPaymentRepository;
             this.billPaymentService = billPaymentService;
