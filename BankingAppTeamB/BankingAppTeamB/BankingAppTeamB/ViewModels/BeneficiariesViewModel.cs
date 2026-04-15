@@ -15,7 +15,7 @@ namespace BankingAppTeamB.ViewModels
 {
     public class BeneficiariesViewModel : ViewModelBase
     {
-        private readonly BeneficiaryService beneficiaryService;
+        private readonly IBeneficiaryService beneficiaryService;
 
         // Hardcoded for this example.
         private readonly int currentUserId = 1;
@@ -79,7 +79,7 @@ namespace BankingAppTeamB.ViewModels
         public RelayCommand UseForTransferCommand { get; }
 
         //Constructor
-        public BeneficiariesViewModel(BeneficiaryService beneficiaryService)
+        public BeneficiariesViewModel(IBeneficiaryService beneficiaryService)
         {
             this.beneficiaryService = beneficiaryService;
 
@@ -106,10 +106,11 @@ namespace BankingAppTeamB.ViewModels
         private async Task AddBeneficiaryAsync()
         {
             ErrorMessage = string.Empty;
-
+            // TODO: figure out whatever this shi is
+            // Disclaimer: we got the code like this
             try
             {
-                var newBeneficiary = beneficiaryService.Add(NewName, NewIBAN, NewBankName, currentUserId);
+                var newBeneficiary = beneficiaryService.Add(NewName, NewIBAN, currentUserId);
 
                 NewName = string.Empty;
                 NewIBAN = string.Empty;

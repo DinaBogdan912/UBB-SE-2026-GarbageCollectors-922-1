@@ -23,6 +23,9 @@ public static class ServiceLocator
     private static ITransferService _transferService = new TransferService(_transferRepository, _beneficiaryRepository, _pipelineService, _exchangeService);
     private static IBillPaymentService _billPaymentService = new BillPaymentService(_billPaymentRepository, _pipelineService);
     private static IRecurringPaymentService _recurringPaymentService = new RecurringPaymentService(_recurringPaymentRepository, _billPaymentService);
+    private static IBeneficiaryService _beneficiaryService = new BeneficiaryService(_beneficiaryRepository);
+
+
     //mock
     private static readonly Timer timer = new Timer(30000) //30secs
     {
@@ -35,6 +38,7 @@ public static class ServiceLocator
     public static IBillPaymentService BillPaymentService => _billPaymentService;
     public static IRecurringPaymentService RecurringPaymentService => _recurringPaymentService;
     public static IRecurringScheduler RecurringScheduler => _recurringScheduler;
+    public static IBeneficiaryService BeneficiaryService => _beneficiaryService;
     public static void Initialize()
     {
         _recurringScheduler.Start();
