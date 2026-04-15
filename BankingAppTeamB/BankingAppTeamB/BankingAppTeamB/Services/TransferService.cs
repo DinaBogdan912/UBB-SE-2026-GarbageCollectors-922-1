@@ -8,6 +8,10 @@ namespace BankingAppTeamB.Services
 {
     public class TransferService : ITransferService
     {
+        private const int MinimumIbanLength = 15;
+        private const int MaximumIbanLength = 34;
+        private const decimal TwoFaAmountThreshold = 1000m;
+
         private readonly ITransferRepository transferRepo;
         private readonly IBeneficiaryRepository beneficiaryRepo;
         private readonly ITransactionPipelineService pipeline;
@@ -65,7 +69,7 @@ namespace BankingAppTeamB.Services
 
             // newly added
             var beneficiaries = beneficiaryRepo.GetByUserId(dto.UserId);
-            var match = beneficiaries.Find(b => b.IBAN == dto.RecipientIBAN);
+            var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == dto.RecipientIBAN);
             if (match != null)
             {
                 match.TransferCount++;
@@ -81,7 +85,7 @@ namespace BankingAppTeamB.Services
         public bool ValidateIBAN(string iban)
         {
             if (string.IsNullOrWhiteSpace(iban)) return false;
-            if (iban.Length < 15 || iban.Length > 34) return false;
+            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength) return false;
             if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1])) return false;
             if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3])) return false;
             return true;
@@ -133,7 +137,7 @@ namespace BankingAppTeamB.Services
 
         public bool Requires2FA(decimal amount)
         {
-            return amount >= 1000;
+            return amount >= TwoFaAmountThreshold;
         }
     }
 }

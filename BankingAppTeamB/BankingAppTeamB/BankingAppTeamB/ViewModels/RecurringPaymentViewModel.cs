@@ -57,7 +57,7 @@ namespace BankingAppTeamB.ViewModels
             _selectedAccount = null;
             _selectedBiller = null;
 
-            CreateCommand = new AsyncRelayCommand(_ => ExecuteCreateAsync());
+            CreateCommand = new AsyncRelayCommand(unusedParameter => ExecuteCreateAsync());
             PauseCommand = new RelayCommand(ExecutePause);
             ResumeCommand = new RelayCommand(ExecuteResume);
             CancelCommand = new RelayCommand(ExecuteCancel);
@@ -269,7 +269,7 @@ namespace BankingAppTeamB.ViewModels
 
                 _recurringPaymentService.Pause(payment.Id);
 
-                var existing = Payments.FirstOrDefault(p => p.Id == payment.Id);
+                var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
                 if (existing != null)
                 {
                     var index = Payments.IndexOf(existing);
@@ -297,7 +297,7 @@ namespace BankingAppTeamB.ViewModels
 
                 _recurringPaymentService.Resume(payment.Id);
 
-                var existing = Payments.FirstOrDefault(p => p.Id == payment.Id);
+                var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
                 if (existing != null)
                 {
                     var index = Payments.IndexOf(existing);
@@ -325,7 +325,7 @@ namespace BankingAppTeamB.ViewModels
 
                 _recurringPaymentService.Cancel(payment.Id);
 
-                var existing = Payments.FirstOrDefault(p => p.Id == payment.Id);
+                var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
                 if (existing != null)
                 {
                     var index = Payments.IndexOf(existing);
