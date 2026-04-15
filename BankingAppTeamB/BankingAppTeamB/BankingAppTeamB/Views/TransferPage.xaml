@@ -20,9 +20,9 @@
 
             <!-- Error InfoBar -->
             <InfoBar
-                IsOpen="{Binding ErrorMessage, Converter={StaticResource BoolToVisibility}}"
+                IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                 Severity="Error"
-                Message="{Binding ErrorMessage}"/>
+                Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"/>
 
             <!-- STEP 1: Select Account -->
             <StackPanel Spacing="16"
