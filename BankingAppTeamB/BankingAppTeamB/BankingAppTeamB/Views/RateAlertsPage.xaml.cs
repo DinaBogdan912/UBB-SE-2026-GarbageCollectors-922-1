@@ -33,7 +33,7 @@ namespace BankingAppTeamB.Views
         {
             InitializeComponent();
 
-            // at the next line get the current user id
+            // Initialize the view model with the active session's user ID so alerts are loaded for the current user.
             this.DataContext = new RateAlertViewModel(ServiceLocator.ExchangeService, UserSession.CurrentUserId);
         }
 
