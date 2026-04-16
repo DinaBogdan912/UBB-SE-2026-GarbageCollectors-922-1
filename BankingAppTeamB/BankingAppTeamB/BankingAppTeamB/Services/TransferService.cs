@@ -108,25 +108,25 @@ namespace BankingAppTeamB.Services
             };
         }
 
-        public FxPreview GetFxPreview(string src, string tgt, decimal amt)
+        public FxPreview GetFxPreview(string sourceCurrency, string targetCurrency, decimal amount)
         {
-            if (src.Equals(tgt, StringComparison.OrdinalIgnoreCase))
-                return new FxPreview { Rate = 1, ConvertedAmount = amt };
+            if (sourceCurrency.Equals(targetCurrency, StringComparison.OrdinalIgnoreCase))
+                return new FxPreview { Rate = 1, ConvertedAmount = amount };
 
             if (exchangeService == null)
-                return new FxPreview { Rate = 1, ConvertedAmount = amt };
+                return new FxPreview { Rate = 1, ConvertedAmount = amount };
 
             var rates = exchangeService.GetLiveRates();
-            string pair = $"{src.ToUpper()}/{tgt.ToUpper()}";
+            string pair = $"{sourceCurrency.ToUpper()}/{targetCurrency.ToUpper()}";
 
             if (!rates.ContainsKey(pair))
-                return new FxPreview { Rate = 1, ConvertedAmount = amt };
+                return new FxPreview { Rate = 1, ConvertedAmount = amount };
 
             decimal rate = rates[pair];
             return new FxPreview
             {
                 Rate = rate,
-                ConvertedAmount = Math.Round(amt * rate, 2)
+                ConvertedAmount = Math.Round(amount * rate, 2)
             };
         }
 
