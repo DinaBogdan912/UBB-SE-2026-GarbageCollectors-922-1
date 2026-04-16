@@ -7,6 +7,8 @@ Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "BankingAppTeamB (Package)",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingAppTeamB", "BankingAppTeamB\BankingAppTeamB\BankingAppTeamB.csproj", "{BEA9E00E-56D7-476A-A594-22766C85A847}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankingAppTeamB.Tests", "BankingAppTeamB.Tests\BankingAppTeamB.Tests.csproj", "{28201CAC-EB61-4C82-8B42-EE4075F2A041}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D3428198-4B2F-440B-B24E-98AABF15A1B4}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
