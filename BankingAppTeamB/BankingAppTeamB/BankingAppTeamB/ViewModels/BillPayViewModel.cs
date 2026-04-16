@@ -161,6 +161,12 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        public double AmountAsDouble
+        {
+            get => (double)_amount;
+            set => Amount = (decimal)value;
+        }
+
         public bool IsPayInFull
         {
             get => _isPayInFull;
