@@ -8,7 +8,7 @@ namespace BankingAppTeamB.Services
 {
     public class AccountService : IAccountService
     {
-        private const decimal StubAccountBalance = 50m;
+        private const int StubAccountBalance = 50;
         public void DebitAccount(int accountId, decimal amount)
         {
             if (amount <= 0)

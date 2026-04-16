@@ -7,7 +7,7 @@ namespace BankingAppTeamB.Services
     public class TransactionPipelineService : ITransactionPipelineService
     {
         private const int ExpectedCurrencyCodeLength = 3;
-        private const decimal TwoFaAmountThreshold = 1000m;
+        private const int TwoFaAmountThreshold = 1000;
 
         private readonly ITransactionRepository transactionRepo;
         private readonly IAccountService accountService;

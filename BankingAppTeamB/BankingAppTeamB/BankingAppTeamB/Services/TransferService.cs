@@ -10,7 +10,7 @@ namespace BankingAppTeamB.Services
     {
         private const int MinimumIbanLength = 15;
         private const int MaximumIbanLength = 34;
-        private const decimal TwoFaAmountThreshold = 1000m;
+        private const int TwoFaAmountThreshold = 1000;
 
         private readonly ITransferRepository transferRepository;
         private readonly IBeneficiaryRepository beneficiaryRepository;

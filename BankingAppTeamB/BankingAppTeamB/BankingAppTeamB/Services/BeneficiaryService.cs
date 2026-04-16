@@ -25,10 +25,23 @@ namespace BankingAppTeamB.Services
         }
         public bool ValidateIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban)) return false;
-            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength) return false;
-            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1])) return false;
-            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3])) return false;
+            if (string.IsNullOrWhiteSpace(iban))
+            {
+                return false;
+            }
+
+            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength)
+            {
+                return false;
+            }
+            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1]))
+            {
+                return false;
+            }
+            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3]))
+            {
+                return false;
+            }
             return true;
         }
         public Beneficiary Add(string name, string iban, int userId)
