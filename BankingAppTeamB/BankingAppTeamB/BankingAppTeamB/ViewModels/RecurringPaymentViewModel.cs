@@ -40,7 +40,7 @@ namespace BankingAppTeamB.ViewModels
             _billPaymentService = billPaymentService;
 
             _payments = new ObservableCollection<RecurringPayment>();
-            _accounts = new ObservableCollection<Account>(UserSession.GetAccounts());
+            _accounts = new ObservableCollection<Account>(ServiceLocator.UserSessionService.GetAccounts());
             _billers = new ObservableCollection<Biller>();
             _frequencies = new ObservableCollection<RecurringFrequency>
             {
@@ -176,7 +176,7 @@ namespace BankingAppTeamB.ViewModels
                 ErrorMessage = string.Empty;
 
                 var payments = await Task.Run(() =>
-                    _recurringPaymentService.GetByUser(UserSession.CurrentUserId));
+                    _recurringPaymentService.GetByUser(ServiceLocator.UserSessionService.CurrentUserId));
 
                 var billers = await Task.Run(() =>
                     _billPaymentService.GetBillerDirectory(null));
@@ -242,7 +242,7 @@ namespace BankingAppTeamB.ViewModels
 
                 var dto = new RecurringPaymentDto
                 {
-                    UserId = UserSession.CurrentUserId,
+                    UserId = ServiceLocator.UserSessionService.CurrentUserId,
                     BillerId = SelectedBiller.Id,
                     SourceAccountId = SelectedAccount.Id,
                     Amount = Amount,

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using BankingAppTeamB.Commands;
+using BankingAppTeamB.Configuration;
 using Microsoft.UI.Xaml;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Services;
@@ -206,7 +207,7 @@ public class FXViewModel : ViewModelBase
         _timer?.Stop();
         _timer = null;
         
-        _exchangeService.ClearLocks(UserSession.CurrentUserId);
+        _exchangeService.ClearLocks(ServiceLocator.UserSessionService.CurrentUserId);
 
         SourceAccount = null;
         TargetAccount = null;
@@ -256,7 +257,7 @@ public class FXViewModel : ViewModelBase
             
             var dto = new ExchangeDto
             {
-                UserId = UserSession.CurrentUserId,
+                UserId = ServiceLocator.UserSessionService.CurrentUserId,
                 SourceAccountId = SourceAccount!.Id,
                 TargetAccountId = TargetAccount!.Id,
                 SourceCurrency = SourceCurrency,
@@ -287,7 +288,7 @@ public class FXViewModel : ViewModelBase
     {
         Accounts.Clear();
 
-        foreach (var account in UserSession.GetAccounts())
+        foreach (var account in ServiceLocator.UserSessionService.GetAccounts())
             Accounts.Add(account);
 
         return Task.CompletedTask;
@@ -352,7 +353,7 @@ public class FXViewModel : ViewModelBase
         {
             ErrorMessage = "";
 
-            _lockedRate = _exchangeService.LockRate(UserSession.CurrentUserId, SourceCurrency, TargetCurrency);
+            _lockedRate = _exchangeService.LockRate(ServiceLocator.UserSessionService.CurrentUserId, SourceCurrency, TargetCurrency);
 
             CurrentStep = 4;
 

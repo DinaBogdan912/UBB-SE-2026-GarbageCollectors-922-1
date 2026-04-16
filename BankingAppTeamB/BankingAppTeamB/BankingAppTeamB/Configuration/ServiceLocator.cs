@@ -15,6 +15,7 @@ public static class ServiceLocator
     private static IBillPaymentRepository _billPaymentRepository = new BillPaymentRepository();
     private static IRecurringPaymentRepository _recurringPaymentRepository = new RecurringPaymentRepository();
     private static IExchangeRepository _exchangeRepository = new ExchangeRepository();
+    private static IUserSessionService _userSessionService = new UserSessionService();
 
     //mock
     private static IAccountService _accountService = new AccountService();
@@ -39,6 +40,7 @@ public static class ServiceLocator
     public static IRecurringPaymentService RecurringPaymentService => _recurringPaymentService;
     public static IRecurringScheduler RecurringScheduler => _recurringScheduler;
     public static IBeneficiaryService BeneficiaryService => _beneficiaryService;
+    public static IUserSessionService UserSessionService => _userSessionService;
     public static void Initialize()
     {
         _recurringScheduler.Start();
