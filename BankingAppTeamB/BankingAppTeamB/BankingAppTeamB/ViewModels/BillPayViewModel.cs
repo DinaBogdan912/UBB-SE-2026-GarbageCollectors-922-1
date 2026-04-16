@@ -217,7 +217,7 @@ namespace BankingAppTeamB.ViewModels
             HasSavedBillers ? Visibility.Visible : Visibility.Collapsed;
 
         public Visibility ErrorMessageVisibility =>
-            string.IsNullOrWhiteSpace(ErrorMessage) ? Visibility.Collapsed : Visibility.Collapsed == Visibility.Visible ? Visibility.Visible : Visibility.Visible;
+            string.IsNullOrWhiteSpace(ErrorMessage) ? Visibility.Collapsed : Visibility.Visible;
         
         public string SelectedBillerName =>
             SelectedBiller?.Name ?? "No biller selected";
