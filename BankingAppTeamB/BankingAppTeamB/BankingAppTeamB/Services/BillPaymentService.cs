@@ -30,21 +30,19 @@ namespace BankingAppTeamB.Services
         public List<Biller> GetBillerDirectory(string? category)
         {
             if (category == null)
-            {
-                return billPaymentRepository.GetAllBillers();
-            }
+                return billPaymentRepository.GetAllBillers(isActive: true);
 
-            return billPaymentRepository.SearchBillers(string.Empty, category);
+            return billPaymentRepository.SearchBillers(string.Empty, category, isActive: true);
         }
 
         public List<Biller> SearchBillers(string query)
         {
-            return billPaymentRepository.SearchBillers(query, null);
+            return billPaymentRepository.SearchBillers(query, null, isActive: true);
         }
 
         public List<Biller> SearchBillers(string query, string? category)
         {
-            return billPaymentRepository.SearchBillers(query ?? string.Empty, category);
+            return billPaymentRepository.SearchBillers(query ?? string.Empty, category, isActive: true);
         }
 
         public List<SavedBiller> GetSavedBillers(int userId)

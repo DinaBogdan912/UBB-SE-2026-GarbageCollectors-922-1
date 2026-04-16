@@ -68,11 +68,11 @@ namespace BankingAppTeamB.Repositories
             return results;
         }
 
-        public List<Biller> GetAllBillers()
+        public List<Biller> GetAllBillers(bool? isActive = null)
         {
             string sql = @"
                 SELECT * FROM Biller
-                WHERE IsActive = 1
+                WHERE (@IsActive IS NULL OR IsActive = @IsActive)
                 ORDER BY Category ASC, Name ASC";
             var results = new List<Biller>();
 
@@ -81,6 +81,8 @@ namespace BankingAppTeamB.Repositories
                 connection.Open();
                 using (var command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.Add(new SqlParameter("@IsActive", (object?)isActive ?? DBNull.Value));
+
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -93,11 +95,11 @@ namespace BankingAppTeamB.Repositories
             return results;
         }
 
-        public List<Biller> SearchBillers(string query, string? category)
+        public List<Biller> SearchBillers(string query, string? category, bool? isActive = null)
         {
             string sql = @"
                 SELECT * FROM Biller
-                WHERE IsActive = 1
+                WHERE (@IsActive IS NULL OR IsActive = @IsActive)
                 AND (@Query = '' OR Name LIKE '%' + @Query + '%')
                 AND (@Category IS NULL OR Category = @Category)
                 ORDER BY Category ASC, Name ASC";
@@ -108,6 +110,7 @@ namespace BankingAppTeamB.Repositories
                 connection.Open();
                 using (var command = new SqlCommand(sql, connection))
                 {
+                    command.Parameters.Add(new SqlParameter("@IsActive", (object?)isActive ?? DBNull.Value));
                     command.Parameters.Add(new SqlParameter("@Query", query));
                     command.Parameters.Add(new SqlParameter("@Category", (object?)category ?? DBNull.Value));
 

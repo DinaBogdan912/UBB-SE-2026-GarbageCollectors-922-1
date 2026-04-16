@@ -6,6 +6,7 @@ namespace BankingAppTeamB.Services
 {
     public class AccountService : IAccountService
     {
+        private const decimal StubAccountBalance = 50m;
         public void DebitAccount(int accountId, decimal amount)
         {
             if (amount <= 0)
@@ -14,7 +15,7 @@ namespace BankingAppTeamB.Services
             }
 
             var accounts = UserSession.GetAccounts();
-            var account = accounts.SingleOrDefault(a => a.Id == accountId);
+            var account = accounts.SingleOrDefault(account => account.Id == accountId);
 
             if (account == null)
             {
@@ -36,7 +37,7 @@ namespace BankingAppTeamB.Services
             }
 
             var accounts = UserSession.GetAccounts();
-            var account = accounts.SingleOrDefault(a => a.Id == accountId);
+            var account = accounts.SingleOrDefault(account => account.Id == accountId);
 
             if (account == null)
             {
@@ -57,7 +58,7 @@ namespace BankingAppTeamB.Services
 
         public decimal GetBalance(int id)
         {
-            return 50;
+            return StubAccountBalance;
         }
     }
 }
