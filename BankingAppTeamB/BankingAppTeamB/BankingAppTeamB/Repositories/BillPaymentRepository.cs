@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Data;
 using BankingAppTeamB.Models;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 
 namespace BankingAppTeamB.Repositories
 {
@@ -59,7 +59,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
+                        {
                             results.Add(MapBillPayment(reader));
+                        }
                     }
                 }
             }
@@ -82,7 +84,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
+                        {
                             results.Add(MapBiller(reader));
+                        }
                     }
                 }
             }
@@ -110,7 +114,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
+                        {
                             results.Add(MapBiller(reader));
+                        }
                     }
                 }
             }
@@ -131,7 +137,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
+                        {
                             return MapBiller(reader);
+                        }
                     }
                 }
             }

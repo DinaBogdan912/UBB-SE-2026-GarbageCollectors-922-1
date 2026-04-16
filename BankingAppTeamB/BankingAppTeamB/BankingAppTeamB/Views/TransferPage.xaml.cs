@@ -30,9 +30,9 @@ namespace BankingAppTeamB.Views
             {
                 ViewModel.RecipientName = dto.RecipientName;
                 ViewModel.RecipientIBAN = dto.RecipientIBAN;
-                ViewModel.Amount        = dto.Amount;
-                ViewModel.Currency      = dto.Currency;
-                ViewModel.TwoFAToken    = dto.TwoFAToken;
+                ViewModel.Amount = dto.Amount;
+                ViewModel.Currency = dto.Currency;
+                ViewModel.TwoFAToken = dto.TwoFAToken;
             }
         }
     }

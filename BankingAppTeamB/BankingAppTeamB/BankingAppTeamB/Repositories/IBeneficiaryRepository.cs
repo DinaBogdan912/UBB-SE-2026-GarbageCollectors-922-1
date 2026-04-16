@@ -1,5 +1,5 @@
-using BankingAppTeamB.Models;
 using System.Collections.Generic;
+using BankingAppTeamB.Models;
 
 namespace BankingAppTeamB.Repositories
 {

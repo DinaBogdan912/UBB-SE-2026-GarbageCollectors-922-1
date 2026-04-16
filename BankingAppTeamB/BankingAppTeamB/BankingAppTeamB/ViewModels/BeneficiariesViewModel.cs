@@ -1,15 +1,15 @@
-﻿using BankingAppTeamB.Commands;
-using BankingAppTeamB.Models;
-using BankingAppTeamB.Services;
-using BankingAppTeamB.Repositories;
-using BankingAppTeamB.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BankingAppTeamB.Commands;
+using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
+using BankingAppTeamB.Repositories;
+using BankingAppTeamB.Services;
+using BankingAppTeamB.Views;
 
 namespace BankingAppTeamB.ViewModels
 {
@@ -20,7 +20,7 @@ namespace BankingAppTeamB.ViewModels
         // Hardcoded for this example.
         private readonly int currentUserId = 1;
 
-        //Backing Fields
+        // Backing Fields
         private ObservableCollection<Beneficiary> beneficiaries = new ObservableCollection<Beneficiary>();
         private Beneficiary? selectedBeneficiary;
         private string newName = string.Empty;
@@ -29,7 +29,7 @@ namespace BankingAppTeamB.ViewModels
         private string errorMessage = string.Empty;
         private bool isAddFormVisible;
 
-        //Properties
+        // Properties
         public ObservableCollection<Beneficiary> Beneficiaries
         {
             get => beneficiaries;
@@ -72,24 +72,24 @@ namespace BankingAppTeamB.ViewModels
             set => SetProperty(ref isAddFormVisible, value);
         }
 
-        //Commands
+        // Commands
         public AsyncRelayCommand AddCommand { get; }
         public RelayCommand DeleteCommand { get; }
         public RelayCommand ShowAddFormCommand { get; }
         public RelayCommand UseForTransferCommand { get; }
 
-        //Constructor
+        // Constructor
         public BeneficiariesViewModel(IBeneficiaryService beneficiaryService)
         {
             this.beneficiaryService = beneficiaryService;
 
-            //Initialize Commands
+            // Initialize Commands
             AddCommand = new AsyncRelayCommand(unusedParameter => AddBeneficiaryAsync());
             DeleteCommand = new RelayCommand(commandParameter => DeleteBeneficiary(commandParameter as Beneficiary));
             ShowAddFormCommand = new RelayCommand(unusedParameter => ShowAddForm());
             UseForTransferCommand = new RelayCommand(commandParameter => UseForTransfer(commandParameter as Beneficiary));
         }
-        //Methods
+        // Methods
         public async Task LoadAsync()
         {
             var data = beneficiaryService.GetByUser(currentUserId);
@@ -131,7 +131,10 @@ namespace BankingAppTeamB.ViewModels
 
         private void DeleteBeneficiary(Beneficiary beneficiary)
         {
-            if (beneficiary == null) return;
+            if (beneficiary == null)
+            {
+                return;
+            }
 
             beneficiaryService.Delete(beneficiary.Id);
             Beneficiaries.Remove(beneficiary);
@@ -148,9 +151,12 @@ namespace BankingAppTeamB.ViewModels
 
         private void UseForTransfer(Beneficiary beneficiary)
         {
-            if (beneficiary == null) return;
+            if (beneficiary == null)
+            {
+                return;
+            }
 
-            //(0 is the placeholder for SourceAccountId)
+            // (0 is the placeholder for SourceAccountId)
             TransferDto transferDto = beneficiaryService.BuildTransferDtoFrom(beneficiary, 0, currentUserId);
 
             NavigationService.NavigateTo<TransferPage>(transferDto);

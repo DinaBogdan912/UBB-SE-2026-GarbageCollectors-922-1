@@ -1,7 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using System;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
-using System;
-
 
 namespace BankingAppTeamB.Converters
 {
@@ -12,6 +11,5 @@ namespace BankingAppTeamB.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
             => value is Visibility v && v == Visibility.Visible;
-
     }
 }

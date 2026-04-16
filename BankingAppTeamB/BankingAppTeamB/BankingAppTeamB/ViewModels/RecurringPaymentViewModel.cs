@@ -1,63 +1,63 @@
-﻿using BankingAppTeamB.Commands;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using BankingAppTeamB.Commands;
 using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Mocks;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Services;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace BankingAppTeamB.ViewModels
 {
     public class RecurringPaymentViewModel : ViewModelBase
     {
-        private readonly IRecurringPaymentService _recurringPaymentService;
-        private readonly IBillPaymentService _billPaymentService;
+        private readonly IRecurringPaymentService recurringPaymentService;
+        private readonly IBillPaymentService billPaymentService;
 
-        private ObservableCollection<RecurringPayment> _payments;
-        private RecurringPayment? _selectedPayment;
-        private int _selectedBillerId;
-        private decimal _amount;
-        private RecurringFrequency _frequency;
-        private DateTime _startDate;
-        private DateTime? _endDate;
-        private string _errorMessage;
+        private ObservableCollection<RecurringPayment> payments;
+        private RecurringPayment? selectedPayment;
+        private int selectedBillerId;
+        private decimal amount;
+        private RecurringFrequency frequency;
+        private DateTime startDate;
+        private DateTime? endDate;
+        private string errorMessage;
 
-        private ObservableCollection<Account> _accounts;
-        private Account? _selectedAccount;
+        private ObservableCollection<Account> accounts;
+        private Account? selectedAccount;
 
-        private ObservableCollection<Biller> _billers;
-        private Biller? _selectedBiller;
+        private ObservableCollection<Biller> billers;
+        private Biller? selectedBiller;
 
-        private ObservableCollection<RecurringFrequency> _frequencies;
+        private ObservableCollection<RecurringFrequency> frequencies;
 
         public RecurringPaymentViewModel(IRecurringPaymentService recurringPaymentService, IBillPaymentService billPaymentService)
         {
-            _recurringPaymentService = recurringPaymentService;
-            _billPaymentService = billPaymentService;
+            this.recurringPaymentService = recurringPaymentService;
+            this.billPaymentService = billPaymentService;
 
-            _payments = new ObservableCollection<RecurringPayment>();
-            _accounts = new ObservableCollection<Account>(ServiceLocator.UserSessionService.GetAccounts());
-            _billers = new ObservableCollection<Biller>();
-            _frequencies = new ObservableCollection<RecurringFrequency>
+            payments = new ObservableCollection<RecurringPayment>();
+            accounts = new ObservableCollection<Account>(ServiceLocator.UserSessionService.GetAccounts());
+            billers = new ObservableCollection<Biller>();
+            frequencies = new ObservableCollection<RecurringFrequency>
             {
                 RecurringFrequency.Weekly,
                 RecurringFrequency.Monthly,
-                RecurringFrequency.Quarterly
+                RecurringFrequency.Quarterly,
             };
 
-            _selectedPayment = null;
-            _selectedBillerId = 0;
-            _amount = 0;
-            _frequency = RecurringFrequency.Weekly;
-            _startDate = DateTime.Today;
-            _endDate = null;
-            _errorMessage = string.Empty;
-            _selectedAccount = null;
-            _selectedBiller = null;
+            selectedPayment = null;
+            selectedBillerId = 0;
+            amount = 0;
+            frequency = RecurringFrequency.Weekly;
+            startDate = DateTime.Today;
+            endDate = null;
+            errorMessage = string.Empty;
+            selectedAccount = null;
+            selectedBiller = null;
 
             CreateCommand = new AsyncRelayCommand(unusedParameter => ExecuteCreateAsync());
             PauseCommand = new RelayCommand(ExecutePause);
@@ -67,52 +67,52 @@ namespace BankingAppTeamB.ViewModels
 
         public ObservableCollection<RecurringPayment> Payments
         {
-            get => _payments;
-            set => SetProperty(ref _payments, value);
+            get => payments;
+            set => SetProperty(ref payments, value);
         }
 
         public RecurringPayment? SelectedPayment
         {
-            get => _selectedPayment;
-            set => SetProperty(ref _selectedPayment, value);
+            get => selectedPayment;
+            set => SetProperty(ref selectedPayment, value);
         }
 
         public int SelectedBillerId
         {
-            get => _selectedBillerId;
-            set => SetProperty(ref _selectedBillerId, value);
+            get => selectedBillerId;
+            set => SetProperty(ref selectedBillerId, value);
         }
 
         public decimal Amount
         {
-            get => _amount;
-            set => SetProperty(ref _amount, value);
+            get => amount;
+            set => SetProperty(ref amount, value);
         }
 
         public RecurringFrequency Frequency
         {
-            get => _frequency;
-            set => SetProperty(ref _frequency, value);
+            get => frequency;
+            set => SetProperty(ref frequency, value);
         }
 
         public DateTime StartDate
         {
-            get => _startDate;
-            set => SetProperty(ref _startDate, value);
+            get => startDate;
+            set => SetProperty(ref startDate, value);
         }
 
         public DateTime? EndDate
         {
-            get => _endDate;
-            set => SetProperty(ref _endDate, value);
+            get => endDate;
+            set => SetProperty(ref endDate, value);
         }
 
         public string ErrorMessage
         {
-            get => _errorMessage;
+            get => errorMessage;
             set
             {
-                if (SetProperty(ref _errorMessage, value))
+                if (SetProperty(ref errorMessage, value))
                 {
                     OnPropertyChanged(nameof(HasError));
                     OnPropertyChanged(nameof(ErrorMessageVisibility));
@@ -124,34 +124,34 @@ namespace BankingAppTeamB.ViewModels
 
         // Compute error visibility here as a property to bind the xaml to it
         // (avoid view logic here)
-        public Microsoft.UI.Xaml.Visibility ErrorMessageVisibility => HasError ? 
-            Microsoft.UI.Xaml.Visibility.Visible : 
+        public Microsoft.UI.Xaml.Visibility ErrorMessageVisibility => HasError ?
+            Microsoft.UI.Xaml.Visibility.Visible :
             Microsoft.UI.Xaml.Visibility.Collapsed;
 
         public ObservableCollection<Account> Accounts
         {
-            get => _accounts;
-            set => SetProperty(ref _accounts, value);
+            get => accounts;
+            set => SetProperty(ref accounts, value);
         }
 
         public Account? SelectedAccount
         {
-            get => _selectedAccount;
-            set => SetProperty(ref _selectedAccount, value);
+            get => selectedAccount;
+            set => SetProperty(ref selectedAccount, value);
         }
 
         public ObservableCollection<Biller> Billers
         {
-            get => _billers;
-            set => SetProperty(ref _billers, value);
+            get => billers;
+            set => SetProperty(ref billers, value);
         }
 
         public Biller? SelectedBiller
         {
-            get => _selectedBiller;
+            get => selectedBiller;
             set
             {
-                if (SetProperty(ref _selectedBiller, value))
+                if (SetProperty(ref selectedBiller, value))
                 {
                     SelectedBillerId = value?.Id ?? 0;
                 }
@@ -160,8 +160,8 @@ namespace BankingAppTeamB.ViewModels
 
         public ObservableCollection<RecurringFrequency> Frequencies
         {
-            get => _frequencies;
-            set => SetProperty(ref _frequencies, value);
+            get => frequencies;
+            set => SetProperty(ref frequencies, value);
         }
 
         public ICommand CreateCommand { get; }
@@ -176,10 +176,10 @@ namespace BankingAppTeamB.ViewModels
                 ErrorMessage = string.Empty;
 
                 var payments = await Task.Run(() =>
-                    _recurringPaymentService.GetByUser(ServiceLocator.UserSessionService.CurrentUserId));
+                    recurringPaymentService.GetByUser(ServiceLocator.UserSessionService.CurrentUserId));
 
                 var billers = await Task.Run(() =>
-                    _billPaymentService.GetBillerDirectory(null));
+                    billPaymentService.GetBillerDirectory(null));
 
                 Payments = new ObservableCollection<RecurringPayment>(payments);
                 Billers = new ObservableCollection<Biller>(billers);
@@ -253,7 +253,7 @@ namespace BankingAppTeamB.ViewModels
                 };
 
                 var createdPayment = await Task.Run(() =>
-                    _recurringPaymentService.Create(dto));
+                    recurringPaymentService.Create(dto));
 
                 Payments.Add(createdPayment);
                 ClearForm();
@@ -276,7 +276,7 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                _recurringPaymentService.Pause(payment.Id);
+                recurringPaymentService.Pause(payment.Id);
 
                 var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
                 if (existing != null)
@@ -304,7 +304,7 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                _recurringPaymentService.Resume(payment.Id);
+                recurringPaymentService.Resume(payment.Id);
 
                 var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
                 if (existing != null)
@@ -332,7 +332,7 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                _recurringPaymentService.Cancel(payment.Id);
+                recurringPaymentService.Cancel(payment.Id);
 
                 var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
                 if (existing != null)

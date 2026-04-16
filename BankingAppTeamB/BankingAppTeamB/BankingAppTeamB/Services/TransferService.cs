@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Repositories;
-using System;
-using System.Collections.Generic;
 
 namespace BankingAppTeamB.Services
 {
@@ -32,7 +32,9 @@ namespace BankingAppTeamB.Services
         public Transfer ExecuteTransfer(TransferDto dto)
         {
             if (!ValidateIBAN(dto.RecipientIBAN))
+            {
                 throw new InvalidOperationException("Recipient IBAN is invalid.");
+            }
 
             var context = new PipelineContext
             {
@@ -78,23 +80,40 @@ namespace BankingAppTeamB.Services
                 beneficiaryRepo.Update(match);
             }
             // end of newly added
-
             return transfer;
         }
 
         public bool ValidateIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban)) return false;
-            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength) return false;
-            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1])) return false;
-            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3])) return false;
+            if (string.IsNullOrWhiteSpace(iban))
+            {
+                return false;
+            }
+
+            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength)
+            {
+                return false;
+            }
+
+            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1]))
+            {
+                return false;
+            }
+
+            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3]))
+            {
+                return false;
+            }
+
             return true;
         }
 
         public string GetBankNameFromIBAN(string iban)
         {
             if (string.IsNullOrWhiteSpace(iban) || iban.Length < 2)
+            {
                 return "Unknown Bank";
+            }
 
             string countryCode = iban.Substring(0, 2).ToUpper();
             return countryCode switch
@@ -111,16 +130,22 @@ namespace BankingAppTeamB.Services
         public FxPreview GetFxPreview(string sourceCurrency, string targetCurrency, decimal amount)
         {
             if (sourceCurrency.Equals(targetCurrency, StringComparison.OrdinalIgnoreCase))
+            {
                 return new FxPreview { Rate = 1, ConvertedAmount = amount };
+            }
 
             if (exchangeService == null)
+            {
                 return new FxPreview { Rate = 1, ConvertedAmount = amount };
+            }
 
             var rates = exchangeService.GetLiveRates();
             string pair = $"{sourceCurrency.ToUpper()}/{targetCurrency.ToUpper()}";
 
             if (!rates.ContainsKey(pair))
+            {
                 return new FxPreview { Rate = 1, ConvertedAmount = amount };
+            }
 
             decimal rate = rates[pair];
             return new FxPreview

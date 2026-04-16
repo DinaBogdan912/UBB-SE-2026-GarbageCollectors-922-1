@@ -1,39 +1,46 @@
 ﻿using System;
 using System.ComponentModel;
 
-
 namespace BankingAppTeamB.Models
 {
     public class RateAlert : INotifyPropertyChanged
     {
         public int Id { get; set; }
-        public int UserId { get; set; }
-        public string BaseCurrency {  get; set; }
-        public string TargetCurrency { get; set; }
-        public decimal TargetRate { get; set; }
-       
-        public DateTime CreatedAt { get; set; }
-        public bool IsBuyAlert { get; set; }
-        public event PropertyChangedEventHandler PropertyChanged;
 
-        private bool _isTriggered;
+        public int UserId { get; set; }
+
+        public string BaseCurrency { get; set; } = string.Empty;
+
+        public string TargetCurrency { get; set; } = string.Empty;
+
+        public decimal TargetRate { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public bool IsBuyAlert { get; set; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private bool isTriggered;
 
         public bool IsTriggered
         {
-            get => _isTriggered;
+            get => this.isTriggered;
             set
             {
-                if (_isTriggered != value)
+                if (this.isTriggered == value)
                 {
-                    _isTriggered = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTriggered)));
+                    return;
                 }
+
+                this.isTriggered = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTriggered)));
             }
         }
 
         public RateAlert(int userId, string baseCurrency, string targetCurrency, decimal rate, bool isBuyAlert)
         {
-            Id = userId;
+            UserId = userId;
             BaseCurrency = baseCurrency;
             TargetCurrency = targetCurrency;
             TargetRate = rate;
@@ -42,14 +49,38 @@ namespace BankingAppTeamB.Models
             IsBuyAlert = isBuyAlert;
         }
 
-        public RateAlert(){}
+        public RateAlert()
+        {
+        }
 
-        public void setBuyAlert(bool v) { IsBuyAlert = v; }
-        public int getId() { return Id; }
-        public bool isTriggered() { return IsTriggered; }
-        public void setTriggered(bool v) { IsTriggered = v; }
-        public decimal getTargetRate() { return TargetRate; }
-        public string getBaseCurrency() { return BaseCurrency; }
-        public string getTargetCurrency() { return TargetCurrency; }
+        public void SetBuyAlert(bool v)
+        {
+            IsBuyAlert = v;
+        }
+
+        public int GetId()
+        {
+            return Id;
+        }
+
+        public void SetTriggered(bool v)
+        {
+            IsTriggered = v;
+        }
+
+        public decimal GetTargetRate()
+        {
+            return TargetRate;
+        }
+
+        public string GetBaseCurrency()
+        {
+            return BaseCurrency;
+        }
+
+        public string GetTargetCurrency()
+        {
+            return TargetCurrency;
+        }
     }
 }

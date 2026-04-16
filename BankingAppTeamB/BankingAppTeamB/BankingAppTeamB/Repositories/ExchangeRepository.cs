@@ -6,13 +6,13 @@ using Microsoft.Data.SqlClient;
 
 namespace BankingAppTeamB.Repositories;
 
-public class ExchangeRepository  : IExchangeRepository
+public class ExchangeRepository : IExchangeRepository
 {
     public ExchangeTransaction Add(ExchangeTransaction t)
     {
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var query = @"
                 INSERT INTO ExchangeTransaction
                 (UserId, SourceAccountId, TargetAccountId, SourceCurrency, TargetCurrency,
@@ -21,9 +21,9 @@ public class ExchangeRepository  : IExchangeRepository
                 VALUES
                 (@UserId, @SourceAccountId, @TargetAccountId, @SourceCurrency, @TargetCurrency,
                  @SourceAmount, @TargetAmount, @Rate, @Commission, @Status, @CreatedAt)";
-        
+
         using var cmd = new SqlCommand(query, conn);
-        
+
         cmd.Parameters.AddWithValue("@UserId", t.UserId);
         cmd.Parameters.AddWithValue("@SourceAccountId", t.SourceAccountId);
         cmd.Parameters.AddWithValue("@TargetAccountId", t.TargetAccountId);
@@ -44,18 +44,18 @@ public class ExchangeRepository  : IExchangeRepository
     public List<ExchangeTransaction> GetByUserId(int userId)
     {
         var list = new List<ExchangeTransaction>();
-        
+
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var query = @"
         SELECT * FROM ExchangeTransaction
         WHERE UserId = @UserId
         ORDER BY CreatedAt DESC";
-        
+
         using var cmd = new SqlCommand(query, conn);
         cmd.Parameters.AddWithValue("@UserId", userId);
-        
+
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
@@ -74,7 +74,7 @@ public class ExchangeRepository  : IExchangeRepository
                 CreatedAt = (DateTime)reader["CreatedAt"]
             });
         }
-        
+
         return list;
     }
 
@@ -83,14 +83,14 @@ public class ExchangeRepository  : IExchangeRepository
         var list = new List<RateAlert>();
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var query = @"
         SELECT * FROM RateAlert
         WHERE UserId = @UserId AND IsTriggered = 0";
-        
+
         using var cmd = new SqlCommand(query, conn);
         cmd.Parameters.AddWithValue("@UserId", userId);
-        
+
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
@@ -100,7 +100,7 @@ public class ExchangeRepository  : IExchangeRepository
 
         return list;
     }
-    
+
     private RateAlert MapAlert(SqlDataReader reader)
     {
         return new RateAlert
@@ -121,9 +121,9 @@ public class ExchangeRepository  : IExchangeRepository
         var list = new List<RateAlert>();
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var query = "SELECT * FROM RateAlert WHERE IsTriggered = 0";
-        
+
         using var cmd = new SqlCommand(query, conn);
         using var reader = cmd.ExecuteReader();
 
@@ -131,7 +131,7 @@ public class ExchangeRepository  : IExchangeRepository
         {
             list.Add(MapAlert(reader));
         }
-        
+
         return list;
     }
 
@@ -139,22 +139,22 @@ public class ExchangeRepository  : IExchangeRepository
     {
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var query = @"
         INSERT INTO RateAlert
         (UserId, BaseCurrency, TargetCurrency, TargetRate, isTriggered, isBuyAlert, CreatedAt)
         OUTPUT INSERTED.Id
         VALUES (@UserId, @Base, @Target, @Rate, 0, @IsBuyAlert, @CreatedAt)";
-        
+
         using var cmd = new SqlCommand(query, conn);
-        
+
         cmd.Parameters.AddWithValue("@UserId", alert.UserId);
         cmd.Parameters.AddWithValue("@Base", alert.BaseCurrency);
         cmd.Parameters.AddWithValue("@Target", alert.TargetCurrency);
         cmd.Parameters.AddWithValue("@Rate", alert.TargetRate);
         cmd.Parameters.AddWithValue("@CreatedAt", alert.CreatedAt);
         cmd.Parameters.AddWithValue("@IsBuyAlert", alert.IsBuyAlert);
-        
+
         alert.Id = (int)cmd.ExecuteScalar();
 
         return alert;
@@ -164,9 +164,9 @@ public class ExchangeRepository  : IExchangeRepository
     {
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var cmd = new SqlCommand("DELETE FROM RateAlert WHERE Id = @id", conn);
-        
+
         cmd.Parameters.AddWithValue("@id", id);
         cmd.ExecuteNonQuery();
     }
@@ -175,7 +175,7 @@ public class ExchangeRepository  : IExchangeRepository
     {
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var cmd = new SqlCommand(
             "UPDATE RateAlert SET IsTriggered = 1 WHERE Id = @Id", conn);
 
@@ -183,6 +183,4 @@ public class ExchangeRepository  : IExchangeRepository
 
         cmd.ExecuteNonQuery();
     }
-    
-    
 }

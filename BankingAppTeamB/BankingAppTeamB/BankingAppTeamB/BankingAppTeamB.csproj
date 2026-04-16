@@ -77,5 +77,6 @@
 
 	<PropertyGroup>
 		<CodeAnalysisRuleSet>SE.ruleset</CodeAnalysisRuleSet>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 </Project>

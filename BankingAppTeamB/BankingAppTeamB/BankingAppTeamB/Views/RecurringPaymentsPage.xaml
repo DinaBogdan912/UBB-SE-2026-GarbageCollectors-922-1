@@ -116,8 +116,8 @@
             <TextBlock x:Name="ErrorMessageTextBlock"
                        Foreground="Red"
                        TextWrapping="Wrap"
-                       Text="{x:Bind _viewModel.ErrorMessage}"
-                       Visibility="{x:Bind _viewModel.ErrorMessageVisibility}"/>
+                       Text="{Binding ErrorMessage}"
+                       Visibility="{Binding ErrorMessageVisibility}"/>
 
             <Button Content="Create"
                     Click="CreateButton_Click"/>

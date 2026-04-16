@@ -9,17 +9,17 @@ namespace BankingAppTeamB.Commands
 {
     public class AsyncRelayCommand : ICommand
     {
-        private readonly Func<object?, Task> _execute;
-        private bool _isExecuting;
+        private readonly Func<object?, Task> execute;
+        private bool isExecuting;
 
         public event EventHandler? CanExecuteChanged;
 
         public AsyncRelayCommand(Func<object?, Task> execute)
         {
-            _execute = execute;
+            this.execute = execute;
         }
 
-        public bool CanExecute(object? parameter) => !_isExecuting;
+        public bool CanExecute(object? parameter) => !isExecuting;
 
         public void Execute(object? parameter)
         {
@@ -28,15 +28,15 @@ namespace BankingAppTeamB.Commands
 
         public async Task ExecuteAsync(object? parameter)
         {
-            _isExecuting = true;
+            isExecuting = true;
             RaiseCanExecuteChanged();
             try
             {
-                await _execute(parameter);
+                await execute(parameter);
             }
             finally
             {
-                _isExecuting = false;
+                isExecuting = false;
                 RaiseCanExecuteChanged();
             }
         }

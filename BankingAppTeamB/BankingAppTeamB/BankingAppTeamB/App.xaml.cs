@@ -1,13 +1,13 @@
-﻿using Microsoft.UI.Xaml;
-using BankingAppTeamB.Data;
+﻿using System;
 using BankingAppTeamB.Configuration;
-using System;
+using BankingAppTeamB.Data;
+using Microsoft.UI.Xaml;
 
 namespace BankingAppTeamB
 {
     public partial class App : Application
     {
-        private Window? _window;
+        private Window? window;
 
         public App()
         {
@@ -33,11 +33,11 @@ namespace BankingAppTeamB
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"ServiceLocator error: {ex.Message}");
-                throw new InvalidOperationException($"ServiceLocator initialization failed: {ex.Message}", ex); 
+                throw new InvalidOperationException($"ServiceLocator initialization failed: {ex.Message}", ex);
             }
 
-            _window = new MainWindow();
-            _window.Activate();
+            window = new MainWindow();
+            window.Activate();
         }
     }
 }

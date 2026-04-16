@@ -1,15 +1,13 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Repositories;
-using System;
-using System.Collections.Generic;
 
 namespace BankingAppTeamB.Services
 {
     public class BillPaymentService : IBillPaymentService
     {
-
-
         private const decimal SmallPaymentThreshold = 100m;
         private const decimal SmallPaymentFee = 0.50m;
         private const decimal StandardPaymentFee = 1.00m;
@@ -32,7 +30,9 @@ namespace BankingAppTeamB.Services
         public List<Biller> GetBillerDirectory(string? category)
         {
             if (category == null)
+            {
                 return billPaymentRepository.GetAllBillers();
+            }
 
             return billPaymentRepository.SearchBillers(string.Empty, category);
         }
@@ -76,8 +76,7 @@ namespace BankingAppTeamB.Services
             return amount >= TwoFaAmountThreshold;
         }
 
-
-        private String GenerateReceiptId()
+        private string GenerateReceiptId()
         {
             const int receiptSuffixLength = 6;
             string uniqueSuffix = Guid.NewGuid().ToString("N")[..receiptSuffixLength].ToUpper();
@@ -87,7 +86,9 @@ namespace BankingAppTeamB.Services
         {
             var biller = billPaymentRepository.GetBillerById(dto.BillerId);
             if (biller == null)
+            {
                 throw new InvalidOperationException($"Biller with ID {dto.BillerId} does not exist.");
+            }
 
             decimal fee = CalculateFee(dto.Amount);
 
@@ -105,7 +106,6 @@ namespace BankingAppTeamB.Services
             };
 
             var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
-
 
             var billPayment = new BillPayment
             {

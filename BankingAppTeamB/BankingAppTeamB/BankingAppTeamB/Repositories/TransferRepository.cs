@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Data;
 using BankingAppTeamB.Models;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 
 namespace BankingAppTeamB.Repositories
 {
@@ -65,7 +65,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
+                        {
                             return MapTransfer(reader);
+                        }
                     }
                 }
             }
@@ -88,7 +90,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
+                        {
                             results.Add(MapTransfer(reader));
+                        }
                     }
                 }
             }
@@ -134,8 +138,7 @@ namespace BankingAppTeamB.Repositories
                 Reference = reader["Reference"] == DBNull.Value ? null : (string)reader["Reference"],
                 Status = Enum.TryParse<TransferStatus>(
                     reader["Status"].ToString(),
-                    out var status
-                )
+                    out var status)
                     ? status
                     : throw new Exception("Invalid TransferStatus value"),
                 EstimatedArrival = reader["EstimatedArrival"] == DBNull.Value

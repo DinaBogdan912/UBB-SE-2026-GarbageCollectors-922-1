@@ -20,7 +20,9 @@ namespace BankingAppTeamB.Services
             this.timer.Elapsed += OnTick;
         }
 
-        public void SetExchangeService(ExchangeService exchangeService) { }
+        public void SetExchangeService(ExchangeService exchangeService)
+        {
+        }
 
         public void Start()
         {

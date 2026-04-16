@@ -1,5 +1,5 @@
-﻿using Microsoft.UI.Xaml.Data;
-using System;
+﻿using System;
+using Microsoft.UI.Xaml.Data;
 
 namespace BankingAppTeamB.Converters
 {
@@ -9,7 +9,7 @@ namespace BankingAppTeamB.Converters
         {
             if (value is decimal d)
             {
-                string symbol = parameter as string ?? "";
+                string symbol = parameter as string ?? string.Empty;
                 return string.IsNullOrEmpty(symbol) ? d.ToString("F2") : $"{symbol}{d:F2}";
             }
             return "0.00";
