@@ -108,11 +108,5 @@ namespace BankingAppTeamB.Services
             };
         }
 
-
-        public IAccountService GetAccountService()
-        {
-            return accountService;
-        }
-
     }
 }

@@ -1,4 +1,5 @@
 using BankingAppTeamB.Configuration;
+using BankingAppTeamB.Mocks;
 using BankingAppTeamB.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -30,7 +31,8 @@ namespace BankingAppTeamB.Views
         public RateAlertsPage()
         {
             InitializeComponent();
-            this.DataContext = new RateAlertViewModel(ServiceLocator.ExchangeService, 0);
+            // at the next line get the current user id
+            this.DataContext = new RateAlertViewModel(ServiceLocator.ExchangeService, UserSession.CurrentUserId);
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
