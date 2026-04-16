@@ -10,26 +10,29 @@ namespace BankingAppTeamB.Services
 {
     public class BeneficiaryService : IBeneficiaryService
     {
-        private readonly IBeneficiaryRepository repo;
+        private const int MinimumIbanLength = 15;
+        private const int MaximumIbanLength = 34;
 
-        public BeneficiaryService(IBeneficiaryRepository InputRepo)
+        private readonly IBeneficiaryRepository beneficiaryRepository;
+
+        public BeneficiaryService(IBeneficiaryRepository inputRepository)
         {
-            repo = InputRepo;
+            beneficiaryRepository = inputRepository;
         }
 
         public List<Beneficiary> GetByUser(int userId)
         {
-            return repo.GetByUserId(userId);
+            return beneficiaryRepository.GetByUserId(userId);
         }
         public bool ValidateIBAN(string iban)
         {
             if (string.IsNullOrWhiteSpace(iban)) return false;
-            if (iban.Length < 15 || iban.Length > 34) return false;
+            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength) return false;
             if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1])) return false;
             if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3])) return false;
             return true;
         }
-        public Beneficiary Add(string name, string iban, int uid)
+        public Beneficiary Add(string name, string iban, int userId)
         {
             if (ValidateIBAN(iban) == false)
             {
@@ -39,20 +42,20 @@ namespace BankingAppTeamB.Services
             {
                 throw new ArgumentException("Name cannot be empty");
             }
-            List<Beneficiary> existingBeneficiaries = repo.GetByUserId(uid);
-            if (existingBeneficiaries.Any(b => b.IBAN.Equals(iban, StringComparison.OrdinalIgnoreCase)))
+            List<Beneficiary> existingBeneficiaries = beneficiaryRepository.GetByUserId(userId);
+            if (existingBeneficiaries.Any(beneficiary => beneficiary.IBAN.Equals(iban, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new ArgumentException("A beneficiary with this IBAN already exists for this user.");
             }
             Beneficiary beneficiary = new Beneficiary
             {
-                UserId = uid,
+                UserId = userId,
                 Name = name,
                 IBAN = iban,
                 CreatedAt = DateTime.UtcNow
             };
 
-            repo.Add(beneficiary);
+            beneficiaryRepository.Add(beneficiary);
             return beneficiary;
         }
         public void Update(Beneficiary beneficiary)
@@ -62,11 +65,11 @@ namespace BankingAppTeamB.Services
                 throw new ArgumentException("Beneficiary name cannot be empty.");
             }
 
-            repo.Update(beneficiary);
+            beneficiaryRepository.Update(beneficiary);
         }
         public void Delete(int id)
         {
-            repo.Delete(id);
+            beneficiaryRepository.Delete(id);
         }
         public TransferDto BuildTransferDtoFrom(Beneficiary beneficiary, int sourceAccountId, int userId)
         {
@@ -79,7 +82,7 @@ namespace BankingAppTeamB.Services
             };
         }
 
-        internal object Add(string name, string iban, string newBankName, int uid)
+        internal object Add(string name, string iban, string newBankName, int userId)
         {
             if (ValidateIBAN(iban) == false)
             {
@@ -89,21 +92,21 @@ namespace BankingAppTeamB.Services
             {
                 throw new ArgumentException("Name cannot be empty");
             }
-            List<Beneficiary> existingBeneficiaries = repo.GetByUserId(uid);
-            if (existingBeneficiaries.Any(b => b.IBAN.Equals(iban, StringComparison.OrdinalIgnoreCase)))
+            List<Beneficiary> existingBeneficiaries = beneficiaryRepository.GetByUserId(userId);
+            if (existingBeneficiaries.Any(beneficiary => beneficiary.IBAN.Equals(iban, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new ArgumentException("A beneficiary with this IBAN already exists for this user.");
             }
             Beneficiary beneficiary = new Beneficiary
             {
-                UserId = uid,
+                UserId = userId,
                 Name = name,
                 IBAN = iban,
                 BankName = newBankName,
                 CreatedAt = DateTime.UtcNow
             };
 
-            repo.Add(beneficiary);
+            beneficiaryRepository.Add(beneficiary);
             return beneficiary;
         }
     }

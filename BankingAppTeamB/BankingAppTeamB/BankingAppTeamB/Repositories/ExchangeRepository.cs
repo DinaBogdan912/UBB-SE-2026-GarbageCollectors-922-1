@@ -78,19 +78,21 @@ public class ExchangeRepository  : IExchangeRepository
         return list;
     }
 
-    public List<RateAlert> GetUserActiveAlerts(int userId)
+    public List<RateAlert> GetAlertsByUser(int userId, bool? isTriggered = null)
     {
         var list = new List<RateAlert>();
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
+
         var query = @"
         SELECT * FROM RateAlert
-        WHERE UserId = @UserId AND IsTriggered = 0";
-        
+        WHERE UserId = @UserId
+        AND (@IsTriggered IS NULL OR IsTriggered = @IsTriggered)";
+
         using var cmd = new SqlCommand(query, conn);
         cmd.Parameters.AddWithValue("@UserId", userId);
-        
+        cmd.Parameters.AddWithValue("@IsTriggered", (object?)isTriggered ?? DBNull.Value);
+
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
@@ -116,22 +118,23 @@ public class ExchangeRepository  : IExchangeRepository
         };
     }
 
-    public List<RateAlert> GetAllActiveAlerts()
+    public List<RateAlert> GetAllAlerts(bool? isTriggered = null)
     {
         var list = new List<RateAlert>();
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
-        
-        var query = "SELECT * FROM RateAlert WHERE IsTriggered = 0";
-        
+
+        var query = "SELECT * FROM RateAlert WHERE @IsTriggered IS NULL OR IsTriggered = @IsTriggered";
+
         using var cmd = new SqlCommand(query, conn);
+        cmd.Parameters.AddWithValue("@IsTriggered", (object?)isTriggered ?? DBNull.Value);
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
         {
             list.Add(MapAlert(reader));
         }
-        
+
         return list;
     }
 
@@ -144,14 +147,15 @@ public class ExchangeRepository  : IExchangeRepository
         INSERT INTO RateAlert
         (UserId, BaseCurrency, TargetCurrency, TargetRate, isTriggered, isBuyAlert, CreatedAt)
         OUTPUT INSERTED.Id
-        VALUES (@UserId, @Base, @Target, @Rate, 0, @IsBuyAlert, @CreatedAt)";
-        
+        VALUES (@UserId, @Base, @Target, @Rate, @IsTriggered, @IsBuyAlert, @CreatedAt)";
+
         using var cmd = new SqlCommand(query, conn);
-        
+
         cmd.Parameters.AddWithValue("@UserId", alert.UserId);
         cmd.Parameters.AddWithValue("@Base", alert.BaseCurrency);
         cmd.Parameters.AddWithValue("@Target", alert.TargetCurrency);
         cmd.Parameters.AddWithValue("@Rate", alert.TargetRate);
+        cmd.Parameters.AddWithValue("@IsTriggered", alert.IsTriggered);
         cmd.Parameters.AddWithValue("@CreatedAt", alert.CreatedAt);
         cmd.Parameters.AddWithValue("@IsBuyAlert", alert.IsBuyAlert);
         

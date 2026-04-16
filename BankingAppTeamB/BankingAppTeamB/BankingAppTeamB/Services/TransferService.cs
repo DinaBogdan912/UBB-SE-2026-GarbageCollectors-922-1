@@ -12,20 +12,20 @@ namespace BankingAppTeamB.Services
         private const int MaximumIbanLength = 34;
         private const decimal TwoFaAmountThreshold = 1000m;
 
-        private readonly ITransferRepository transferRepo;
-        private readonly IBeneficiaryRepository beneficiaryRepo;
-        private readonly ITransactionPipelineService pipeline;
+        private readonly ITransferRepository transferRepository;
+        private readonly IBeneficiaryRepository beneficiaryRepository;
+        private readonly ITransactionPipelineService transactionPipelineService;
         private readonly IExchangeService? exchangeService;
 
         public TransferService(
-            ITransferRepository transferRepo,
-            IBeneficiaryRepository beneficiaryRepo,
-            ITransactionPipelineService pipeline,
+            ITransferRepository transferRepository,
+            IBeneficiaryRepository beneficiaryRepository,
+            ITransactionPipelineService transactionPipelineService,
             IExchangeService? exchangeService = null)
         {
-            this.transferRepo = transferRepo;
-            this.beneficiaryRepo = beneficiaryRepo;
-            this.pipeline = pipeline;
+            this.transferRepository = transferRepository;
+            this.beneficiaryRepository = beneficiaryRepository;
+            this.transactionPipelineService = transactionPipelineService;
             this.exchangeService = exchangeService;
         }
 
@@ -47,7 +47,7 @@ namespace BankingAppTeamB.Services
                 RelatedEntityId = 0
             };
 
-            var transaction = pipeline.RunPipeline(context, dto.TwoFAToken);
+            var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
 
             var transfer = new Transfer
             {
@@ -65,17 +65,17 @@ namespace BankingAppTeamB.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            transferRepo.Add(transfer);
+            transferRepository.Add(transfer);
 
             // newly added
-            var beneficiaries = beneficiaryRepo.GetByUserId(dto.UserId);
+            var beneficiaries = beneficiaryRepository.GetByUserId(dto.UserId);
             var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == dto.RecipientIBAN);
             if (match != null)
             {
                 match.TransferCount++;
                 match.TotalAmountSent += dto.Amount;
                 match.LastTransferDate = DateTime.UtcNow;
-                beneficiaryRepo.Update(match);
+                beneficiaryRepository.Update(match);
             }
             // end of newly added
 
@@ -132,7 +132,7 @@ namespace BankingAppTeamB.Services
 
         public List<Transfer> GetHistory(int userId)
         {
-            return transferRepo.GetByUserId(userId);
+            return transferRepository.GetByUserId(userId);
         }
 
         public bool Requires2FA(decimal amount)

@@ -4,11 +4,11 @@ namespace BankingAppTeamB.Services
 {
     public interface ITransactionPipelineService
     {
-        AuthResult Authorize(PipelineContext ctx, string? twoFAToken = null);
-        ExecutionResult Execute(PipelineContext ctx);
+        AuthResult Authorize(PipelineContext context, string? twoFAToken = null);
+        ExecutionResult Execute(PipelineContext context);
         IAccountService GetAccountService();
-        Transaction LogTransaction(Transaction tx);
-        Transaction RunPipeline(PipelineContext ctx, string? twoFAToken = null);
-        ValidationResult Validate(PipelineContext ctx);
+        Transaction LogTransaction(Transaction transaction);
+        Transaction RunPipeline(PipelineContext context, string? twoFAToken = null);
+        ValidationResult Validate(PipelineContext context);
     }
 }
