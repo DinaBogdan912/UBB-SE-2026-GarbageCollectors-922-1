@@ -1,12 +1,50 @@
-﻿using System;
-using BankingAppTeamB.Models;
+﻿using BankingAppTeamB.Models;
+using System;
+using System.Linq;
 
 namespace BankingAppTeamB.Services
 {
     public class AccountService : IAccountService
     {
-        public void DebitAccount(int accountId, decimal amount) { }
-        public void CreditAccount(int accountId, decimal amount) { }
+        public void DebitAccount(int accountId, decimal amount)
+        {
+            if (amount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be > 0.");
+            }
+
+            var accounts = UserSession.GetAccounts();
+            var account = accounts.SingleOrDefault(a => a.Id == accountId);
+
+            if (account == null)
+            {
+                throw new ArgumentException("Account not found.", nameof(accountId));
+            }
+
+            if (account.Balance < amount)
+            {
+                throw new InvalidOperationException("Insufficient funds.");
+            }
+
+            account.Balance -= amount;
+        }
+        public void CreditAccount(int accountId, decimal amount)
+        {
+            if (amount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be > 0.");
+            }
+
+            var accounts = UserSession.GetAccounts();
+            var account = accounts.SingleOrDefault(a => a.Id == accountId);
+
+            if (account == null)
+            {
+                throw new ArgumentException("Account not found.", nameof(accountId));
+            }
+
+            account.Balance += amount;
+        }
 
         public AccountService() { }
 
