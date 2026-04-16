@@ -33,19 +33,22 @@ namespace BankingAppTeamB.Services
             _accountService = accountService;
         }
 
+        // TODO: Replace hardcoded seed rates with live API call (FR-FX-001)
+        private static Dictionary<string, decimal> GetSeedExchangeRates() => new()
+        {
+            { "EUR/USD", 1.15m },
+            { "EUR/GBP", 0.86m },
+            { "EUR/RON", 5.09m },
+            { "USD/RON", 4.41m },
+            { "GBP/RON", 5.90m }
+        };
+
         public Dictionary<string, decimal> GetLiveRates()
         {
             if (_cachedRates != null && DateTime.Now - _ratesLastFetched < CacheDuration)
                 return _cachedRates;
 
-            Dictionary<string, decimal> rates = new Dictionary<string, decimal>
-            {
-                { "EUR/USD", 1.15m },
-                { "EUR/GBP", 0.86m },
-                { "EUR/RON", 5.09m },
-                { "USD/RON", 4.41m },
-                { "GBP/RON", 5.90m }
-            };
+            Dictionary<string, decimal> rates = GetSeedExchangeRates();
 
             List<string> keys = new List<string>(rates.Keys);
             foreach (string currencyPair in keys)
