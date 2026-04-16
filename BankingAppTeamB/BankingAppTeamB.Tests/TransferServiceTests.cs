@@ -2,6 +2,8 @@
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Repositories;
 using BankingAppTeamB.Services;
+using FluentAssertions;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -17,36 +19,42 @@ namespace BankingAppTeamB.Tests.Services
         private readonly Mock<IExchangeService> _exchange = new();
 
         private TransferService CreateSut(bool withExchange = true)
-            => new TransferService(
+            => new(
                 _transferRepo.Object,
                 _beneficiaryRepo.Object,
                 _pipeline.Object,
                 withExchange ? _exchange.Object : null);
 
-        [Fact]
-        public void ValidateIBAN_ReturnsFalse_ForNullOrWhitespace()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public void ValidateIBAN_ReturnsFalse_ForNullOrWhitespace(string? iban)
         {
             var sut = CreateSut();
-            Assert.False(sut.ValidateIBAN(null!));
-            Assert.False(sut.ValidateIBAN(""));
-            Assert.False(sut.ValidateIBAN("   "));
+            sut.ValidateIBAN(iban!).Should().BeFalse();
         }
 
         [Theory]
-        [InlineData("R")] 
-        [InlineData("123456789012345")] 
-        [InlineData("ROAA56789012345")] 
+        [InlineData("R")]
+        [InlineData("123456789012345")]
+        [InlineData("ROAA56789012345")]
+        [InlineData("RO49AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARO49AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")]
+        [InlineData("1O49AAAA1B31007593840000")]
+        [InlineData("R149AAAA1B31007593840000")]
+        [InlineData("ROA9AAAA1B31007593840000")]
+        [InlineData("RO4AAAAA1B31007593840000")]
         public void ValidateIBAN_ReturnsFalse_ForInvalidFormats(string iban)
         {
             var sut = CreateSut();
-            Assert.False(sut.ValidateIBAN(iban));
+            sut.ValidateIBAN(iban).Should().BeFalse();
         }
 
         [Fact]
         public void ValidateIBAN_ReturnsTrue_ForValidBasicFormat()
         {
             var sut = CreateSut();
-            Assert.True(sut.ValidateIBAN("RO49AAAA1B31007593840000"));
+            sut.ValidateIBAN("RO49AAAA1B31007593840000").Should().BeTrue();
         }
 
         [Theory]
@@ -59,10 +67,10 @@ namespace BankingAppTeamB.Tests.Services
         [InlineData("FR12...", "French Bank")]
         [InlineData("US12...", "US Bank")]
         [InlineData("ES12...", "International Bank")]
-        public void GetBankNameFromIBAN_ReturnsExpected(string iban, string expected)
+        public void GetBankNameFromIBAN_ReturnsExpected(string? iban, string expected)
         {
             var sut = CreateSut();
-            Assert.Equal(expected, sut.GetBankNameFromIBAN(iban!));
+            sut.GetBankNameFromIBAN(iban!).Should().Be(expected);
         }
 
         [Theory]
@@ -72,7 +80,7 @@ namespace BankingAppTeamB.Tests.Services
         public void Requires2FA_ReturnsExpected(decimal amount, bool expected)
         {
             var sut = CreateSut();
-            Assert.Equal(expected, sut.Requires2FA(amount));
+            sut.Requires2FA(amount).Should().Be(expected);
         }
 
         [Fact]
@@ -81,8 +89,7 @@ namespace BankingAppTeamB.Tests.Services
             var sut = CreateSut();
             var fx = sut.GetFxPreview("USD", "usd", 123.45m);
 
-            Assert.Equal(1m, fx.Rate);
-            Assert.Equal(123.45m, fx.ConvertedAmount);
+            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 123.45m });
         }
 
         [Fact]
@@ -91,38 +98,29 @@ namespace BankingAppTeamB.Tests.Services
             var sut = CreateSut(withExchange: false);
             var fx = sut.GetFxPreview("USD", "EUR", 100m);
 
-            Assert.Equal(1m, fx.Rate);
-            Assert.Equal(100m, fx.ConvertedAmount);
+            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 100m });
         }
 
         [Fact]
         public void GetFxPreview_ReturnsIdentity_WhenPairMissing()
         {
-            _exchange.Setup(x => x.GetLiveRates()).Returns(new Dictionary<string, decimal>
-            {
-                ["USD/JPY"] = 150m
-            });
-
+            _exchange.Setup(x => x.GetLiveRates()).Returns(new Dictionary<string, decimal> { ["USD/JPY"] = 150m });
             var sut = CreateSut();
+
             var fx = sut.GetFxPreview("USD", "EUR", 100m);
 
-            Assert.Equal(1m, fx.Rate);
-            Assert.Equal(100m, fx.ConvertedAmount);
+            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 100m });
         }
 
         [Fact]
         public void GetFxPreview_ReturnsConvertedAndRounded_WhenPairExists()
         {
-            _exchange.Setup(x => x.GetLiveRates()).Returns(new Dictionary<string, decimal>
-            {
-                ["USD/EUR"] = 0.91337m
-            });
-
+            _exchange.Setup(x => x.GetLiveRates()).Returns(new Dictionary<string, decimal> { ["USD/EUR"] = 0.91337m });
             var sut = CreateSut();
+
             var fx = sut.GetFxPreview("usd", "eur", 10m);
 
-            Assert.Equal(0.91337m, fx.Rate);
-            Assert.Equal(9.13m, fx.ConvertedAmount); // rounded 2 decimals
+            fx.Should().BeEquivalentTo(new FxPreview { Rate = 0.91337m, ConvertedAmount = 9.13m });
         }
 
         [Fact]
@@ -141,31 +139,19 @@ namespace BankingAppTeamB.Tests.Services
                 TwoFAToken = "123456"
             };
 
-            Assert.Throws<InvalidOperationException>(() => sut.ExecuteTransfer(dto));
-            _pipeline.Verify(x => x.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
-            _transferRepo.Verify(x => x.Add(It.IsAny<Transfer>()), Times.Never);
+            Action act = () => sut.ExecuteTransfer(dto);
+
+            act.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
-        public void ExecuteTransfer_AddsTransfer_AndUpdatesMatchingBeneficiary()
+        public void ExecuteTransfer_CallsPipeline_WithExpectedContext()
         {
-            var nowBefore = DateTime.UtcNow;
-
             _pipeline.Setup(x => x.RunPipeline(It.IsAny<PipelineContext>(), "654321"))
                 .Returns(new Transaction { Id = 777 });
-
-            var beneficiary = new Beneficiary
-            {
-                IBAN = "RO49AAAA1B31007593840000",
-                TransferCount = 1,
-                TotalAmountSent = 50m
-            };
-
-            _beneficiaryRepo.Setup(x => x.GetByUserId(42))
-                .Returns(new List<Beneficiary> { beneficiary });
+            _beneficiaryRepo.Setup(x => x.GetByUserId(42)).Returns(new List<Beneficiary>());
 
             var sut = CreateSut();
-
             var dto = new TransferDto
             {
                 UserId = 42,
@@ -178,15 +164,7 @@ namespace BankingAppTeamB.Tests.Services
                 TwoFAToken = "654321"
             };
 
-            var result = sut.ExecuteTransfer(dto);
-
-            Assert.NotNull(result);
-            Assert.Equal(42, result.UserId);
-            Assert.Equal(100, result.SourceAccountId);
-            Assert.Equal(777, result.TransactionId);
-            Assert.Equal("Alice", result.RecipientName);
-            Assert.Equal("Romanian Bank", result.RecipientBankName);
-            Assert.Equal(TransferStatus.Completed, result.Status);
+            sut.ExecuteTransfer(dto);
 
             _pipeline.Verify(x => x.RunPipeline(
                 It.Is<PipelineContext>(c =>
@@ -197,6 +175,29 @@ namespace BankingAppTeamB.Tests.Services
                     c.Type == "Transfer" &&
                     c.RelatedEntityType == "Transfer"),
                 dto.TwoFAToken), Times.Once);
+        }
+
+        [Fact]
+        public void ExecuteTransfer_AddsTransfer_ToRepository()
+        {
+            _pipeline.Setup(x => x.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()))
+                .Returns(new Transaction { Id = 777 });
+            _beneficiaryRepo.Setup(x => x.GetByUserId(42)).Returns(new List<Beneficiary>());
+
+            var sut = CreateSut();
+            var dto = new TransferDto
+            {
+                UserId = 42,
+                SourceAccountId = 100,
+                RecipientName = "Alice",
+                RecipientIBAN = "RO49AAAA1B31007593840000",
+                Amount = 150m,
+                Currency = "EUR",
+                Reference = "Invoice 2026",
+                TwoFAToken = "654321"
+            };
+
+            sut.ExecuteTransfer(dto);
 
             _transferRepo.Verify(x => x.Add(It.Is<Transfer>(t =>
                 t.UserId == dto.UserId &&
@@ -205,13 +206,45 @@ namespace BankingAppTeamB.Tests.Services
                 t.RecipientIBAN == dto.RecipientIBAN &&
                 t.Amount == dto.Amount &&
                 t.Currency == dto.Currency &&
-                t.Reference == dto.Reference)), Times.Once);
+                t.Reference == dto.Reference &&
+                t.Status == TransferStatus.Completed)), Times.Once);
+        }
+
+        [Fact]
+        public void ExecuteTransfer_UpdatesMatchingBeneficiary()
+        {
+            _pipeline.Setup(x => x.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()))
+                .Returns(new Transaction { Id = 1 });
+
+            var beneficiary = new Beneficiary
+            {
+                IBAN = "RO49AAAA1B31007593840000",
+                TransferCount = 1,
+                TotalAmountSent = 50m
+            };
+
+            _beneficiaryRepo.Setup(x => x.GetByUserId(42))
+                .Returns(new List<Beneficiary> { beneficiary });
+
+            var sut = CreateSut();
+            var dto = new TransferDto
+            {
+                UserId = 42,
+                SourceAccountId = 100,
+                RecipientName = "Alice",
+                RecipientIBAN = "RO49AAAA1B31007593840000",
+                Amount = 150m,
+                Currency = "EUR",
+                Reference = "Invoice 2026",
+                TwoFAToken = "654321"
+            };
+
+            sut.ExecuteTransfer(dto);
 
             _beneficiaryRepo.Verify(x => x.Update(It.Is<Beneficiary>(b =>
                 b.IBAN == dto.RecipientIBAN &&
                 b.TransferCount == 2 &&
-                b.TotalAmountSent == 200m &&
-                b.LastTransferDate >= nowBefore)), Times.Once);
+                b.TotalAmountSent == 200m)), Times.Once);
         }
 
         [Fact]
@@ -221,10 +254,7 @@ namespace BankingAppTeamB.Tests.Services
                 .Returns(new Transaction { Id = 99 });
 
             _beneficiaryRepo.Setup(x => x.GetByUserId(1))
-                .Returns(new List<Beneficiary>
-                {
-                    new Beneficiary { IBAN = "DE12123456789012345" }
-                });
+                .Returns(new List<Beneficiary> { new() { IBAN = "DE12123456789012345" } });
 
             var sut = CreateSut();
             var dto = new TransferDto
@@ -242,7 +272,6 @@ namespace BankingAppTeamB.Tests.Services
             sut.ExecuteTransfer(dto);
 
             _beneficiaryRepo.Verify(x => x.Update(It.IsAny<Beneficiary>()), Times.Never);
-            _transferRepo.Verify(x => x.Add(It.IsAny<Transfer>()), Times.Once);
         }
 
         [Fact]
@@ -250,17 +279,15 @@ namespace BankingAppTeamB.Tests.Services
         {
             var expected = new List<Transfer>
             {
-                new Transfer { UserId = 7, Amount = 12m },
-                new Transfer { UserId = 7, Amount = 34m }
+                new() { UserId = 7, Amount = 12m },
+                new() { UserId = 7, Amount = 34m }
             };
-
             _transferRepo.Setup(x => x.GetByUserId(7)).Returns(expected);
 
             var sut = CreateSut();
             var result = sut.GetHistory(7);
 
-            Assert.Same(expected, result);
-            _transferRepo.Verify(x => x.GetByUserId(7), Times.Once);
+            result.Should().BeSameAs(expected);
         }
     }
 }

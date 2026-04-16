@@ -27,7 +27,7 @@
 		<None Remove="Views\RecurringPaymentsPage.xaml" />
 		<None Remove="Views\TransferPage.xaml" />
 		<Content Include="appsettings.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 
