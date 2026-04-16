@@ -26,11 +26,13 @@ namespace BankingAppTeamB.Views
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class RateAlertsPage : Page
-    {   
+    {
         public RateAlertViewModel ViewModel => (RateAlertViewModel) DataContext;
+
         public RateAlertsPage()
         {
             InitializeComponent();
+
             // at the next line get the current user id
             this.DataContext = new RateAlertViewModel(ServiceLocator.ExchangeService, UserSession.CurrentUserId);
         }
@@ -38,7 +40,7 @@ namespace BankingAppTeamB.Views
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if(ViewModel != null)
+            if (ViewModel != null)
             {
                 await ViewModel.LoadAsync();
             }
