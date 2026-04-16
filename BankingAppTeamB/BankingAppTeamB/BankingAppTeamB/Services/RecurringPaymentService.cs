@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Repositories;
@@ -9,6 +10,14 @@ namespace BankingAppTeamB.Services
 {
     public class RecurringPaymentService : IRecurringPaymentService
     {
+        private const int DailyIntervalInDays = 1;
+        private const int WeeklyIntervalInDays = 7;
+        private const int BiweeklyIntervalInDays = 14;
+        private const int MonthlyIntervalInMonths = 1;
+        private const int QuarterlyIntervalInMonths = 3;
+        private const int YearlyIntervalInYears = 1;
+        private const int DueSoonWarningHours = 24;
+
         private readonly IRecurringPaymentRepository recurringPaymentRepository;
         private readonly IBillPaymentService billPaymentService;
 
@@ -22,12 +31,12 @@ namespace BankingAppTeamB.Services
         {
             return frequency switch
             {
-                RecurringFrequency.Daily => from.AddDays(1),
-                RecurringFrequency.Weekly => from.AddDays(7),
-                RecurringFrequency.BiWeekly => from.AddDays(14),
-                RecurringFrequency.Monthly => from.AddMonths(1),
-                RecurringFrequency.Quarterly => from.AddMonths(3),
-                RecurringFrequency.Yearly => from.AddYears(1),
+                RecurringFrequency.Daily => from.AddDays(DailyIntervalInDays),
+                RecurringFrequency.Weekly => from.AddDays(WeeklyIntervalInDays),
+                RecurringFrequency.BiWeekly => from.AddDays(BiweeklyIntervalInDays),
+                RecurringFrequency.Monthly => from.AddMonths(MonthlyIntervalInMonths),
+                RecurringFrequency.Quarterly => from.AddMonths(QuarterlyIntervalInMonths),
+                RecurringFrequency.Yearly => from.AddYears(YearlyIntervalInYears),
                 _ => throw new ArgumentOutOfRangeException(nameof(frequency), $"Unknown frequency: {frequency}")
             };
         }
@@ -95,7 +104,9 @@ namespace BankingAppTeamB.Services
 
         public void ProcessDuePayments()
         {
-            var duePayments = recurringPaymentRepository.GetDueBefore(DateTime.UtcNow);
+            var duePayments = recurringPaymentRepository.GetDueBefore(DateTime.UtcNow)
+                .Where(payment => payment.Status == PaymentStatus.Active)
+                .ToList();
 
             foreach (var payment in duePayments)
             {
@@ -127,7 +138,9 @@ namespace BankingAppTeamB.Services
 
         public List<RecurringPayment> GetDueSoon()
         {
-            var dueSoon = recurringPaymentRepository.GetDueBefore(DateTime.UtcNow.AddHours(24));
+            var dueSoon = recurringPaymentRepository.GetDueBefore(DateTime.UtcNow.AddHours(DueSoonWarningHours))
+                .Where(payment => payment.Status == PaymentStatus.Active)
+                .ToList();
 
             foreach (var payment in dueSoon)
             {

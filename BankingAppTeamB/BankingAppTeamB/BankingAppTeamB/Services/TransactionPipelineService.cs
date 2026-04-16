@@ -52,6 +52,10 @@ namespace BankingAppTeamB.Services
 
             return AuthResult.Success();
         }
+        public IAccountService GetAccountService()
+        {
+            return accountService;
+        }
 
         public ExecutionResult Execute(PipelineContext ctx)
         {

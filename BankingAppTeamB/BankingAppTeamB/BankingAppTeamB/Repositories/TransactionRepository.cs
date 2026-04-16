@@ -15,9 +15,9 @@ namespace BankingAppTeamB.Repositories
                     (AccountId, CardId, TransactionRef, Type, Direction,
                      Amount, Currency, BalanceAfter, CounterpartyName, CounterpartyIBAN,
                      Fee, ExchangeRate, Status, RelatedEntityType, RelatedEntityId, CreatedAt)
-                OUTPUT INSERTED.Id 
+                OUTPUT INSERTED.Id
                 VALUES
-                    (@AccountId, @CardId, @TempRef, @Type, @Direction,
+                    (@AccountId, @CardId, @TransactionRef, @Type, @Direction,
                      @Amount, @Currency, @BalanceAfter, @CounterpartyName, @CounterpartyIBAN,
                      @Fee, @ExchangeRate, @Status, @RelatedEntityType, @RelatedEntityId, @CreatedAt)";
 
@@ -25,12 +25,11 @@ namespace BankingAppTeamB.Repositories
             {
                 connection.Open();
 
-                int newId;
                 using (var command = new SqlCommand(insertSql, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@AccountId", t.AccountId));
                     command.Parameters.Add(new SqlParameter("@CardId", (object?)t.CardId ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@TempRef", "PLACEHOLDER"));
+                    command.Parameters.Add(new SqlParameter("@TransactionRef", t.TransactionRef));
                     command.Parameters.Add(new SqlParameter("@Type", t.Type));
                     command.Parameters.Add(new SqlParameter("@Direction", t.Direction));
                     command.Parameters.Add(new SqlParameter("@Amount", t.Amount));
@@ -45,21 +44,8 @@ namespace BankingAppTeamB.Repositories
                     command.Parameters.Add(new SqlParameter("@RelatedEntityId", (object?)t.RelatedEntityId ?? DBNull.Value));
                     command.Parameters.Add(new SqlParameter("@CreatedAt", t.CreatedAt));
 
-                    newId = (int)command.ExecuteScalar();
+                    t.Id = (int)command.ExecuteScalar();
                 }
-
-                string transactionRef = $"TXN-{t.CreatedAt:yyyyMMdd}-{newId:D4}";
-
-                string updateRefSql = "UPDATE Transactions SET TransactionRef = @Ref WHERE Id = @Id";
-                using (var updateCommand = new SqlCommand(updateRefSql, connection))
-                {
-                    updateCommand.Parameters.Add(new SqlParameter("@Ref", transactionRef));
-                    updateCommand.Parameters.Add(new SqlParameter("@Id", newId));
-                    updateCommand.ExecuteNonQuery();
-                }
-
-                t.Id = newId;
-                t.TransactionRef = transactionRef;
             }
         }
 

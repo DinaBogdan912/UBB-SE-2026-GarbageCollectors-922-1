@@ -177,7 +177,7 @@ namespace BankingAppTeamB.Services
 
         public List<RateAlert> GetUserAlerts(int userId)
         {
-            return exchangeRepository.GetUserActiveAlerts(userId);
+            return exchangeRepository.GetAlertsByUser(userId, isTriggered: false);
         }
 
         public RateAlert CreateAlert(int userId, string source, string target, decimal rate, bool isBuyAlert)
@@ -213,7 +213,7 @@ namespace BankingAppTeamB.Services
 
         public void CheckRateAlerts()
         {
-            List<RateAlert> activeAlerts = exchangeRepository.GetAllActiveAlerts();
+            List<RateAlert> activeAlerts = exchangeRepository.GetAllAlerts(isTriggered: false);
 
             foreach (var alert in activeAlerts)
             {

@@ -96,8 +96,7 @@ namespace BankingAppTeamB.Repositories
         {
             string sql = @"
                 SELECT * FROM RecurringPayment
-                WHERE Status = 'Active'
-                AND NextExecutionDate <= @DateTime
+                WHERE NextExecutionDate <= @DateTime
                 ORDER BY NextExecutionDate ASC";
             var results = new List<RecurringPayment>();
 
