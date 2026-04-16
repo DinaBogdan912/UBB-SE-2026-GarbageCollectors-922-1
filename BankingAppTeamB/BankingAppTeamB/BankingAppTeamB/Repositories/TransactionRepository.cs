@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Data;
 using BankingAppTeamB.Models;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 
 namespace BankingAppTeamB.Repositories
 {
@@ -77,7 +77,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
+                        {
                             return MapTransaction(reader);
+                        }
                     }
                 }
             }
@@ -99,7 +101,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
+                        {
                             results.Add(MapTransaction(reader));
+                        }
                     }
                 }
             }
@@ -110,23 +114,23 @@ namespace BankingAppTeamB.Repositories
         {
             return new Transaction
             {
-                Id                  = (int)reader["Id"],
-                AccountId           = (int)reader["AccountId"],
-                CardId              = reader["CardId"] == DBNull.Value ? null : (int?)reader["CardId"],
-                TransactionRef      = (string)reader["TransactionRef"],
-                Type                = (string)reader["Type"],
-                Direction           = (string)reader["Direction"],
-                Amount              = (decimal)reader["Amount"],
-                Currency            = (string)reader["Currency"],
-                BalanceAfter        = (decimal)reader["BalanceAfter"],
-                CounterpartyName    = (string)reader["CounterpartyName"],
-                CounterpartyIBAN    = reader["CounterpartyIBAN"] == DBNull.Value ? null : (string)reader["CounterpartyIBAN"],
-                Fee                 = (decimal)reader["Fee"],
-                ExchangeRate        = reader["ExchangeRate"] == DBNull.Value ? null : (decimal?)reader["ExchangeRate"],
-                Status              = (string)reader["Status"],
-                RelatedEntityType   = reader["RelatedEntityType"] == DBNull.Value ? null : (string)reader["RelatedEntityType"],
-                RelatedEntityId     = reader["RelatedEntityId"] == DBNull.Value ? null : (int?)reader["RelatedEntityId"],
-                CreatedAt           = (DateTime)reader["CreatedAt"]
+                Id = (int)reader["Id"],
+                AccountId = (int)reader["AccountId"],
+                CardId = reader["CardId"] == DBNull.Value ? null : (int?)reader["CardId"],
+                TransactionRef = (string)reader["TransactionRef"],
+                Type = (string)reader["Type"],
+                Direction = (string)reader["Direction"],
+                Amount = (decimal)reader["Amount"],
+                Currency = (string)reader["Currency"],
+                BalanceAfter = (decimal)reader["BalanceAfter"],
+                CounterpartyName = (string)reader["CounterpartyName"],
+                CounterpartyIBAN = reader["CounterpartyIBAN"] == DBNull.Value ? null : (string)reader["CounterpartyIBAN"],
+                Fee = (decimal)reader["Fee"],
+                ExchangeRate = reader["ExchangeRate"] == DBNull.Value ? null : (decimal?)reader["ExchangeRate"],
+                Status = (string)reader["Status"],
+                RelatedEntityType = reader["RelatedEntityType"] == DBNull.Value ? null : (string)reader["RelatedEntityType"],
+                RelatedEntityId = reader["RelatedEntityId"] == DBNull.Value ? null : (int?)reader["RelatedEntityId"],
+                CreatedAt = (DateTime)reader["CreatedAt"]
             };
         }
     }

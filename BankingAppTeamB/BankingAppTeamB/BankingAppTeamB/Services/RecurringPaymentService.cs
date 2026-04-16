@@ -1,9 +1,9 @@
-using BankingAppTeamB.Models;
-using BankingAppTeamB.Models.DTOs;
-using BankingAppTeamB.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BankingAppTeamB.Models;
+using BankingAppTeamB.Models.DTOs;
+using BankingAppTeamB.Repositories;
 
 namespace BankingAppTeamB.Services
 {
@@ -61,7 +61,9 @@ namespace BankingAppTeamB.Services
         {
             var payment = recurringPaymentRepository.GetById(id);
             if (payment == null)
+            {
                 throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+            }
 
             payment.Status = PaymentStatus.Paused;
             recurringPaymentRepository.Update(payment);
@@ -71,7 +73,9 @@ namespace BankingAppTeamB.Services
         {
             var payment = recurringPaymentRepository.GetById(id);
             if (payment == null)
+            {
                 throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+            }
 
             payment.Status = PaymentStatus.Active;
             recurringPaymentRepository.Update(payment);
@@ -81,7 +85,9 @@ namespace BankingAppTeamB.Services
         {
             var payment = recurringPaymentRepository.GetById(id);
             if (payment == null)
+            {
                 throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+            }
 
             payment.Status = PaymentStatus.Cancelled;
             recurringPaymentRepository.Update(payment);

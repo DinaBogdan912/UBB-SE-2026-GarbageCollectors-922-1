@@ -1,23 +1,23 @@
+using System;
 using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
 
 namespace BankingAppTeamB.Views
 {
     public sealed partial class RecurringPaymentsPage : Page
     {
-        private readonly RecurringPaymentViewModel _viewModel;
+        private readonly RecurringPaymentViewModel viewModel;
 
         public RecurringPaymentsPage()
         {
             InitializeComponent();
 
-            _viewModel = new RecurringPaymentViewModel(ServiceLocator.RecurringPaymentService, ServiceLocator.BillPaymentService);
-            DataContext = _viewModel;
+            viewModel = new RecurringPaymentViewModel(ServiceLocator.RecurringPaymentService, ServiceLocator.BillPaymentService);
+            DataContext = viewModel;
 
             StartDatePicker.Date = DateTimeOffset.Now;
             EndDatePicker.Date = DateTimeOffset.Now;
@@ -26,42 +26,40 @@ namespace BankingAppTeamB.Views
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            await _viewModel.LoadAsync();
+            await viewModel.LoadAsync();
         }
 
         private void AmountNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
-            _viewModel.Amount = double.IsNaN(sender.Value) ? 0 : (decimal)sender.Value;
+            viewModel.Amount = double.IsNaN(sender.Value) ? 0 : (decimal)sender.Value;
         }
 
         private void StartDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs args)
         {
             if (sender is DatePicker picker)
             {
-                _viewModel.StartDate = picker.Date.DateTime.Date;
+                viewModel.StartDate = picker.Date.DateTime.Date;
             }
-
         }
 
         private void EndDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs args)
         {
             if (sender is DatePicker picker)
             {
-                _viewModel.EndDate = picker.Date.DateTime.Date;
+                viewModel.EndDate = picker.Date.DateTime.Date;
             }
-
         }
 
         private async void CreateButton_Click(object sender, RoutedEventArgs e)
         {
-            await _viewModel.CreateAsync();
+            await viewModel.CreateAsync();
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is RecurringPayment payment)
             {
-                _viewModel.Pause(payment);
+                viewModel.Pause(payment);
             }
         }
 
@@ -69,7 +67,7 @@ namespace BankingAppTeamB.Views
         {
             if (sender is Button button && button.Tag is RecurringPayment payment)
             {
-                _viewModel.Resume(payment);
+                viewModel.Resume(payment);
             }
         }
 
@@ -77,7 +75,7 @@ namespace BankingAppTeamB.Views
         {
             if (sender is Button button && button.Tag is RecurringPayment payment)
             {
-                _viewModel.Cancel(payment);
+                viewModel.Cancel(payment);
             }
         }
     }

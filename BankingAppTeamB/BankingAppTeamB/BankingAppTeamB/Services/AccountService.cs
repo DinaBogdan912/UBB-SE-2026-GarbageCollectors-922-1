@@ -1,6 +1,6 @@
-﻿using BankingAppTeamB.Models;
-using System;
+﻿using System;
 using System.Linq;
+using BankingAppTeamB.Mocks;
 
 namespace BankingAppTeamB.Services
 {
@@ -46,7 +46,9 @@ namespace BankingAppTeamB.Services
             account.Balance += amount;
         }
 
-        public AccountService() { }
+        public AccountService()
+        {
+        }
 
         public bool IsAccountValid(int id)
         {

@@ -1,7 +1,7 @@
-﻿using BankingAppTeamB.Models;
-using BankingAppTeamB.Models.DTOs;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using BankingAppTeamB.Models;
+using BankingAppTeamB.Models.DTOs;
 
 namespace BankingAppTeamB.Services
 {

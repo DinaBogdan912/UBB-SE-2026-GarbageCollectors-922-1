@@ -1,3 +1,5 @@
+using System;
+using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Repositories;
 using BankingAppTeamB.Services;
 using BankingAppTeamB.ViewModels;
@@ -5,8 +7,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using BankingAppTeamB.Configuration;
 
 namespace BankingAppTeamB.Views
 {

@@ -1,10 +1,10 @@
+using System;
+using System.ComponentModel;
 using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.ComponentModel;
 
 namespace BankingAppTeamB.Views
 {
@@ -65,6 +65,5 @@ namespace BankingAppTeamB.Views
                 ViewModel.Amount = 0;
             }
         }
-        
     }
 }

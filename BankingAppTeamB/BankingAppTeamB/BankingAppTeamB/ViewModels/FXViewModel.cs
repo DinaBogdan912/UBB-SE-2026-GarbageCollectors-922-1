@@ -14,91 +14,96 @@ namespace BankingAppTeamB.ViewModels;
 
 public class FXViewModel : ViewModelBase
 {
-    private readonly IExchangeService _exchangeService;
+    private readonly IExchangeService exchangeService;
 
-
-    private int _currentStep;
+    private int currentStep;
 
     public int CurrentStep
     {
-        get => _currentStep;
-        set => SetProperty(ref _currentStep, value);
+        get => currentStep;
+        set => SetProperty(ref currentStep, value);
     }
 
-    public ObservableCollection<Account> Accounts { get; } = new();
+    public ObservableCollection<Account> Accounts { get; } = new ObservableCollection<Account>();
 
-    private Account? _sourceAccount;
+    private Account? sourceAccount;
 
     public Account? SourceAccount
     {
-        get => _sourceAccount;
+        get => sourceAccount;
         set
         {
-            if (SetProperty(ref _sourceAccount, value))
+            if (SetProperty(ref sourceAccount, value))
             {
-                SourceCurrency = value?.Currency ?? "";
+                SourceCurrency = value?.Currency ?? string.Empty;
             }
         }
     }
 
-    private Account? _targetAccount;
+    private Account? targetAccount;
 
     public Account? TargetAccount
     {
-        get => _targetAccount;
+        get => targetAccount;
         set
         {
-            if (SetProperty(ref _targetAccount, value))
+            if (SetProperty(ref targetAccount, value))
             {
-                TargetCurrency = value?.Currency ?? "";
+                TargetCurrency = value?.Currency ?? string.Empty;
             }
         }
     }
 
-    private string _sourceCurrency = "";
+    private string sourceCurrency = string.Empty;
 
     public string SourceCurrency
     {
-        get => _sourceCurrency;
+        get => sourceCurrency;
         set
         {
-            if (SetProperty(ref _sourceCurrency, value))
+            if (SetProperty(ref sourceCurrency, value))
+            {
                 Recalculate();
+            }
         }
     }
 
-    private string _targetCurrency = "";
+    private string targetCurrency = string.Empty;
 
     public string TargetCurrency
     {
-        get => _targetCurrency;
+        get => targetCurrency;
         set
         {
-            if (SetProperty(ref _targetCurrency, value))
+            if (SetProperty(ref targetCurrency, value))
+            {
                 Recalculate();
+            }
         }
     }
 
-    private decimal _amount;
+    private decimal amount;
 
     public decimal Amount
     {
-        get => _amount;
+        get => amount;
         set
         {
-            if (SetProperty(ref _amount, value))
+            if (SetProperty(ref amount, value))
+            {
                 Recalculate();
+            }
         }
     }
-    
-    private string _amountText = "";
+
+    private string amountText = string.Empty;
 
     public string AmountText
     {
-        get => _amountText;
+        get => amountText;
         set
         {
-            if (SetProperty(ref _amountText, value))
+            if (SetProperty(ref amountText, value))
             {
                 if (decimal.TryParse(value, out var parsed))
                 {
@@ -112,78 +117,75 @@ public class FXViewModel : ViewModelBase
         }
     }
 
-    private decimal _liveRate;
+    private decimal liveRate;
 
     public decimal LiveRate
     {
-        get => _liveRate;
-        set => SetProperty(ref _liveRate, value);
+        get => liveRate;
+        set => SetProperty(ref liveRate, value);
     }
 
-    private decimal _commission;
+    private decimal commission;
 
     public decimal Commission
     {
-        get => _commission;
-        set => SetProperty(ref _commission, value);
+        get => commission;
+        set => SetProperty(ref commission, value);
     }
 
-    private decimal _targetAmount;
+    private decimal targetAmount;
 
     public decimal TargetAmount
     {
-        get => _targetAmount;
-        set => SetProperty(ref _targetAmount, value);
+        get => targetAmount;
+        set => SetProperty(ref targetAmount, value);
     }
 
-    private int _secondsRemaining;
+    private int secondsRemaining;
 
     public int SecondsRemaining
     {
-        get => _secondsRemaining;
-        set => SetProperty(ref _secondsRemaining, value);
+        get => secondsRemaining;
+        set => SetProperty(ref secondsRemaining, value);
     }
 
-    private bool _isRateExpired;
+    private bool isRateExpired;
 
     public bool IsRateExpired
     {
-        get => _isRateExpired;
-        set => SetProperty(ref _isRateExpired, value);
+        get => isRateExpired;
+        set => SetProperty(ref isRateExpired, value);
     }
 
-    private string _transactionRef = "";
+    private string transactionRef = string.Empty;
 
     public string TransactionRef
     {
-        get => _transactionRef;
-        set => SetProperty(ref _transactionRef, value);
+        get => transactionRef;
+        set => SetProperty(ref transactionRef, value);
     }
 
-    private string _errorMessage = "";
+    private string errorMessage = string.Empty;
 
     public string ErrorMessage
     {
-        get => _errorMessage;
-        set => SetProperty(ref _errorMessage, value);
+        get => errorMessage;
+        set => SetProperty(ref errorMessage, value);
     }
-
 
     public AsyncRelayCommand LoadRatesCommand { get; }
     public RelayCommand LockRateCommand { get; }
-    
+
     public AsyncRelayCommand ExecuteExchangeCommand { get; }
     public RelayCommand CancelCommand { get; }
     public RelayCommand NewExchangeCommand { get; }
 
-
-    private DispatcherTimer? _timer;
-    private LockedRate? _lockedRate;
-
+    private DispatcherTimer? timer;
+    private LockedRate? lockedRate;
 
     public FXViewModel(IExchangeService exchangeService)
     {
-        _exchangeService = exchangeService;
+        this.exchangeService = exchangeService;
 
         LoadRatesCommand = new AsyncRelayCommand(LoadRatesAsync);
         LockRateCommand = new RelayCommand(LockRate);
@@ -198,24 +200,24 @@ public class FXViewModel : ViewModelBase
 
     private void Cancel(object? unusedParameter)
     {
-        _timer?.Stop();
+        timer?.Stop();
         Reset(null);
     }
 
     private void Reset(object? unusedParameter)
     {
-        _timer?.Stop();
-        _timer = null;
-        
-        _exchangeService.ClearLocks(ServiceLocator.UserSessionService.CurrentUserId);
+        timer?.Stop();
+        timer = null;
+
+        exchangeService.ClearLocks(ServiceLocator.UserSessionService.CurrentUserId);
 
         SourceAccount = null;
         TargetAccount = null;
-        
-        _lockedRate = null;
-        
-        SourceCurrency = "";
-        TargetCurrency = "";
+
+        lockedRate = null;
+
+        SourceCurrency = string.Empty;
+        TargetCurrency = string.Empty;
 
         Amount = 0;
         LiveRate = 0;
@@ -224,37 +226,37 @@ public class FXViewModel : ViewModelBase
 
         SecondsRemaining = 0;
         IsRateExpired = false;
-        
-        ErrorMessage = "";
+
+        ErrorMessage = string.Empty;
 
         CurrentStep = 1;
-        AmountText = "";
+        AmountText = string.Empty;
     }
-    
+
     private Task ExecuteExchanges(object? unusedParameter)
     {
         try
         {
-            ErrorMessage = "";
-            
+            ErrorMessage = string.Empty;
+
             if (IsRateExpired)
             {
                 ErrorMessage = "The exchange rate has expired. Please lock a new rate.";
                 return Task.CompletedTask;
             }
-            
+
             if (SourceAccount == null || TargetAccount == null)
             {
                 ErrorMessage = "Please select both source and target accounts.";
                 return Task.CompletedTask;
             }
-            
-            if (_lockedRate == null)
+
+            if (lockedRate == null)
             {
                 ErrorMessage = "Please lock a rate first.";
                 return Task.CompletedTask;
             }
-            
+
             var dto = new ExchangeDto
             {
                 UserId = ServiceLocator.UserSessionService.CurrentUserId,
@@ -263,24 +265,22 @@ public class FXViewModel : ViewModelBase
                 SourceCurrency = SourceCurrency,
                 TargetCurrency = TargetCurrency,
                 SourceAmount = Amount,
-                LockedRate = _lockedRate!.Rate
+                LockedRate = lockedRate!.Rate
             };
 
-            var result =  _exchangeService.ExecuteExchange(dto);
+            var result = exchangeService.ExecuteExchange(dto);
 
-    
-            _timer?.Stop();
+            timer?.Stop();
 
-       
             TransactionRef = $"TX-{result.Id}";
-            
+
             CurrentStep = 5;
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
         }
-        
+
         return Task.CompletedTask;
     }
 
@@ -289,23 +289,26 @@ public class FXViewModel : ViewModelBase
         Accounts.Clear();
 
         foreach (var account in ServiceLocator.UserSessionService.GetAccounts())
+        {
             Accounts.Add(account);
+        }
 
         return Task.CompletedTask;
     }
-
 
     private Task LoadRatesAsync(object? unusedParameter)
     {
         try
         {
-            ErrorMessage = "";
+            ErrorMessage = string.Empty;
 
             if (string.IsNullOrWhiteSpace(SourceCurrency) ||
                 string.IsNullOrWhiteSpace(TargetCurrency))
+            {
                 return Task.CompletedTask;
+            }
 
-            LiveRate = _exchangeService.GetRate(SourceCurrency, TargetCurrency);
+            LiveRate = exchangeService.GetRate(SourceCurrency, TargetCurrency);
         }
         catch (Exception ex)
         {
@@ -315,17 +318,18 @@ public class FXViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
-
     private void Recalculate()
     {
         try
         {
-            ErrorMessage = "";
+            ErrorMessage = string.Empty;
 
             if (string.IsNullOrWhiteSpace(SourceCurrency) ||
                 string.IsNullOrWhiteSpace(TargetCurrency) ||
                 Amount <= 0)
+            {
                 return;
+            }
 
             // Same currency shortcut
             if (SourceCurrency == TargetCurrency)
@@ -336,9 +340,9 @@ public class FXViewModel : ViewModelBase
                 return;
             }
 
-            LiveRate = _exchangeService.GetRate(SourceCurrency, TargetCurrency);
-            Commission = _exchangeService.CalculateCommission(Amount);
-            TargetAmount = _exchangeService.CalculateTargetAmount(Amount, LiveRate);
+            LiveRate = exchangeService.GetRate(SourceCurrency, TargetCurrency);
+            Commission = exchangeService.CalculateCommission(Amount);
+            TargetAmount = exchangeService.CalculateTargetAmount(Amount, LiveRate);
         }
         catch (Exception ex)
         {
@@ -346,14 +350,13 @@ public class FXViewModel : ViewModelBase
         }
     }
 
-
-    private void LockRate(object? _)
+    private void LockRate(object? something)
     {
         try
         {
-            ErrorMessage = "";
+            ErrorMessage = string.Empty;
 
-            _lockedRate = _exchangeService.LockRate(ServiceLocator.UserSessionService.CurrentUserId, SourceCurrency, TargetCurrency);
+            lockedRate = exchangeService.LockRate(ServiceLocator.UserSessionService.CurrentUserId, SourceCurrency, TargetCurrency);
 
             CurrentStep = 4;
 
@@ -367,27 +370,29 @@ public class FXViewModel : ViewModelBase
 
     private void StartCountdownTimer()
     {
-        if (_lockedRate == null)
+        if (lockedRate == null)
+        {
             return;
+        }
 
         IsRateExpired = false;
 
-        _timer = new DispatcherTimer
+        timer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
         };
 
-        _timer.Tick += (timerSender, timerEventArgs) =>
+        timer.Tick += (timerSender, timerEventArgs) =>
         {
-            SecondsRemaining = _lockedRate.SecondsRemaining();
+            SecondsRemaining = lockedRate.SecondsRemaining();
 
             if (SecondsRemaining <= 0)
             {
-                _timer.Stop();
+                timer.Stop();
                 IsRateExpired = true;
             }
         };
 
-        _timer.Start();
+        timer.Start();
     }
 }

@@ -12,74 +12,74 @@ namespace BankingAppTeamB.ViewModels
 {
     public class RateAlertViewModel : ViewModelBase
     {
-        private readonly IExchangeService _exchangeService;
-        private readonly int _userId;
+        private readonly IExchangeService exchangeService;
+        private readonly int userId;
 
-        private ObservableCollection<RateAlert> _alerts = new();
-        private string _baseCurrency = string.Empty;
-        private string _targetCurrency = string.Empty;
-        private string _targetRateText = string.Empty;
-        private string _errorMessage = string.Empty;
-        private bool _isTriggered;
-        private Dictionary<string, decimal> _liveRates = new();
-        private bool _isBuyAlert;
+        private ObservableCollection<RateAlert> alerts = new ObservableCollection<RateAlert>();
+        private string baseCurrency = string.Empty;
+        private string targetCurrency = string.Empty;
+        private string targetRateText = string.Empty;
+        private string errorMessage = string.Empty;
+        private bool isTriggered;
+        private Dictionary<string, decimal> liveRates = new Dictionary<string, decimal>();
+        private bool isBuyAlert;
 
         public ObservableCollection<RateAlert> Alerts
         {
-            get => _alerts;
-            set => SetProperty(ref _alerts, value);
+            get => alerts;
+            set => SetProperty(ref alerts, value);
         }
 
         public string BaseCurrency
         {
-            get => _baseCurrency;
-            set => SetProperty(ref _baseCurrency, value);
+            get => baseCurrency;
+            set => SetProperty(ref baseCurrency, value);
         }
 
         public string TargetCurrency
         {
-            get => _targetCurrency;
-            set => SetProperty(ref _targetCurrency, value);
+            get => targetCurrency;
+            set => SetProperty(ref targetCurrency, value);
         }
 
         public string TargetRateText
         {
-            get => _targetRateText;
-            set => SetProperty(ref _targetRateText, value);
+            get => targetRateText;
+            set => SetProperty(ref targetRateText, value);
         }
 
         public string ErrorMessage
         {
-            get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
+            get => errorMessage;
+            set => SetProperty(ref errorMessage, value);
         }
 
         public Dictionary<string, decimal> LiveRates
         {
-            get => _liveRates;
-            set => SetProperty(ref _liveRates, value);
+            get => liveRates;
+            set => SetProperty(ref liveRates, value);
         }
 
         public bool IsBuyAlert
         {
-            get => _isBuyAlert;
-            set => SetProperty(ref _isBuyAlert, value) ;
+            get => isBuyAlert;
+            set => SetProperty(ref isBuyAlert, value);
         }
-        
+
         public bool IsTriggered
         {
-            get => _isTriggered;
-            set => SetProperty(ref _isTriggered, value);
+            get => isTriggered;
+            set => SetProperty(ref isTriggered, value);
         }
-        
+
         public AsyncRelayCommand RefreshRatesCommand { get; }
         public AsyncRelayCommand CreateAlertCommand { get; }
         public RelayCommand DeleteAlertCommand { get; }
 
         public RateAlertViewModel(IExchangeService exchangeService, int userId)
         {
-            _exchangeService = exchangeService;
-            _userId = userId;
+            this.exchangeService = exchangeService;
+            this.userId = userId;
 
             RefreshRatesCommand = new AsyncRelayCommand(unusedParameter => LoadRatesAsync());
             CreateAlertCommand = new AsyncRelayCommand(unusedParameter => CreateAlertAsync());
@@ -88,7 +88,7 @@ namespace BankingAppTeamB.ViewModels
 
         public async Task LoadAsync()
         {
-            var alerts = await Task.Run(() => _exchangeService.GetUserAlerts(_userId));
+            var alerts = await Task.Run(() => exchangeService.GetUserAlerts(userId));
             Alerts = new ObservableCollection<RateAlert>(alerts);
 
             await LoadRatesAsync();
@@ -96,29 +96,37 @@ namespace BankingAppTeamB.ViewModels
 
         private async Task LoadRatesAsync()
         {
-            var rates = await Task.Run(() => _exchangeService.GetLiveRates());
+            var rates = await Task.Run(() => exchangeService.GetLiveRates());
             LiveRates = rates;
 
             AvailableCurrencies.Clear();
 
             var currencies = rates.Keys
-                .SelectMany(currencyPair => currencyPair.Split('/')) 
+                .SelectMany(currencyPair => currencyPair.Split('/'))
                 .Distinct()
                 .OrderBy(currencyCode => currencyCode);
 
             foreach (var currency in currencies)
+            {
                 AvailableCurrencies.Add(currency);
+            }
 
             foreach (var alert in Alerts)
             {
-                var currentRate = _exchangeService.GetRate(alert.BaseCurrency, alert.TargetCurrency);
+                var currentRate = exchangeService.GetRate(alert.BaseCurrency, alert.TargetCurrency);
 
                 if (!alert.IsBuyAlert && currentRate >= alert.TargetRate)
+                {
                     alert.IsTriggered = true;
+                }
                 else if (alert.IsBuyAlert && currentRate <= alert.TargetRate)
+                {
                     alert.IsTriggered = true;
+                }
                 else
+                {
                     alert.IsTriggered = false;
+                }
             }
         }
 
@@ -136,7 +144,6 @@ namespace BankingAppTeamB.ViewModels
                 ErrorMessage = "Base currency and target currency must be different.";
                 return;
             }
-
 
             var text = TargetRateText.Trim();
             if (text.Contains(',') && text.Contains('.'))
@@ -159,7 +166,7 @@ namespace BankingAppTeamB.ViewModels
             try
             {
                 var newAlert = await Task.Run(() =>
-                    _exchangeService.CreateAlert(_userId, BaseCurrency, TargetCurrency, parsedRate, _isBuyAlert));
+                    exchangeService.CreateAlert(userId, BaseCurrency, TargetCurrency, parsedRate, isBuyAlert));
 
                 Alerts.Add(newAlert);
 
@@ -177,7 +184,7 @@ namespace BankingAppTeamB.ViewModels
         private void DeleteAlert(object commandParameter)
         {
             var alert = (RateAlert)commandParameter;
-            _exchangeService.DeleteAlert(alert.Id);
+            exchangeService.DeleteAlert(alert.Id);
             Alerts.Remove(alert);
         }
 
@@ -193,12 +200,12 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        private ObservableCollection<string> _availableCurrencies = new();
+        private ObservableCollection<string> availableCurrencies = new ObservableCollection<string>();
 
         public ObservableCollection<string> AvailableCurrencies
         {
-            get => _availableCurrencies;
-            set => SetProperty(ref _availableCurrencies, value);
+            get => availableCurrencies;
+            set => SetProperty(ref availableCurrencies, value);
         }
     }
 }

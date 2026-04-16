@@ -16,7 +16,7 @@ namespace BankingAppTeamB.Models
 
         public int SecondsRemaining()
         {
-            var elapsed= (DateTime.Now - LockedAt).TotalSeconds;
+            var elapsed = (DateTime.Now - LockedAt).TotalSeconds;
             int remaining = 30 - (int)Math.Floor(elapsed);
             return Math.Max(remaining, 0);
         }

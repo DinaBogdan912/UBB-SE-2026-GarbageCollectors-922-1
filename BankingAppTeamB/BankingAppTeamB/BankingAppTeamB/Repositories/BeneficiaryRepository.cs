@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Data;
 using BankingAppTeamB.Models;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 
 namespace BankingAppTeamB.Repositories
 {
@@ -52,7 +52,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
+                        {
                             return MapBeneficiary(reader);
+                        }
                     }
                 }
             }
@@ -74,7 +76,9 @@ namespace BankingAppTeamB.Repositories
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
+                        {
                             results.Add(MapBeneficiary(reader));
+                        }
                     }
                 }
             }
@@ -145,15 +149,15 @@ namespace BankingAppTeamB.Repositories
         {
             return new Beneficiary
             {
-                Id                  = (int)reader["Id"],
-                UserId              = (int)reader["UserId"],
-                Name                = (string)reader["Name"],
-                IBAN                = (string)reader["IBAN"],
-                BankName            = reader["BankName"] == DBNull.Value ? null : (string)reader["BankName"],
-                LastTransferDate    = reader["LastTransferDate"] == DBNull.Value ? null : (DateTime?)reader["LastTransferDate"],
-                TotalAmountSent     = (decimal)reader["TotalAmountSent"],
-                TransferCount       = (int)reader["TransferCount"],
-                CreatedAt           = (DateTime)reader["CreatedAt"]
+                Id = (int)reader["Id"],
+                UserId = (int)reader["UserId"],
+                Name = (string)reader["Name"],
+                IBAN = (string)reader["IBAN"],
+                BankName = reader["BankName"] == DBNull.Value ? null : (string)reader["BankName"],
+                LastTransferDate = reader["LastTransferDate"] == DBNull.Value ? null : (DateTime?)reader["LastTransferDate"],
+                TotalAmountSent = (decimal)reader["TotalAmountSent"],
+                TransferCount = (int)reader["TransferCount"],
+                CreatedAt = (DateTime)reader["CreatedAt"]
             };
         }
     }

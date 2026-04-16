@@ -5,7 +5,7 @@ namespace BankingAppTeamB.Services
 {
     public class TwoFAService : ITwoFAService
     {
-        const string TFA_PLACEHOLDER = "123456";
+        private const string TFA_PLACEHOLDER = "123456";
         public bool Requires2FA(decimal amount)
         {
             return amount >= 1000;

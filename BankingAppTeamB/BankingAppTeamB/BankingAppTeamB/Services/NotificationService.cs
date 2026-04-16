@@ -1,7 +1,7 @@
-using BankingAppTeamB.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BankingAppTeamB.Models;
 
 namespace BankingAppTeamB.Services
 {
@@ -78,7 +78,10 @@ namespace BankingAppTeamB.Services
             foreach (var alert in alerts)
             {
                 string pair = $"{alert.BaseCurrency}/{alert.TargetCurrency}";
-                if (!liveRates.ContainsKey(pair)) continue;
+                if (!liveRates.ContainsKey(pair))
+                {
+                    continue;
+                }
 
                 decimal currentRate = liveRates[pair];
                 if (currentRate >= alert.TargetRate && !alert.IsTriggered)

@@ -1,58 +1,57 @@
-﻿using BankingAppTeamB.Commands;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using BankingAppTeamB.Commands;
+using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Mocks;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Services;
 using BankingAppTeamB.Views;
 using Microsoft.UI.Xaml;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using BankingAppTeamB.Configuration;
-
 
 namespace BankingAppTeamB.ViewModels
 {
     public class BillPayViewModel : ViewModelBase
     {
-        private readonly IBillPaymentService _billPaymentService;
+        private readonly IBillPaymentService billPaymentService;
 
-        private int _currentStep;
-        private ObservableCollection<Biller> _billers;
-        private ObservableCollection<SavedBiller> _savedBillers;
-        private ObservableCollection<Account> _accounts;
-        private Biller? _selectedBiller;
-        private string _searchQuery = string.Empty;
-        private string? _selectedCategory;
-        private string _billerReference = string.Empty;
-        private decimal _amount;
-        private bool _isPayInFull;
-        private Account? _selectedAccount;
-        private decimal _fee;
-        private string _receiptNumber = string.Empty;
-        private string _errorMessage = string.Empty;
+        private int currentStep;
+        private ObservableCollection<Biller> billers;
+        private ObservableCollection<SavedBiller> savedBillers;
+        private ObservableCollection<Account> accounts;
+        private Biller? selectedBiller;
+        private string searchQuery = string.Empty;
+        private string? selectedCategory;
+        private string billerReference = string.Empty;
+        private decimal amount;
+        private bool isPayInFull;
+        private Account? selectedAccount;
+        private decimal fee;
+        private string receiptNumber = string.Empty;
+        private string errorMessage = string.Empty;
 
-        private bool _requires2FA;
+        private bool requires2FA;
         public bool Requires2FA
         {
-            get => _requires2FA;
-            set => SetProperty(ref _requires2FA, value);
+            get => requires2FA;
+            set => SetProperty(ref requires2FA, value);
         }
 
-        private bool _is2FAConfirmed;
+        private bool is2FAConfirmed;
         public bool Is2FAConfirmed
         {
-            get => _is2FAConfirmed;
-            set => SetProperty(ref _is2FAConfirmed, value);
+            get => is2FAConfirmed;
+            set => SetProperty(ref is2FAConfirmed, value);
         }
 
-        private string _twoFAToken = string.Empty;
+        private string twoFAToken = string.Empty;
         public string TwoFAToken
         {
-            get => _twoFAToken;
-            set => SetProperty(ref _twoFAToken, value);
+            get => twoFAToken;
+            set => SetProperty(ref twoFAToken, value);
         }
 
         private string GenerateTwoFAToken()
@@ -61,16 +60,16 @@ namespace BankingAppTeamB.ViewModels
             return rnd.Next(100000, 999999).ToString();
         }
 
-        private bool _shouldSaveBiller;
+        private bool shouldSaveBiller;
 
         public BillPayViewModel(IBillPaymentService billPaymentService)
         {
-            _billPaymentService = billPaymentService;
+            this.billPaymentService = billPaymentService;
 
-            _billers = new ObservableCollection<Biller>();
-            _savedBillers = new ObservableCollection<SavedBiller>();
-            _accounts = new ObservableCollection<Account>();
-            _currentStep = 1;
+            billers = new ObservableCollection<Biller>();
+            savedBillers = new ObservableCollection<SavedBiller>();
+            accounts = new ObservableCollection<Account>();
+            currentStep = 1;
 
             SearchCommand = new RelayCommand(unusedParameter => ExecuteSearch());
             SelectBillerCommand = new RelayCommand(ExecuteSelectBiller);
@@ -83,22 +82,22 @@ namespace BankingAppTeamB.ViewModels
 
         public int CurrentStep
         {
-            get => _currentStep;
-            set => SetProperty(ref _currentStep, value);
+            get => currentStep;
+            set => SetProperty(ref currentStep, value);
         }
 
         public ObservableCollection<Biller> Billers
         {
-            get => _billers;
-            set => SetProperty(ref _billers, value);
+            get => billers;
+            set => SetProperty(ref billers, value);
         }
 
         public ObservableCollection<SavedBiller> SavedBillers
         {
-            get => _savedBillers;
+            get => savedBillers;
             set
             {
-                if (SetProperty(ref _savedBillers, value))
+                if (SetProperty(ref savedBillers, value))
                 {
                     OnPropertyChanged(nameof(HasSavedBillers));
                     OnPropertyChanged(nameof(SavedBillersVisibility));
@@ -108,16 +107,16 @@ namespace BankingAppTeamB.ViewModels
 
         public ObservableCollection<Account> Accounts
         {
-            get => _accounts;
-            set => SetProperty(ref _accounts, value);
+            get => accounts;
+            set => SetProperty(ref accounts, value);
         }
 
         public Biller? SelectedBiller
         {
-            get => _selectedBiller;
+            get => selectedBiller;
             set
             {
-                if (SetProperty(ref _selectedBiller, value))
+                if (SetProperty(ref selectedBiller, value))
                 {
                     ApplySavedDefaultsForSelectedBiller();
                     OnPropertyChanged(nameof(SelectedBillerName));
@@ -127,16 +126,16 @@ namespace BankingAppTeamB.ViewModels
 
         public string SearchQuery
         {
-            get => _searchQuery;
-            set => SetProperty(ref _searchQuery, value);
+            get => searchQuery;
+            set => SetProperty(ref searchQuery, value);
         }
 
         public string? SelectedCategory
         {
-            get => _selectedCategory;
+            get => selectedCategory;
             set
             {
-                if (SetProperty(ref _selectedCategory, value))
+                if (SetProperty(ref selectedCategory, value))
                 {
                     ExecuteSearch();
                 }
@@ -145,16 +144,16 @@ namespace BankingAppTeamB.ViewModels
 
         public string BillerReference
         {
-            get => _billerReference;
-            set => SetProperty(ref _billerReference, value);
+            get => billerReference;
+            set => SetProperty(ref billerReference, value);
         }
 
         public decimal Amount
         {
-            get => _amount;
+            get => amount;
             set
             {
-                if (SetProperty(ref _amount, value))
+                if (SetProperty(ref amount, value))
                 {
                     OnPropertyChanged(nameof(ReviewAmountText));
                     OnPropertyChanged(nameof(Total));
@@ -165,28 +164,28 @@ namespace BankingAppTeamB.ViewModels
 
         public double AmountAsDouble
         {
-            get => (double)_amount;
+            get => (double)amount;
             set => Amount = (decimal)value;
         }
 
         public bool IsPayInFull
         {
-            get => _isPayInFull;
-            set => SetProperty(ref _isPayInFull, value);
+            get => isPayInFull;
+            set => SetProperty(ref isPayInFull, value);
         }
 
         public Account? SelectedAccount
         {
-            get => _selectedAccount;
-            set => SetProperty(ref _selectedAccount, value);
+            get => selectedAccount;
+            set => SetProperty(ref selectedAccount, value);
         }
 
         public decimal Fee
         {
-            get => _fee;
+            get => fee;
             set
             {
-                if (SetProperty(ref _fee, value))
+                if (SetProperty(ref fee, value))
                 {
                     OnPropertyChanged(nameof(ReviewFeeText));
                     OnPropertyChanged(nameof(Total));
@@ -197,16 +196,16 @@ namespace BankingAppTeamB.ViewModels
 
         public string ReceiptNumber
         {
-            get => _receiptNumber;
-            set => SetProperty(ref _receiptNumber, value);
+            get => receiptNumber;
+            set => SetProperty(ref receiptNumber, value);
         }
 
         public string ErrorMessage
         {
-            get => _errorMessage;
+            get => errorMessage;
             set
             {
-                if (SetProperty(ref _errorMessage, value))
+                if (SetProperty(ref errorMessage, value))
                 {
                     OnPropertyChanged(nameof(ErrorMessageVisibility));
                 }
@@ -215,8 +214,8 @@ namespace BankingAppTeamB.ViewModels
 
         public bool ShouldSaveBiller
         {
-            get => _shouldSaveBiller;
-            set => SetProperty(ref _shouldSaveBiller, value);
+            get => shouldSaveBiller;
+            set => SetProperty(ref shouldSaveBiller, value);
         }
 
         public bool HasSavedBillers => SavedBillers != null && SavedBillers.Count > 0;
@@ -226,7 +225,7 @@ namespace BankingAppTeamB.ViewModels
 
         public Visibility ErrorMessageVisibility =>
             string.IsNullOrWhiteSpace(ErrorMessage) ? Visibility.Collapsed : Visibility.Visible;
-        
+
         public string SelectedBillerName =>
             SelectedBiller?.Name ?? "No biller selected";
 
@@ -255,10 +254,10 @@ namespace BankingAppTeamB.ViewModels
                 ErrorMessage = string.Empty;
                 ResetFormStateOnly();
 
-                var directory = await Task.Run(() => _billPaymentService.GetBillerDirectory(null));
+                var directory = await Task.Run(() => billPaymentService.GetBillerDirectory(null));
                 Billers = new ObservableCollection<Biller>(directory);
 
-                var saved = await Task.Run(() => _billPaymentService.GetSavedBillers(ServiceLocator.UserSessionService.CurrentUserId));
+                var saved = await Task.Run(() => billPaymentService.GetSavedBillers(ServiceLocator.UserSessionService.CurrentUserId));
                 SavedBillers = new ObservableCollection<SavedBiller>(saved);
 
                 Accounts = new ObservableCollection<Account>(UserSession.GetAccounts());
@@ -275,7 +274,7 @@ namespace BankingAppTeamB.ViewModels
             {
                 ErrorMessage = string.Empty;
 
-                var results = _billPaymentService.SearchBillers(
+                var results = billPaymentService.SearchBillers(
                     SearchQuery ?? string.Empty,
                     SelectedCategory);
 
@@ -353,8 +352,8 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                Fee = _billPaymentService.CalculateFee(Amount);
-                Requires2FA = _billPaymentService.Requires2FA(Amount);
+                Fee = billPaymentService.CalculateFee(Amount);
+                Requires2FA = billPaymentService.Requires2FA(Amount);
                 CurrentStep = Requires2FA ? 3 : 4;
                 return;
             }
@@ -438,7 +437,7 @@ namespace BankingAppTeamB.ViewModels
                     TwoFAToken = Requires2FA ? TwoFAToken : null
                 };
 
-                var result = await Task.Run(() => _billPaymentService.PayBill(dto));
+                var result = await Task.Run(() => billPaymentService.PayBill(dto));
 
                 if (ShouldSaveBiller)
                 {
@@ -448,7 +447,7 @@ namespace BankingAppTeamB.ViewModels
 
                     if (!alreadySaved)
                     {
-                        await Task.Run(() => _billPaymentService.SaveBiller(
+                        await Task.Run(() => billPaymentService.SaveBiller(
                             ServiceLocator.UserSessionService.CurrentUserId,
                             SelectedBiller.Id,
                             BillerReference,
@@ -515,6 +514,17 @@ namespace BankingAppTeamB.ViewModels
             {
                 BillerReference = matchingSavedBiller.DefaultReference!;
             }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is BillPayViewModel model &&
+                   isPayInFull == model.isPayInFull;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(isPayInFull);
         }
     }
 }

@@ -1,13 +1,13 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using BankingAppTeamB.Commands;
+using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Mocks;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Services;
 using BankingAppTeamB.ViewModels;
-using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using BankingAppTeamB.Configuration;
 
 public class TransferViewModel : ViewModelBase
 {
@@ -21,7 +21,7 @@ public class TransferViewModel : ViewModelBase
         CurrentStep = 1;
 
         Currency = "EUR";
-        AmountText = "";
+        AmountText = string.Empty;
 
         NextStepCommand = new RelayCommand(unusedParameter => ExecuteNextStep());
         TransferCommand = new AsyncRelayCommand(unusedParameter => ExecuteTransferAsync());
@@ -31,7 +31,7 @@ public class TransferViewModel : ViewModelBase
         LoadAccounts();
     }
 
-    public string SelectedAccountName => SelectedAccount?.AccountName ?? "";
+    public string SelectedAccountName => SelectedAccount?.AccountName ?? string.Empty;
 
     private int currentStep;
     public int CurrentStep
@@ -199,10 +199,14 @@ public class TransferViewModel : ViewModelBase
             if (userAccounts != null)
             {
                 foreach (var account in userAccounts)
+                {
                     Accounts.Add(account);
+                }
 
                 if (Accounts.Count > 0)
+                {
                     SelectedAccount = Accounts[0];
+                }
             }
         }
         catch (Exception ex)
@@ -269,7 +273,9 @@ public class TransferViewModel : ViewModelBase
             ErrorMessage = string.Empty;
 
             if (SelectedAccount == null)
+            {
                 throw new Exception("No account selected.");
+            }
 
             var dto = new TransferDto
             {

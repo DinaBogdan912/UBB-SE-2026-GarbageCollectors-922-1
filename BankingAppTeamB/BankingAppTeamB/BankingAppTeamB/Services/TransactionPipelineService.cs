@@ -1,7 +1,6 @@
+using System;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Repositories;
-
-using System;
 
 namespace BankingAppTeamB.Services
 {
@@ -12,8 +11,6 @@ namespace BankingAppTeamB.Services
 
         private readonly ITransactionRepository transactionRepo;
         private readonly IAccountService accountService;
-        
-
 
         public TransactionPipelineService(ITransactionRepository transactionRepo, IAccountService accountService)
         {
@@ -25,18 +22,23 @@ namespace BankingAppTeamB.Services
         // {
         //     this.transactionRepo = transactionRepo;
         // }
-
         public ValidationResult Validate(PipelineContext ctx)
         {
             if (ctx.Amount <= 0)
+            {
                 return ValidationResult.Failure("Amount must be greater than zero.");
+            }
 
             if (ctx.Currency == null || ctx.Currency.Length != ExpectedCurrencyCodeLength)
+            {
                 return ValidationResult.Failure("Currency code must be exactly 3 characters.");
+            }
 
             if (!accountService.IsAccountValid(ctx.SourceAccountId))
+            {
                 // if (!AccountService.IsAccountValid(ctx.SourceAccountId))
                 return ValidationResult.Failure("Source account is invalid or does not exist.");
+            }
 
             return ValidationResult.Success();
         }
@@ -44,7 +46,9 @@ namespace BankingAppTeamB.Services
         public AuthResult Authorize(PipelineContext ctx, string? twoFAToken = null)
         {
             if (ctx.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
+            {
                 return AuthResult.Failure("A 2FA token is required for transfers of 1000 or more.");
+            }
 
             return AuthResult.Success();
         }
@@ -74,15 +78,21 @@ namespace BankingAppTeamB.Services
         {
             var validation = Validate(ctx);
             if (!validation.IsValid)
+            {
                 throw new InvalidOperationException(validation.Message);
+            }
 
             var auth = Authorize(ctx, twoFAToken);
             if (!auth.IsAuthorized)
+            {
                 throw new InvalidOperationException(auth.Message);
+            }
 
             var execution = Execute(ctx);
             if (!execution.IsSuccess)
+            {
                 throw new InvalidOperationException(execution.Message);
+            }
 
             return LogTransaction(BuildTransaction(ctx));
         }
@@ -106,6 +116,5 @@ namespace BankingAppTeamB.Services
                 CreatedAt = DateTime.Now
             };
         }
-
     }
 }

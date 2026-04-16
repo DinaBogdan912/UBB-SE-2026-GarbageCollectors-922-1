@@ -1,10 +1,9 @@
-﻿using BankingAppTeamB.Models;
-using BankingAppTeamB.Models.DTOs;
-using BankingAppTeamB.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
+using BankingAppTeamB.Repositories;
 
 namespace BankingAppTeamB.Services
 {
@@ -12,9 +11,9 @@ namespace BankingAppTeamB.Services
     {
         private readonly IBeneficiaryRepository repo;
 
-        public BeneficiaryService(IBeneficiaryRepository InputRepo)
+        public BeneficiaryService(IBeneficiaryRepository inputRepo)
         {
-            repo = InputRepo;
+            repo = inputRepo;
         }
 
         public List<Beneficiary> GetByUser(int userId)
@@ -23,10 +22,26 @@ namespace BankingAppTeamB.Services
         }
         public bool ValidateIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban)) return false;
-            if (iban.Length < 15 || iban.Length > 34) return false;
-            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1])) return false;
-            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3])) return false;
+            if (string.IsNullOrWhiteSpace(iban))
+            {
+                return false;
+            }
+
+            if (iban.Length < 15 || iban.Length > 34)
+            {
+                return false;
+            }
+
+            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1]))
+            {
+                return false;
+            }
+
+            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3]))
+            {
+                return false;
+            }
+
             return true;
         }
         public Beneficiary Add(string name, string iban, int uid)

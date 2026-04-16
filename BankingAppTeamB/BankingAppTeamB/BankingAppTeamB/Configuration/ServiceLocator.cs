@@ -7,42 +7,38 @@ namespace BankingAppTeamB.Configuration;
 
 public static class ServiceLocator
 {
+    private static ITransactionRepository transactionRepository = new TransactionRepository();
+    private static ITransferRepository transferRepository = new TransferRepository();
+    private static IBeneficiaryRepository beneficiaryRepository = new BeneficiaryRepository();
+    private static IBillPaymentRepository billPaymentRepository = new BillPaymentRepository();
+    private static IRecurringPaymentRepository recurringPaymentRepository = new RecurringPaymentRepository();
+    private static IExchangeRepository exchangeRepository = new ExchangeRepository();
+    private static IUserSessionService userSessionService = new UserSessionService();
 
-    private static ITransactionRepository _transactionRepository = new TransactionRepository();
-    private static ITransferRepository _transferRepository = new TransferRepository();
-    private static IBeneficiaryRepository _beneficiaryRepository = new BeneficiaryRepository();
-    private static IBillPaymentRepository _billPaymentRepository = new BillPaymentRepository();
-    private static IRecurringPaymentRepository _recurringPaymentRepository = new RecurringPaymentRepository();
-    private static IExchangeRepository _exchangeRepository = new ExchangeRepository();
-    private static IUserSessionService _userSessionService = new UserSessionService();
+    // mock
+    private static IAccountService accountService = new AccountService();
+    private static ITransactionPipelineService pipelineService = new TransactionPipelineService(transactionRepository, accountService);
+    private static IExchangeService exchangeService = new ExchangeService(exchangeRepository, pipelineService, accountService);
+    private static ITransferService transferService = new TransferService(transferRepository, beneficiaryRepository, pipelineService, exchangeService);
+    private static IBillPaymentService billPaymentService = new BillPaymentService(billPaymentRepository, pipelineService);
+    private static IRecurringPaymentService recurringPaymentService = new RecurringPaymentService(recurringPaymentRepository, billPaymentService);
+    private static IBeneficiaryService beneficiaryService = new BeneficiaryService(beneficiaryRepository);
 
-    //mock
-    private static IAccountService _accountService = new AccountService();
-    private static ITransactionPipelineService _pipelineService = new TransactionPipelineService(_transactionRepository, _accountService);
-    private static IExchangeService _exchangeService = new ExchangeService(_exchangeRepository, _pipelineService, _accountService);
-    private static ITransferService _transferService = new TransferService(_transferRepository, _beneficiaryRepository, _pipelineService, _exchangeService);
-    private static IBillPaymentService _billPaymentService = new BillPaymentService(_billPaymentRepository, _pipelineService);
-    private static IRecurringPaymentService _recurringPaymentService = new RecurringPaymentService(_recurringPaymentRepository, _billPaymentService);
-    private static IBeneficiaryService _beneficiaryService = new BeneficiaryService(_beneficiaryRepository);
-
-
-    //mock
-    private static readonly Timer timer = new Timer(30000) //30secs
+    // mock
+    private static readonly Timer Timer = new Timer(30000) // 30secs
     {
         AutoReset = true
     };
-    
-    private static RecurringScheduler _recurringScheduler = new RecurringScheduler(_recurringPaymentService, _exchangeService, timer);
-    public static ITransferService TransferService => _transferService;
-    public static IExchangeService ExchangeService => _exchangeService;
-    public static IBillPaymentService BillPaymentService => _billPaymentService;
-    public static IRecurringPaymentService RecurringPaymentService => _recurringPaymentService;
-    public static IRecurringScheduler RecurringScheduler => _recurringScheduler;
-    public static IBeneficiaryService BeneficiaryService => _beneficiaryService;
-    public static IUserSessionService UserSessionService => _userSessionService;
+    private static RecurringScheduler recurringScheduler = new RecurringScheduler(recurringPaymentService, exchangeService, Timer);
+    public static ITransferService TransferService => transferService;
+    public static IExchangeService ExchangeService => exchangeService;
+    public static IBillPaymentService BillPaymentService => billPaymentService;
+    public static IRecurringPaymentService RecurringPaymentService => recurringPaymentService;
+    public static IRecurringScheduler RecurringScheduler => recurringScheduler;
+    public static IBeneficiaryService BeneficiaryService => beneficiaryService;
+    public static IUserSessionService UserSessionService => userSessionService;
     public static void Initialize()
     {
-        _recurringScheduler.Start();
+        recurringScheduler.Start();
     }
-
 }

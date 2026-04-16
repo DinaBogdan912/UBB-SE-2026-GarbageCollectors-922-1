@@ -2,7 +2,7 @@
 
 namespace BankingAppTeamB.Services
 {
-    public static class NavigationService 
+    public static class NavigationService
     {
         public static Frame? Frame { get; set; }
 
@@ -14,7 +14,9 @@ namespace BankingAppTeamB.Services
         public static void GoBack()
         {
             if (Frame != null && Frame.CanGoBack)
+            {
                 Frame.GoBack();
+            }
         }
     }
 }

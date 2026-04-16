@@ -12,5 +12,4 @@ public interface IExchangeRepository
     public RateAlert AddAlert(RateAlert alert);
     public void DeleteAlert(int id);
     public void MarkAlertTriggered(int id);
-    
 }

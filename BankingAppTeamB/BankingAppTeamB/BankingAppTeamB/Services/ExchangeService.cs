@@ -1,8 +1,8 @@
-﻿using BankingAppTeamB.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using BankingAppTeamB.Repositories;
+using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
+using BankingAppTeamB.Repositories;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BankingAppTeamB.Services
@@ -12,28 +12,27 @@ namespace BankingAppTeamB.Services
         private const decimal CommissionRate = 0.005m;
         private const decimal MinimumCommission = 0.50m;
 
+        private readonly IExchangeRepository exchangeRepository;
+        private readonly ITransactionPipelineService transactionPipelineService;
+        private readonly IAccountService accountService;
 
-        private readonly IExchangeRepository _exchangeRepository;
-        private readonly ITransactionPipelineService _transactionPipelineService;
-        private readonly IAccountService _accountService;
+        private Dictionary<string, decimal> cachedRates;
+        private DateTime ratesLastFetched;
 
-        private Dictionary<string, decimal> _cachedRates;
-        private DateTime _ratesLastFetched;
-
-        private readonly Dictionary<int, LockedRate> _lockedRates = new();
+        private readonly Dictionary<int, LockedRate> lockedRates = new Dictionary<int, LockedRate>();
         private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(30);
 
         public ExchangeService(IExchangeRepository exchangeRepository,
             ITransactionPipelineService transactionPipelineService,
             IAccountService accountService)
         {
-            _exchangeRepository = exchangeRepository;
-            _transactionPipelineService = transactionPipelineService;
-            _accountService = accountService;
+            this.exchangeRepository = exchangeRepository;
+            this.transactionPipelineService = transactionPipelineService;
+            this.accountService = accountService;
         }
 
         // TODO: Replace hardcoded seed rates with live API call (FR-FX-001)
-        private static Dictionary<string, decimal> GetSeedExchangeRates() => new()
+        private static Dictionary<string, decimal> GetSeedExchangeRates() => new ()
         {
             { "EUR/USD", 1.15m },
             { "EUR/GBP", 0.86m },
@@ -44,8 +43,10 @@ namespace BankingAppTeamB.Services
 
         public Dictionary<string, decimal> GetLiveRates()
         {
-            if (_cachedRates != null && DateTime.Now - _ratesLastFetched < CacheDuration)
-                return _cachedRates;
+            if (cachedRates != null && DateTime.Now - ratesLastFetched < CacheDuration)
+            {
+                return cachedRates;
+            }
 
             Dictionary<string, decimal> rates = GetSeedExchangeRates();
 
@@ -57,9 +58,9 @@ namespace BankingAppTeamB.Services
                 rates[inverseKey] = Math.Round(1 / rates[currencyPair], 2);
             }
 
-            _cachedRates = rates;
-            _ratesLastFetched = DateTime.Now;
-            return _cachedRates;
+            cachedRates = rates;
+            ratesLastFetched = DateTime.Now;
+            return cachedRates;
         }
 
         public decimal GetRate(string from, string to)
@@ -68,11 +69,15 @@ namespace BankingAppTeamB.Services
             string key = $"{from}/{to}";
 
             if (rates.ContainsKey(key))
+            {
                 return rates[key];
+            }
 
             string inverseKey = $"{to}/{from}";
             if (rates.ContainsKey(inverseKey))
+            {
                 return Math.Round(1 / rates[inverseKey], 2);
+            }
 
             throw new Exception($"Rate not found for pair {from}/{to}");
         }
@@ -88,15 +93,18 @@ namespace BankingAppTeamB.Services
                 Rate = rate,
                 LockedAt = DateTime.Now
             };
-            _lockedRates[userId] = lockedRate;
+            lockedRates[userId] = lockedRate;
             return lockedRate;
         }
 
         public bool IsRateLockValid(int userId)
         {
-            if (!_lockedRates.ContainsKey(userId))
+            if (!lockedRates.ContainsKey(userId))
+            {
                 return false;
-            return !_lockedRates[userId].IsExpired();
+            }
+
+            return !lockedRates[userId].IsExpired();
         }
 
         public decimal CalculateCommission(decimal amount)
@@ -108,15 +116,17 @@ namespace BankingAppTeamB.Services
         public decimal CalculateTargetAmount(decimal sourceAmount, decimal rate)
         {
             decimal commission = CalculateCommission(sourceAmount);
-            return sourceAmount * rate - commission;
+            return (sourceAmount * rate) - commission;
         }
 
         public ExchangeTransaction ExecuteExchange(ExchangeDto dto)
         {
             if (!IsRateLockValid(dto.UserId))
+            {
                 throw new Exception("No valid rate lock found or the 3-second window has expired.");
+            }
 
-            LockedRate lockedRateEntry = _lockedRates[dto.UserId];
+            LockedRate lockedRateEntry = lockedRates[dto.UserId];
 
             decimal commission = CalculateCommission(dto.SourceAmount);
             decimal targetAmount = CalculateTargetAmount(dto.SourceAmount, lockedRateEntry.Rate);
@@ -134,8 +144,8 @@ namespace BankingAppTeamB.Services
                 RelatedEntityId = 0
             };
 
-            Transaction transactionLog = _transactionPipelineService.RunPipeline(context);
-            _accountService.CreditAccount(dto.TargetAccountId, targetAmount);
+            Transaction transactionLog = transactionPipelineService.RunPipeline(context);
+            accountService.CreditAccount(dto.TargetAccountId, targetAmount);
 
             ExchangeTransaction exchangeTransaction = new ExchangeTransaction
             {
@@ -154,48 +164,56 @@ namespace BankingAppTeamB.Services
                 CreatedAt = DateTime.Now
             };
 
-            _exchangeRepository.Add(exchangeTransaction);
-            _lockedRates.Remove(dto.UserId);
+            exchangeRepository.Add(exchangeTransaction);
+            lockedRates.Remove(dto.UserId);
 
             return exchangeTransaction;
         }
 
         public void ClearLocks(int userId)
         {
-            _lockedRates.Remove(userId);
+            lockedRates.Remove(userId);
         }
 
         public List<RateAlert> GetUserAlerts(int userId)
         {
-            return _exchangeRepository.GetUserActiveAlerts(userId);
+            return exchangeRepository.GetUserActiveAlerts(userId);
         }
 
         public RateAlert CreateAlert(int userId, string source, string target, decimal rate, bool isBuyAlert)
         {
             if (string.IsNullOrEmpty(source))
+            {
                 throw new ArgumentException("Source currency cannot be null or empty.");
+            }
 
             if (string.IsNullOrEmpty(target))
+            {
                 throw new ArgumentException("Target currency cannot be null or empty.");
+            }
 
             if (source.Equals(target))
+            {
                 throw new ArgumentException("Source currency cannot be the same as target currency.");
+            }
 
             if (rate <= 0)
+            {
                 throw new ArgumentException("Rate cannot be zero or negative.");
+            }
 
             RateAlert rateAlert = new RateAlert(userId, source, target, rate, isBuyAlert);
-            return _exchangeRepository.AddAlert(rateAlert);
+            return exchangeRepository.AddAlert(rateAlert);
         }
 
         public void DeleteAlert(int id)
         {
-            _exchangeRepository.DeleteAlert(id);
+            exchangeRepository.DeleteAlert(id);
         }
 
         public void CheckRateAlerts()
         {
-            List<RateAlert> activeAlerts = _exchangeRepository.GetAllActiveAlerts();
+            List<RateAlert> activeAlerts = exchangeRepository.GetAllActiveAlerts();
 
             foreach (var alert in activeAlerts)
             {
@@ -203,11 +221,14 @@ namespace BankingAppTeamB.Services
                 var targetRate = Math.Round(alert.TargetRate, 2);
 
                 if (alert.IsBuyAlert)
+                {
                     alert.IsTriggered = currentRate <= targetRate;
+                }
                 else
+                {
                     alert.IsTriggered = currentRate >= targetRate;
+                }
             }
-
         }
     }
 }
