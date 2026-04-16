@@ -55,3 +55,4 @@ project.nuget.cache
 # App environment
 BankingAppTeamB\BankingAppTeamB\appsetting.json
 /BankingAppTeamB/BankingAppTeamB/BankingAppTeamB/appsettings.json
+/BankingAppTeamB/Temp
