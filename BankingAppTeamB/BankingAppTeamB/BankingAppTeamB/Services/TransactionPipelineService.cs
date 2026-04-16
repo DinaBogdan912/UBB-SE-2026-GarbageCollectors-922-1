@@ -9,56 +9,61 @@ namespace BankingAppTeamB.Services
         private const int ExpectedCurrencyCodeLength = 3;
         private const decimal TwoFaAmountThreshold = 1000m;
 
-        private readonly ITransactionRepository transactionRepository;
+        private readonly ITransactionRepository transactionRepo;
         private readonly IAccountService accountService;
-        
 
-
-        public TransactionPipelineService(ITransactionRepository transactionRepository, IAccountService accountService)
+        public TransactionPipelineService(ITransactionRepository transactionRepo, IAccountService accountService)
         {
-            this.transactionRepository = transactionRepository;
+            this.transactionRepo = transactionRepo;
             this.accountService = accountService;
         }
 
-        // public TransactionPipelineService(ITransactionRepository transactionRepository)
+        // public TransactionPipelineService(ITransactionRepository transactionRepo)
         // {
-        //     this.transactionRepository = transactionRepository;
+        //     this.transactionRepo = transactionRepo;
         // }
-
-        public ValidationResult Validate(PipelineContext context)
+        public ValidationResult Validate(PipelineContext ctx)
         {
-            if (context.Amount <= 0)
+            if (ctx.Amount <= 0)
+            {
                 return ValidationResult.Failure("Amount must be greater than zero.");
             }
 
-            if (context.Currency == null || context.Currency.Length != ExpectedCurrencyCodeLength)
+            if (ctx.Currency == null || ctx.Currency.Length != ExpectedCurrencyCodeLength)
+            {
                 return ValidationResult.Failure("Currency code must be exactly 3 characters.");
             }
 
-            if (!accountService.IsAccountValid(context.SourceAccountId))
-                // if (!AccountService.IsAccountValid(context.SourceAccountId))
+            if (!accountService.IsAccountValid(ctx.SourceAccountId))
+            {
+                // if (!AccountService.IsAccountValid(ctx.SourceAccountId))
                 return ValidationResult.Failure("Source account is invalid or does not exist.");
             }
 
             return ValidationResult.Success();
         }
 
-        public AuthResult Authorize(PipelineContext context, string? twoFAToken = null)
+        public AuthResult Authorize(PipelineContext ctx, string? twoFAToken = null)
         {
-            if (context.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
+            if (ctx.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
+            {
                 return AuthResult.Failure("A 2FA token is required for transfers of 1000 or more.");
             }
 
             return AuthResult.Success();
         }
+        public IAccountService GetAccountService()
+        {
+            return accountService;
+        }
 
-        public ExecutionResult Execute(PipelineContext context)
+        public ExecutionResult Execute(PipelineContext ctx)
         {
             try
             {
-                decimal totalDebit = context.Amount + context.Fee;
-                accountService.DebitAccount(context.SourceAccountId, totalDebit);
-                // AccountService.DebitAccount(context.SourceAccountId, totalDebit);
+                decimal totalDebit = ctx.Amount + ctx.Fee;
+                accountService.DebitAccount(ctx.SourceAccountId, totalDebit);
+                // AccountService.DebitAccount(ctx.SourceAccountId, totalDebit);
                 return ExecutionResult.Success();
             }
             catch (Exception ex)
@@ -67,69 +72,53 @@ namespace BankingAppTeamB.Services
             }
         }
 
-        public Transaction LogTransaction(Transaction transaction)
+        public Transaction LogTransaction(Transaction tx)
         {
-            transactionRepository.Add(transaction);
-            return transaction;
+            transactionRepo.Add(tx);
+            return tx;
         }
 
-        public Transaction RunPipeline(PipelineContext context, string? twoFAToken = null)
+        public Transaction RunPipeline(PipelineContext ctx, string? twoFAToken = null)
         {
-            var validation = Validate(context);
+            var validation = Validate(ctx);
             if (!validation.IsValid)
             {
                 throw new InvalidOperationException(validation.Message);
             }
 
-            var auth = Authorize(context, twoFAToken);
+            var auth = Authorize(ctx, twoFAToken);
             if (!auth.IsAuthorized)
             {
                 throw new InvalidOperationException(auth.Message);
             }
 
-            var execution = Execute(context);
+            var execution = Execute(ctx);
             if (!execution.IsSuccess)
             {
                 throw new InvalidOperationException(execution.Message);
             }
 
-            return LogTransaction(BuildTransaction(context));
+            return LogTransaction(BuildTransaction(ctx));
         }
 
-        private Transaction BuildTransaction(PipelineContext context)
+        private Transaction BuildTransaction(PipelineContext ctx)
         {
-            var createdAt = DateTime.Now;
             return new Transaction
             {
-                AccountId = context.SourceAccountId,
-                TransactionRef = GenerateTransactionRef(createdAt),
-                Type = context.Type,
+                AccountId = ctx.SourceAccountId,
+                Type = ctx.Type,
                 Direction = "Debit",
-                Amount = context.Amount,
-                Currency = context.Currency,
-                BalanceAfter = accountService.GetBalance(context.SourceAccountId),
-                // BalanceAfter = AccountService.GetBalance(context.SourceAccountId),
-                CounterpartyName = context.CounterpartyName,
-                Fee = context.Fee,
+                Amount = ctx.Amount,
+                Currency = ctx.Currency,
+                BalanceAfter = accountService.GetBalance(ctx.SourceAccountId),
+                // BalanceAfter = AccountService.GetBalance(ctx.SourceAccountId),
+                CounterpartyName = ctx.CounterpartyName,
+                Fee = ctx.Fee,
                 Status = "Completed",
-                RelatedEntityType = context.RelatedEntityType,
-                RelatedEntityId = context.RelatedEntityId,
-                CreatedAt = createdAt
+                RelatedEntityType = ctx.RelatedEntityType,
+                RelatedEntityId = ctx.RelatedEntityId,
+                CreatedAt = DateTime.Now
             };
         }
-
-        private static string GenerateTransactionRef(DateTime createdAt)
-        {
-            const int suffixLength = 6;
-            string suffix = Guid.NewGuid().ToString("N")[..suffixLength].ToUpper();
-            return $"TXN-{createdAt:yyyyMMdd}-{suffix}";
-        }
-
-
-        public IAccountService GetAccountService()
-        {
-            return accountService;
-        }
-
     }
 }

@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace BankingAppTeamB.Services
 {
