@@ -1,7 +1,7 @@
 ﻿using System;
 using BankingAppTeamB.Models;
 
-namespace BankingAppTeamB.Mocks
+namespace BankingAppTeamB.Services
 {
     public class AccountService : IAccountService
     {
