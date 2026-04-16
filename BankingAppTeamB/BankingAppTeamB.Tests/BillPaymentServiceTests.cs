@@ -30,56 +30,56 @@ namespace BankingAppTeamB.Tests.Services
         [Fact]
         public void GetBillerDirectory_WithNullCategory_CallsGetAllBillers()
         {
-            _repo.Setup(r => r.GetAllBillers()).Returns(new List<Biller>());
+            _repo.Setup(r => r.GetAllBillers(true)).Returns(new List<Biller>());
             var sut = CreateSut();
 
             sut.GetBillerDirectory(null);
 
-            _repo.Verify(r => r.GetAllBillers(), Times.Once);
+            _repo.Verify(r => r.GetAllBillers(true), Times.Once);
         }
 
         [Fact]
         public void GetBillerDirectory_WithCategory_CallsSearchBillers()
         {
-            _repo.Setup(r => r.SearchBillers(string.Empty, "Utilities")).Returns(new List<Biller>());
+            _repo.Setup(r => r.SearchBillers(string.Empty, "Utilities", true)).Returns(new List<Biller>());
             var sut = CreateSut();
 
             sut.GetBillerDirectory("Utilities");
 
-            _repo.Verify(r => r.SearchBillers(string.Empty, "Utilities"), Times.Once);
+            _repo.Verify(r => r.SearchBillers(string.Empty, "Utilities", true), Times.Once);
         }
 
         [Fact]
         public void SearchBillers_WithoutCategory_CallsRepoWithNullCategory()
         {
-            _repo.Setup(r => r.SearchBillers("gas", null)).Returns(new List<Biller>());
+            _repo.Setup(r => r.SearchBillers("gas", null, true)).Returns(new List<Biller>());
             var sut = CreateSut();
 
             sut.SearchBillers("gas");
 
-            _repo.Verify(r => r.SearchBillers("gas", null), Times.Once);
+            _repo.Verify(r => r.SearchBillers("gas", null, true), Times.Once);
         }
 
         [Fact]
         public void SearchBillers_WithNullQuery_UsesEmptyString()
         {
-            _repo.Setup(r => r.SearchBillers(string.Empty, "Utilities")).Returns(new List<Biller>());
+            _repo.Setup(r => r.SearchBillers(string.Empty, "Utilities", true)).Returns(new List<Biller>());
             var sut = CreateSut();
 
             sut.SearchBillers(null!, "Utilities");
 
-            _repo.Verify(r => r.SearchBillers(string.Empty, "Utilities"), Times.Once);
+            _repo.Verify(r => r.SearchBillers(string.Empty, "Utilities", true), Times.Once);
         }
 
         [Fact]
         public void SearchBillers_WithCategory_CallsRepo()
         {
-            _repo.Setup(r => r.SearchBillers("water", "Utilities")).Returns(new List<Biller>());
+            _repo.Setup(r => r.SearchBillers("water", "Utilities", true)).Returns(new List<Biller>());
             var sut = CreateSut();
 
             sut.SearchBillers("water", "Utilities");
 
-            _repo.Verify(r => r.SearchBillers("water", "Utilities"), Times.Once);
+            _repo.Verify(r => r.SearchBillers("water", "Utilities", true), Times.Once);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace BankingAppTeamB.Tests.Services
         {
             _repo.Setup(r => r.GetBillerById(2)).Returns(new Biller { Id = 2, Name = "Electricity Co" });
             _pipeline.Setup(p => p.RunPipeline(It.IsAny<PipelineContext>(), "123456")).Returns(new Transaction { Id = 77 });
-            _repo.Setup(r => r.Add(It.IsAny<BillPayment>())).Returns(new BillPayment());
+            _repo.Setup(r => r.Add(It.IsAny<BillPayment>())).Returns(new BillPayment { BillerReference = "", ReceiptNumber = "" });
             var sut = CreateSut();
             var dto = new BillPaymentDto { UserId = 1, SourceAccountId = 10, BillerId = 2, Amount = 100, BillerReference = "INV-1", TwoFAToken = "123456" };
 
@@ -165,7 +165,7 @@ namespace BankingAppTeamB.Tests.Services
         {
             _repo.Setup(r => r.GetBillerById(2)).Returns(new Biller { Id = 2, Name = "Electricity Co" });
             _pipeline.Setup(p => p.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>())).Returns(new Transaction { Id = 77 });
-            _repo.Setup(r => r.Add(It.IsAny<BillPayment>())).Returns(new BillPayment());
+            _repo.Setup(r => r.Add(It.IsAny<BillPayment>())).Returns(new BillPayment { BillerReference = "", ReceiptNumber = "" });
             var sut = CreateSut();
             var dto = new BillPaymentDto { UserId = 1, SourceAccountId = 10, BillerId = 2, Amount = 150, BillerReference = "INV-2", TwoFAToken = "123456" };
 
@@ -179,7 +179,7 @@ namespace BankingAppTeamB.Tests.Services
         {
             _repo.Setup(r => r.GetBillerById(2)).Returns(new Biller { Id = 2, Name = "Electricity Co" });
             _pipeline.Setup(p => p.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>())).Returns(new Transaction { Id = 77 });
-            var expected = new BillPayment { Id = 5, ReceiptNumber = "RCP-TEST" };
+            var expected = new BillPayment { Id = 5, ReceiptNumber = "RCP-TEST", BillerReference = "" };
             _repo.Setup(r => r.Add(It.IsAny<BillPayment>())).Returns(expected);
             var sut = CreateSut();
             var dto = new BillPaymentDto { UserId = 1, SourceAccountId = 10, BillerId = 2, Amount = 150, BillerReference = "INV-2", TwoFAToken = "123456" };
