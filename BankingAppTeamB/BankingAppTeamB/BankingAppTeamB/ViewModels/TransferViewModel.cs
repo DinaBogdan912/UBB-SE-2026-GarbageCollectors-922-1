@@ -22,10 +22,10 @@ public class TransferViewModel : ViewModelBase
         Currency = "EUR";
         AmountText = "";
 
-        NextStepCommand = new RelayCommand(_ => ExecuteNextStep());
-        TransferCommand = new AsyncRelayCommand(_ => ExecuteTransferAsync());
-        CancelCommand = new RelayCommand(_ => ExecuteCancel());
-        SendAgainCommand = new RelayCommand(_ => ExecuteSendAgain());
+        NextStepCommand = new RelayCommand(unusedParameter => ExecuteNextStep());
+        TransferCommand = new AsyncRelayCommand(unusedParameter => ExecuteTransferAsync());
+        CancelCommand = new RelayCommand(unusedParameter => ExecuteCancel());
+        SendAgainCommand = new RelayCommand(unusedParameter => ExecuteSendAgain());
 
         LoadAccounts();
     }

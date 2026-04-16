@@ -81,9 +81,9 @@ namespace BankingAppTeamB.ViewModels
             _exchangeService = exchangeService;
             _userId = userId;
 
-            RefreshRatesCommand = new AsyncRelayCommand(_ => LoadRatesAsync());
-            CreateAlertCommand = new AsyncRelayCommand(_ => CreateAlertAsync());
-            DeleteAlertCommand = new RelayCommand(param => DeleteAlert((RateAlert)param));
+            RefreshRatesCommand = new AsyncRelayCommand(unusedParameter => LoadRatesAsync());
+            CreateAlertCommand = new AsyncRelayCommand(unusedParameter => CreateAlertAsync());
+            DeleteAlertCommand = new RelayCommand(commandParameter => DeleteAlert((RateAlert)commandParameter));
         }
 
         public async Task LoadAsync()
@@ -102,9 +102,9 @@ namespace BankingAppTeamB.ViewModels
             AvailableCurrencies.Clear();
 
             var currencies = rates.Keys
-                .SelectMany(pair => pair.Split('/')) 
+                .SelectMany(currencyPair => currencyPair.Split('/')) 
                 .Distinct()
-                .OrderBy(c => c);
+                .OrderBy(currencyCode => currencyCode);
 
             foreach (var currency in currencies)
                 AvailableCurrencies.Add(currency);
@@ -174,9 +174,9 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        private void DeleteAlert(object param)
+        private void DeleteAlert(object commandParameter)
         {
-            var alert = (RateAlert)param;
+            var alert = (RateAlert)commandParameter;
             _exchangeService.DeleteAlert(alert.Id);
             Alerts.Remove(alert);
         }

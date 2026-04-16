@@ -84,10 +84,10 @@ namespace BankingAppTeamB.ViewModels
             this.beneficiaryService = beneficiaryService;
 
             //Initialize Commands
-            AddCommand = new AsyncRelayCommand(_ => AddBeneficiaryAsync());
-            DeleteCommand = new RelayCommand(p => DeleteBeneficiary(p as Beneficiary));
-            ShowAddFormCommand = new RelayCommand(_ => ShowAddForm());
-            UseForTransferCommand = new RelayCommand(p => UseForTransfer(p as Beneficiary));
+            AddCommand = new AsyncRelayCommand(unusedParameter => AddBeneficiaryAsync());
+            DeleteCommand = new RelayCommand(commandParameter => DeleteBeneficiary(commandParameter as Beneficiary));
+            ShowAddFormCommand = new RelayCommand(unusedParameter => ShowAddForm());
+            UseForTransferCommand = new RelayCommand(commandParameter => UseForTransfer(commandParameter as Beneficiary));
         }
         //Methods
         public async Task LoadAsync()
@@ -95,9 +95,9 @@ namespace BankingAppTeamB.ViewModels
             var data = beneficiaryService.GetByUser(currentUserId);
 
             Beneficiaries.Clear();
-            foreach (var item in data)
+            foreach (var beneficiary in data)
             {
-                Beneficiaries.Add(item);
+                Beneficiaries.Add(beneficiary);
             }
 
             await Task.CompletedTask;

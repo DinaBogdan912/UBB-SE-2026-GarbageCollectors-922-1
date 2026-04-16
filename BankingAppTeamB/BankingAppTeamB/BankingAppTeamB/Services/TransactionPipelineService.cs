@@ -12,8 +12,12 @@ namespace BankingAppTeamB.Services
 {
     public class TransactionPipelineService : ITransactionPipelineService
     {
+        private const int ExpectedCurrencyCodeLength = 3;
+        private const decimal TwoFaAmountThreshold = 1000m;
+
         private readonly ITransactionRepository transactionRepo;
         private readonly IAccountService accountService;
+        
 
 
         public TransactionPipelineService(ITransactionRepository transactionRepo, IAccountService accountService)
@@ -32,7 +36,7 @@ namespace BankingAppTeamB.Services
             if (ctx.Amount <= 0)
                 return ValidationResult.Failure("Amount must be greater than zero.");
 
-            if (ctx.Currency == null || ctx.Currency.Length != 3)
+            if (ctx.Currency == null || ctx.Currency.Length != ExpectedCurrencyCodeLength)
                 return ValidationResult.Failure("Currency code must be exactly 3 characters.");
 
             if (!accountService.IsAccountValid(ctx.SourceAccountId))
@@ -44,7 +48,7 @@ namespace BankingAppTeamB.Services
 
         public AuthResult Authorize(PipelineContext ctx, string? twoFAToken = null)
         {
-            if (ctx.Amount >= 1000 && string.IsNullOrWhiteSpace(twoFAToken))
+            if (ctx.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
                 return AuthResult.Failure("A 2FA token is required for transfers of 1000 or more.");
 
             return AuthResult.Success();

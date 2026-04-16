@@ -195,13 +195,13 @@ public class FXViewModel : ViewModelBase
         _ = LoadAccountsAsync();
     }
 
-    private void Cancel(object? _)
+    private void Cancel(object? unusedParameter)
     {
         _timer?.Stop();
         Reset(null);
     }
 
-    private void Reset(object? _)
+    private void Reset(object? unusedParameter)
     {
         _timer?.Stop();
         _timer = null;
@@ -230,7 +230,7 @@ public class FXViewModel : ViewModelBase
         AmountText = "";
     }
     
-    private Task ExecuteExchanges(object? _)
+    private Task ExecuteExchanges(object? unusedParameter)
     {
         try
         {
@@ -294,7 +294,7 @@ public class FXViewModel : ViewModelBase
     }
 
 
-    private Task LoadRatesAsync(object? _)
+    private Task LoadRatesAsync(object? unusedParameter)
     {
         try
         {
@@ -376,7 +376,7 @@ public class FXViewModel : ViewModelBase
             Interval = TimeSpan.FromSeconds(1)
         };
 
-        _timer.Tick += (s, e) =>
+        _timer.Tick += (timerSender, timerEventArgs) =>
         {
             SecondsRemaining = _lockedRate.SecondsRemaining();
 

@@ -10,6 +10,10 @@ namespace BankingAppTeamB.Services
 {
     public class ExchangeService : IExchangeService
     {
+        private const decimal CommissionRate = 0.005m;
+        private const decimal MinimumCommission = 0.50m;
+
+
         private readonly IExchangeRepository _exchangeRepository;
         private readonly ITransactionPipelineService _transactionPipelineService;
         private readonly IAccountService _accountService;
@@ -44,11 +48,11 @@ namespace BankingAppTeamB.Services
             };
 
             List<string> keys = new List<string>(rates.Keys);
-            foreach (string pair in keys)
+            foreach (string currencyPair in keys)
             {
-                string[] parts = pair.Split('/');
-                string inverseKey = $"{parts[1]}/{parts[0]}";
-                rates[inverseKey] = Math.Round(1 / rates[pair], 2);
+                string[] currencyComponents = currencyPair.Split('/');
+                string inverseKey = $"{currencyComponents[1]}/{currencyComponents[0]}";
+                rates[inverseKey] = Math.Round(1 / rates[currencyPair], 2);
             }
 
             _cachedRates = rates;
@@ -95,8 +99,8 @@ namespace BankingAppTeamB.Services
 
         public decimal CalculateCommission(decimal amount)
         {
-            decimal percentage = amount * 0.005m;
-            return Math.Max(0.50m, percentage);
+            decimal percentage = amount * CommissionRate;
+            return Math.Max(MinimumCommission, percentage);
         }
 
         public decimal CalculateTargetAmount(decimal sourceAmount, decimal rate)
