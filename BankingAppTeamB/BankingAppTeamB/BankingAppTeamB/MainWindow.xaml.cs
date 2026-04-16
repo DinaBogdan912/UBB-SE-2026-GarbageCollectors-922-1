@@ -16,17 +16,23 @@ namespace BankingAppTeamB
 
         private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            if (NavigationService.Frame == null) return;
+            if (NavigationService.Frame == null)
+            {
+                return;
+            }
 
             var item = args.SelectedItem as NavigationViewItem;
-            if (item == null) return;
+            if (item == null)
+            {
+                return;
+            }
 
             switch (item.Tag?.ToString())
             {
                 case NavigationTags.Transfer: NavigationService.NavigateTo<TransferPage>(); break;
                 case NavigationTags.Beneficiaries: NavigationService.NavigateTo<BeneficiariesPage>(); break;
                 case NavigationTags.Bill: NavigationService.NavigateTo<BillPayPage>(); break;
-                case NavigationTags.Reccurring: NavigationService.NavigateTo<RecurringPaymentsPage>(); break;
+                case NavigationTags.Recurring: NavigationService.NavigateTo<RecurringPaymentsPage>(); break;
                 case NavigationTags.Exchange: NavigationService.NavigateTo<FXPage>(); break;
                 case NavigationTags.Alerts: NavigationService.NavigateTo<RateAlertsPage>(); break;
             }
