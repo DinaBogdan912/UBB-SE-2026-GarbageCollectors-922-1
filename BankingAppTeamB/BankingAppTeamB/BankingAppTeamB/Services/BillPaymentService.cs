@@ -8,8 +8,6 @@ namespace BankingAppTeamB.Services
 {
     public class BillPaymentService : IBillPaymentService
     {
-
-
         private const int SmallPaymentThreshold = 100;
         private const float SmallPaymentFee = 0.50f;
         private const float StandardPaymentFee = 1.00f;
@@ -33,7 +31,9 @@ namespace BankingAppTeamB.Services
         public List<Biller> GetBillerDirectory(string? category)
         {
             if (category == null)
+            {
                 return billPaymentRepository.GetAllBillers(isActive: true);
+            }
 
             return billPaymentRepository.SearchBillers(string.Empty, category, isActive: true);
         }
