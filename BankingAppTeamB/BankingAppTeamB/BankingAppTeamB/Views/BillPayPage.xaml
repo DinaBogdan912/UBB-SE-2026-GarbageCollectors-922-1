@@ -130,6 +130,7 @@
                              Text="{Binding BillerReference, Mode=TwoWay}" />
 
                     <NumberBox x:Name="AmountBox"
+                               Value="{x:Bind ViewModel.AmountAsDouble, Mode=TwoWay}"
                                Header="Amount"
                                Minimum="0"
                                SmallChange="1"

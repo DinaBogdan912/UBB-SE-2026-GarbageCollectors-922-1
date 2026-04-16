@@ -7,6 +7,7 @@ using BankingAppTeamB.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using BankingAppTeamB.Configuration;
 
 public class TransferViewModel : ViewModelBase
 {
@@ -191,7 +192,7 @@ public class TransferViewModel : ViewModelBase
     {
         try
         {
-            var userAccounts = UserSession.GetAccounts();
+            var userAccounts = ServiceLocator.UserSessionService.GetAccounts();
 
             Accounts.Clear();
 
@@ -272,7 +273,7 @@ public class TransferViewModel : ViewModelBase
 
             var dto = new TransferDto
             {
-                UserId = UserSession.CurrentUserId,
+                UserId = ServiceLocator.UserSessionService.CurrentUserId,
                 SourceAccountId = SelectedAccount.Id,
                 RecipientName = RecipientName,
                 RecipientIBAN = RecipientIBAN,

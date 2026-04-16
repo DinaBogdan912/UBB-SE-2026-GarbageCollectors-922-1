@@ -17,7 +17,6 @@ namespace BankingAppTeamB.Views
             InitializeComponent();
             ViewModel = new BillPayViewModel(ServiceLocator.BillPaymentService);
             DataContext = ViewModel;
-            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -66,21 +65,6 @@ namespace BankingAppTeamB.Views
                 ViewModel.Amount = 0;
             }
         }
-
-        private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(BillPayViewModel.Amount))
-            {
-                if (AmountBox != null)
-                {
-                    double newValue = Convert.ToDouble(ViewModel.Amount);
-
-                    if (AmountBox.Value != newValue)
-                    {
-                        AmountBox.Value = newValue;
-                    }
-                }
-            }
-        }
+        
     }
 }

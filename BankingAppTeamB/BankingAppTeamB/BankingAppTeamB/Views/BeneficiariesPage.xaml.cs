@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using BankingAppTeamB.Configuration;
 
 namespace BankingAppTeamB.Views
 {
@@ -14,7 +15,7 @@ namespace BankingAppTeamB.Views
         public BeneficiariesPage()
         {
             InitializeComponent();
-            DataContext = new BeneficiariesViewModel(new BeneficiaryService(new BeneficiaryRepository()));
+            DataContext = new BeneficiariesViewModel(ServiceLocator.BeneficiaryService);
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)

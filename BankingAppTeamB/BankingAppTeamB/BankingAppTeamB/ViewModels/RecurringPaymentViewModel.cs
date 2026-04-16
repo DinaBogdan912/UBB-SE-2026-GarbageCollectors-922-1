@@ -15,6 +15,7 @@ namespace BankingAppTeamB.ViewModels
     public class RecurringPaymentViewModel : ViewModelBase
     {
         private readonly IRecurringPaymentService _recurringPaymentService;
+        private readonly IBillPaymentService _billPaymentService;
 
         private ObservableCollection<RecurringPayment> _payments;
         private RecurringPayment? _selectedPayment;
@@ -33,12 +34,13 @@ namespace BankingAppTeamB.ViewModels
 
         private ObservableCollection<RecurringFrequency> _frequencies;
 
-        public RecurringPaymentViewModel(IRecurringPaymentService recurringPaymentService)
+        public RecurringPaymentViewModel(IRecurringPaymentService recurringPaymentService, IBillPaymentService billPaymentService)
         {
             _recurringPaymentService = recurringPaymentService;
+            _billPaymentService = billPaymentService;
 
             _payments = new ObservableCollection<RecurringPayment>();
-            _accounts = new ObservableCollection<Account>(UserSession.GetAccounts());
+            _accounts = new ObservableCollection<Account>(ServiceLocator.UserSessionService.GetAccounts());
             _billers = new ObservableCollection<Biller>();
             _frequencies = new ObservableCollection<RecurringFrequency>
             {
@@ -113,11 +115,18 @@ namespace BankingAppTeamB.ViewModels
                 if (SetProperty(ref _errorMessage, value))
                 {
                     OnPropertyChanged(nameof(HasError));
+                    OnPropertyChanged(nameof(ErrorMessageVisibility));
                 }
             }
         }
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+        // Compute error visibility here as a property to bind the xaml to it
+        // (avoid view logic here)
+        public Microsoft.UI.Xaml.Visibility ErrorMessageVisibility => HasError ? 
+            Microsoft.UI.Xaml.Visibility.Visible : 
+            Microsoft.UI.Xaml.Visibility.Collapsed;
 
         public ObservableCollection<Account> Accounts
         {
@@ -167,10 +176,10 @@ namespace BankingAppTeamB.ViewModels
                 ErrorMessage = string.Empty;
 
                 var payments = await Task.Run(() =>
-                    _recurringPaymentService.GetByUser(UserSession.CurrentUserId));
+                    _recurringPaymentService.GetByUser(ServiceLocator.UserSessionService.CurrentUserId));
 
                 var billers = await Task.Run(() =>
-                    ServiceLocator.BillPaymentService.GetBillerDirectory(null));
+                    _billPaymentService.GetBillerDirectory(null));
 
                 Payments = new ObservableCollection<RecurringPayment>(payments);
                 Billers = new ObservableCollection<Biller>(billers);
@@ -233,7 +242,7 @@ namespace BankingAppTeamB.ViewModels
 
                 var dto = new RecurringPaymentDto
                 {
-                    UserId = UserSession.CurrentUserId,
+                    UserId = ServiceLocator.UserSessionService.CurrentUserId,
                     BillerId = SelectedBiller.Id,
                     SourceAccountId = SelectedAccount.Id,
                     Amount = Amount,

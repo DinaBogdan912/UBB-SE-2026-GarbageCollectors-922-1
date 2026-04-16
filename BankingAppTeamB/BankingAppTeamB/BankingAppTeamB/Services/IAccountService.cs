@@ -1,4 +1,4 @@
-﻿namespace BankingAppTeamB.Mocks
+﻿namespace BankingAppTeamB.Services
 {
     public interface IAccountService
     {

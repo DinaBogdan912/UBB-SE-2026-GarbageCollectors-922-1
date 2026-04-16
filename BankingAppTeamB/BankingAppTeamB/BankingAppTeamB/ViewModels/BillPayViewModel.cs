@@ -10,6 +10,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using BankingAppTeamB.Configuration;
+
 
 namespace BankingAppTeamB.ViewModels
 {
@@ -161,6 +163,12 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        public double AmountAsDouble
+        {
+            get => (double)_amount;
+            set => Amount = (decimal)value;
+        }
+
         public bool IsPayInFull
         {
             get => _isPayInFull;
@@ -250,7 +258,7 @@ namespace BankingAppTeamB.ViewModels
                 var directory = await Task.Run(() => _billPaymentService.GetBillerDirectory(null));
                 Billers = new ObservableCollection<Biller>(directory);
 
-                var saved = await Task.Run(() => _billPaymentService.GetSavedBillers(UserSession.CurrentUserId));
+                var saved = await Task.Run(() => _billPaymentService.GetSavedBillers(ServiceLocator.UserSessionService.CurrentUserId));
                 SavedBillers = new ObservableCollection<SavedBiller>(saved);
 
                 Accounts = new ObservableCollection<Account>(UserSession.GetAccounts());
@@ -421,7 +429,7 @@ namespace BankingAppTeamB.ViewModels
 
                 var dto = new BillPaymentDto
                 {
-                    UserId = UserSession.CurrentUserId,
+                    UserId = ServiceLocator.UserSessionService.CurrentUserId,
                     SourceAccountId = SelectedAccount.Id,
                     BillerId = SelectedBiller.Id,
                     BillerReference = BillerReference,
@@ -441,7 +449,7 @@ namespace BankingAppTeamB.ViewModels
                     if (!alreadySaved)
                     {
                         await Task.Run(() => _billPaymentService.SaveBiller(
-                            UserSession.CurrentUserId,
+                            ServiceLocator.UserSessionService.CurrentUserId,
                             SelectedBiller.Id,
                             BillerReference,
                             SelectedBiller.Name));

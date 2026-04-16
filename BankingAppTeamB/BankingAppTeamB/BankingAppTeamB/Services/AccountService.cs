@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace BankingAppTeamB.Mocks
+namespace BankingAppTeamB.Services
 {
     public class AccountService : IAccountService
     {
