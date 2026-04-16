@@ -81,8 +81,6 @@ namespace BankingAppTeamB.Tests.Services
             act.Should().NotThrow();
         }
 
-        // ── CheckAndNotifyDuePayments ────────────────────────────────────────
-
         [Fact]
         public void CheckAndNotifyDuePayments_DoesNotThrow_WithEmptyList()
         {
@@ -257,7 +255,6 @@ namespace BankingAppTeamB.Tests.Services
             {
                 ["USD/RON"] = 4.6m,
                 ["EUR/RON"] = 5.2m
-                // GBP/RON  - intentionally missing
             };
 
             Action act = () => sut.CheckAndNotifyRateAlerts(alerts, rates);

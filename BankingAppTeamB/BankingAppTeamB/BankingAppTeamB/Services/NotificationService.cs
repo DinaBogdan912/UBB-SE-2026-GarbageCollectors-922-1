@@ -16,10 +16,6 @@ namespace BankingAppTeamB.Services
                              $"Ref: {transfer.Id} at {transfer.CreatedAt:yyyy-MM-dd HH:mm:ss}";
 
             Log(message);
-
-            // TODO: replace with real email/toast delivery
-            // EmailService.Send(transfer.UserId, "Transfer Completed", message);
-            // ToastService.Push(transfer.UserId, message);
         }
 
         public void NotifyBeneficiaryStatsUpdated(Beneficiary beneficiary, decimal amountSent)
@@ -31,8 +27,6 @@ namespace BankingAppTeamB.Services
                              $"Transfer count: {beneficiary.TransferCount}.";
 
             Log(message);
-
-            // TODO: replace with real email/toast delivery
         }
 
         public void NotifyRateAlertTriggered(RateAlert alert, decimal currentRate)
@@ -43,8 +37,6 @@ namespace BankingAppTeamB.Services
                              $"(your target was {alert.TargetRate}).";
 
             Log(message);
-
-            // TODO: replace with real email/toast delivery
         }
 
         public void NotifyRecurringPaymentDue(RecurringPayment payment)
@@ -55,8 +47,6 @@ namespace BankingAppTeamB.Services
                              $"Status: {payment.Status}.";
 
             Log(message);
-
-            // TODO: replace with real email/toast delivery
         }
 
         public void CheckAndNotifyDuePayments(List<RecurringPayment> payments, TimeSpan warningWindow)
