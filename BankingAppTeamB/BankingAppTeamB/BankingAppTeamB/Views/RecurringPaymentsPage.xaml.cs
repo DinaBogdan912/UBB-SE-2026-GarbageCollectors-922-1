@@ -16,7 +16,7 @@ namespace BankingAppTeamB.Views
         {
             InitializeComponent();
 
-            _viewModel = new RecurringPaymentViewModel(ServiceLocator.RecurringPaymentService);
+            _viewModel = new RecurringPaymentViewModel(ServiceLocator.RecurringPaymentService, ServiceLocator.BillPaymentService);
             DataContext = _viewModel;
 
             StartDatePicker.Date = DateTimeOffset.Now;

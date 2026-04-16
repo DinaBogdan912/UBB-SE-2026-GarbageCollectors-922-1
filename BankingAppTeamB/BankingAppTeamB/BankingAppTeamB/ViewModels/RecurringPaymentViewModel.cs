@@ -15,6 +15,7 @@ namespace BankingAppTeamB.ViewModels
     public class RecurringPaymentViewModel : ViewModelBase
     {
         private readonly IRecurringPaymentService _recurringPaymentService;
+        private readonly IBillPaymentService _billPaymentService;
 
         private ObservableCollection<RecurringPayment> _payments;
         private RecurringPayment? _selectedPayment;
@@ -33,9 +34,10 @@ namespace BankingAppTeamB.ViewModels
 
         private ObservableCollection<RecurringFrequency> _frequencies;
 
-        public RecurringPaymentViewModel(IRecurringPaymentService recurringPaymentService)
+        public RecurringPaymentViewModel(IRecurringPaymentService recurringPaymentService, IBillPaymentService billPaymentService)
         {
             _recurringPaymentService = recurringPaymentService;
+            _billPaymentService = billPaymentService;
 
             _payments = new ObservableCollection<RecurringPayment>();
             _accounts = new ObservableCollection<Account>(UserSession.GetAccounts());
@@ -177,7 +179,7 @@ namespace BankingAppTeamB.ViewModels
                     _recurringPaymentService.GetByUser(UserSession.CurrentUserId));
 
                 var billers = await Task.Run(() =>
-                    ServiceLocator.BillPaymentService.GetBillerDirectory(null));
+                    _billPaymentService.GetBillerDirectory(null));
 
                 Payments = new ObservableCollection<RecurringPayment>(payments);
                 Billers = new ObservableCollection<Biller>(billers);
