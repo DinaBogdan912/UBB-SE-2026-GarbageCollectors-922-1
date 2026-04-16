@@ -1,3 +1,4 @@
+using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Services;
 using BankingAppTeamB.Views;
 using Microsoft.UI.Xaml;
@@ -22,12 +23,12 @@ namespace BankingAppTeamB
 
             switch (item.Tag?.ToString())
             {
-                case "transfer": NavigationService.NavigateTo<TransferPage>(); break;
-                case "beneficiaries": NavigationService.NavigateTo<BeneficiariesPage>(); break;
-                case "bill": NavigationService.NavigateTo<BillPayPage>(); break;
-                case "recurring": NavigationService.NavigateTo<RecurringPaymentsPage>(); break;
-                case "exchange": NavigationService.NavigateTo<FXPage>(); break;
-                case "alerts": NavigationService.NavigateTo<RateAlertsPage>(); break;
+                case NavigationTags.Transfer: NavigationService.NavigateTo<TransferPage>(); break;
+                case NavigationTags.Beneficiaries: NavigationService.NavigateTo<BeneficiariesPage>(); break;
+                case NavigationTags.Bill: NavigationService.NavigateTo<BillPayPage>(); break;
+                case NavigationTags.Reccurring: NavigationService.NavigateTo<RecurringPaymentsPage>(); break;
+                case NavigationTags.Exchange: NavigationService.NavigateTo<FXPage>(); break;
+                case NavigationTags.Alerts: NavigationService.NavigateTo<RateAlertsPage>(); break;
             }
         }
     }

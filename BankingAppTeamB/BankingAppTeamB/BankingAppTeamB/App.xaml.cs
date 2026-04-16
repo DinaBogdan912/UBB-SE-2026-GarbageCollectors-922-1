@@ -23,6 +23,7 @@ namespace BankingAppTeamB
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"DB error: {ex.Message}");
+                throw new InvalidOperationException($"Database initialization failed: {ex.Message}", ex);
             }
 
             try
@@ -32,6 +33,7 @@ namespace BankingAppTeamB
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"ServiceLocator error: {ex.Message}");
+                throw new InvalidOperationException($"ServiceLocator initialization failed: {ex.Message}", ex); 
             }
 
             _window = new MainWindow();

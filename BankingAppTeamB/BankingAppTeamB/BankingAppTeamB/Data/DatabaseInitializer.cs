@@ -30,7 +30,7 @@ namespace BankingAppTeamB.Data
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception($"Script failed: {Path.GetFileName(script)} — {ex.Message}");
+                    throw new InvalidOperationException($"Failed to execute script '{script}': {ex.Message}", ex);
                 }
             }
         }
