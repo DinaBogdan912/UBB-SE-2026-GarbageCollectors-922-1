@@ -190,7 +190,13 @@ namespace BankingAppTeamB.Tests.Services
 
             recurringRepoMock.Setup(r => r.GetDueBefore(It.IsAny<DateTime>()))
                 .Returns(new List<RecurringPayment> { active, paused });
-            billPaymentServiceMock.Setup(b => b.PayBill(It.IsAny<BillPaymentDto>()));
+            billPaymentServiceMock
+                .Setup(b => b.PayBill(It.IsAny<BillPaymentDto>()))
+                .Returns(new BillPayment
+                {
+                    BillerReference = string.Empty,
+                    ReceiptNumber = "test-receipt"
+                });
             recurringRepoMock.Setup(r => r.Update(It.IsAny<RecurringPayment>()));
 
             service.ProcessDuePayments();
@@ -211,7 +217,13 @@ namespace BankingAppTeamB.Tests.Services
 
             recurringRepoMock.Setup(r => r.GetDueBefore(It.IsAny<DateTime>()))
                 .Returns(new List<RecurringPayment> { payment });
-            billPaymentServiceMock.Setup(b => b.PayBill(It.IsAny<BillPaymentDto>()));
+            billPaymentServiceMock
+                .Setup(b => b.PayBill(It.IsAny<BillPaymentDto>()))
+                .Returns(new BillPayment
+                {
+                    BillerReference = string.Empty,
+                    ReceiptNumber = "test-receipt"
+                });
             recurringRepoMock.Setup(r => r.Update(It.IsAny<RecurringPayment>()));
 
             service.ProcessDuePayments();

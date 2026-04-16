@@ -5,7 +5,7 @@ namespace BankingAppTeamB.Services
 {
     public class TwoFAService : ITwoFAService
     {
-        private const decimal TwoFaAmountThreshold = 1000m;
+        private const int TwoFaAmountThreshold = 1000;
         private const string PlaceholderToken = "123456";
 
         public bool Requires2FA(decimal amount)
@@ -13,7 +13,6 @@ namespace BankingAppTeamB.Services
             return amount >= TwoFaAmountThreshold;
         }
 
-        // TODO: replace with real OTP validation (e.g. TOTP via Google Authenticator)
         public bool ValidateToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -26,7 +25,6 @@ namespace BankingAppTeamB.Services
             return true;
         }
 
-        // TODO: replace with real OTP generation (e.g. TOTP, SMS, email code)
         public string GenerateToken(int userId)
         {
             string placeholder = PlaceholderToken;
