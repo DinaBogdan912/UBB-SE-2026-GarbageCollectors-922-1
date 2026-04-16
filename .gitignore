@@ -54,7 +54,7 @@ project.nuget.cache
 
 # App environment
 /BankingAppTeamB/BankingAppTeamB/BankingAppTeamB/appsettings.json
-/BankingAppTeamB/BankingAppTeamB.Tests/coveragereport"
+/BankingAppTeamB.Tests/coveragereport
 
 # Test output
 TestResults/
