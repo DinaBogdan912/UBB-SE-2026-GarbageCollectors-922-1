@@ -1,4 +1,5 @@
 using BankingAppTeamB.Configuration;
+using BankingAppTeamB.Mocks;
 using BankingAppTeamB.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -25,18 +26,21 @@ namespace BankingAppTeamB.Views
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class RateAlertsPage : Page
-    {   
-        public RateAlertViewModel ViewModel => (RateAlertViewModel) DataContext;
+    {
+        public RateAlertViewModel ViewModel => (RateAlertViewModel)DataContext;
+
         public RateAlertsPage()
         {
             InitializeComponent();
-            this.DataContext = new RateAlertViewModel(ServiceLocator.ExchangeService, 0);
+
+            // Initialize the view model with the active session's user ID so alerts are loaded for the current user.
+            this.DataContext = new RateAlertViewModel(ServiceLocator.ExchangeService, ServiceLocator.UserSessionService.CurrentUserId);
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if(ViewModel != null)
+            if (ViewModel != null)
             {
                 await ViewModel.LoadAsync();
             }
