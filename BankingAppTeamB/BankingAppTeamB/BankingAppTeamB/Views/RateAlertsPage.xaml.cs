@@ -27,7 +27,7 @@ namespace BankingAppTeamB.Views
     /// </summary>
     public sealed partial class RateAlertsPage : Page
     {
-        public RateAlertViewModel ViewModel => (RateAlertViewModel) DataContext;
+        public RateAlertViewModel ViewModel => (RateAlertViewModel)DataContext;
 
         public RateAlertsPage()
         {
