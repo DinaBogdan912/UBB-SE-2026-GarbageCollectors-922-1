@@ -45,14 +45,14 @@ namespace BankingAppTeamB.Tests.Services
             var result = service.ComputeNextRunDate(RecurringFrequency.BiWeekly, from);
             Assert.Equal(new DateTime(2026, 1, 15), result);
         }
-
+            
         [Fact]
         public void ComputeNextRunDate_Monthly_AddsOneMonth()
-        {
+            {
             var from = new DateTime(2026, 1, 1);
             var result = service.ComputeNextRunDate(RecurringFrequency.Monthly, from);
             Assert.Equal(new DateTime(2026, 2, 1), result);
-        }
+            }
 
         [Fact]
         public void ComputeNextRunDate_Quarterly_AddsThreeMonths()
@@ -61,7 +61,7 @@ namespace BankingAppTeamB.Tests.Services
             var result = service.ComputeNextRunDate(RecurringFrequency.Quarterly, from);
             Assert.Equal(new DateTime(2026, 4, 1), result);
         }
-
+        
         [Fact]
         public void ComputeNextRunDate_Yearly_AddsOneYear()
         {
@@ -69,19 +69,19 @@ namespace BankingAppTeamB.Tests.Services
             var result = service.ComputeNextRunDate(RecurringFrequency.Yearly, from);
             Assert.Equal(new DateTime(2027, 1, 1), result);
         }
-
+            
         [Fact]
         public void ComputeNextRunDate_UnknownFrequency_ThrowsArgumentOutOfRangeException()
-        {
+            {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 service.ComputeNextRunDate((RecurringFrequency)999, new DateTime(2026, 1, 1)));
         }
 
         [Fact]
         public void Create_ReturnsRepositoryAddResult()
-        {
+                {
             var dto = new RecurringPaymentDto
-            {
+                    {
                 UserId = 1,
                 BillerId = 2,
                 SourceAccountId = 3,
@@ -101,18 +101,18 @@ namespace BankingAppTeamB.Tests.Services
             var result = service.Create(dto);
 
             Assert.Equal(42, result.Id);
-        }
+                    }
 
         [Fact]
         public void GetByUser_ReturnsRepositoryResult()
-        {
+                    {
             var expected = new List<RecurringPayment> { new RecurringPayment { Id = 1 } };
             recurringRepoMock.Setup(r => r.GetByUserId(7)).Returns(expected);
 
             var result = service.GetByUser(7);
 
             Assert.Single(result);
-        }
+                    }
 
         [Fact]
         public void Pause_WhenPaymentMissing_ThrowsInvalidOperationException()
@@ -120,7 +120,7 @@ namespace BankingAppTeamB.Tests.Services
             recurringRepoMock.Setup(r => r.GetById(9)).Returns((RecurringPayment)null);
 
             Assert.Throws<InvalidOperationException>(() => service.Pause(9));
-        }
+                }
 
         [Fact]
         public void Pause_WhenPaymentExists_UpdatesStatusToPaused()
@@ -130,7 +130,7 @@ namespace BankingAppTeamB.Tests.Services
             recurringRepoMock.Setup(r => r.Update(It.IsAny<RecurringPayment>()));
 
             service.Pause(9);
-
+            
             Assert.Equal(PaymentStatus.Paused, p.Status);
         }
 
@@ -141,10 +141,10 @@ namespace BankingAppTeamB.Tests.Services
 
             Assert.Throws<InvalidOperationException>(() => service.Resume(10));
         }
-
+            
         [Fact]
         public void Resume_WhenPaymentExists_UpdatesStatusToActive()
-        {
+            {
             var p = new RecurringPayment { Id = 10, Status = PaymentStatus.Paused };
             recurringRepoMock.Setup(r => r.GetById(10)).Returns(p);
             recurringRepoMock.Setup(r => r.Update(It.IsAny<RecurringPayment>()));
@@ -156,7 +156,7 @@ namespace BankingAppTeamB.Tests.Services
 
         [Fact]
         public void Cancel_WhenPaymentMissing_ThrowsInvalidOperationException()
-        {
+                {
             recurringRepoMock.Setup(r => r.GetById(11)).Returns((RecurringPayment)null);
 
             Assert.Throws<InvalidOperationException>(() => service.Cancel(11));
@@ -164,7 +164,7 @@ namespace BankingAppTeamB.Tests.Services
 
         [Fact]
         public void Cancel_WhenPaymentExists_UpdatesStatusToCancelled()
-        {
+                    {
             var p = new RecurringPayment { Id = 11, Status = PaymentStatus.Active };
             recurringRepoMock.Setup(r => r.GetById(11)).Returns(p);
             recurringRepoMock.Setup(r => r.Update(It.IsAny<RecurringPayment>()));
@@ -172,7 +172,7 @@ namespace BankingAppTeamB.Tests.Services
             service.Cancel(11);
 
             Assert.Equal(PaymentStatus.Cancelled, p.Status);
-        }
+                    }
 
         [Fact]
         public void ProcessDuePayments_ProcessesOnlyActivePayments()
@@ -184,7 +184,7 @@ namespace BankingAppTeamB.Tests.Services
                 NextExecutionDate = DateTime.UtcNow.AddMinutes(-1), Status = PaymentStatus.Active
             };
             var paused = new RecurringPayment
-            {
+                    {
                 Id = 2, Status = PaymentStatus.Paused, NextExecutionDate = DateTime.UtcNow.AddMinutes(-1)
             };
 
@@ -196,7 +196,7 @@ namespace BankingAppTeamB.Tests.Services
             service.ProcessDuePayments();
 
             billPaymentServiceMock.Verify(b => b.PayBill(It.IsAny<BillPaymentDto>()), Times.Once);
-        }
+                    }
 
         [Fact]
         public void ProcessDuePayments_OnSuccess_AdvancesNextExecutionDate()
@@ -217,7 +217,7 @@ namespace BankingAppTeamB.Tests.Services
             service.ProcessDuePayments();
 
             Assert.Equal(oldDate.AddDays(7), payment.NextExecutionDate);
-        }
+                }
 
         [Fact]
         public void ProcessDuePayments_OnPayBillException_SetsStatusFailed()
@@ -228,7 +228,7 @@ namespace BankingAppTeamB.Tests.Services
                 IsPayInFull = false, Frequency = RecurringFrequency.Daily,
                 NextExecutionDate = DateTime.UtcNow.AddMinutes(-30), Status = PaymentStatus.Active
             };
-
+            
             recurringRepoMock.Setup(r => r.GetDueBefore(It.IsAny<DateTime>()))
                 .Returns(new List<RecurringPayment> { payment });
             billPaymentServiceMock.Setup(b => b.PayBill(It.IsAny<BillPaymentDto>()))
