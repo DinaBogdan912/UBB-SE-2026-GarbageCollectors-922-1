@@ -84,7 +84,6 @@ public class ExchangeRepository : IExchangeRepository
         using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
         conn.Open();
 
-
         var query = @"
         SELECT * FROM RateAlert
         WHERE UserId = @UserId
@@ -136,7 +135,6 @@ public class ExchangeRepository : IExchangeRepository
             list.Add(MapAlert(reader));
         }
 
-
         return list;
     }
 
@@ -152,7 +150,6 @@ public class ExchangeRepository : IExchangeRepository
         VALUES (@UserId, @Base, @Target, @Rate, @IsTriggered, @IsBuyAlert, @CreatedAt)";
 
         using var cmd = new SqlCommand(query, conn);
-
 
         cmd.Parameters.AddWithValue("@UserId", alert.UserId);
         cmd.Parameters.AddWithValue("@Base", alert.BaseCurrency);
