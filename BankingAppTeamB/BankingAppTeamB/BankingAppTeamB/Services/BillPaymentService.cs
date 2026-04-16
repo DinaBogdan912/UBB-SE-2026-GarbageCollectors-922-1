@@ -8,10 +8,12 @@ namespace BankingAppTeamB.Services
 {
     public class BillPaymentService : IBillPaymentService
     {
-        private const decimal SmallPaymentThreshold = 100m;
-        private const decimal SmallPaymentFee = 0.50m;
-        private const decimal StandardPaymentFee = 1.00m;
-        private const decimal TwoFaAmountThreshold = 1000m;
+
+
+        private const int SmallPaymentThreshold = 100;
+        private const float SmallPaymentFee = 0.50f;
+        private const float StandardPaymentFee = 1.00f;
+        private const int TwoFaAmountThreshold = 1000;
 
         private readonly IBillPaymentRepository billPaymentRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -24,7 +26,8 @@ namespace BankingAppTeamB.Services
 
         public decimal CalculateFee(decimal amount)
         {
-            return amount <= SmallPaymentThreshold ? SmallPaymentFee : StandardPaymentFee;
+            var fee = amount <= SmallPaymentThreshold ? SmallPaymentFee : StandardPaymentFee;
+            return Convert.ToDecimal(fee);
         }
 
         public List<Biller> GetBillerDirectory(string? category)
@@ -71,7 +74,7 @@ namespace BankingAppTeamB.Services
 
         public bool Requires2FA(decimal amount)
         {
-            return amount >= TwoFaAmountThreshold;
+            return (float)amount >= TwoFaAmountThreshold;
         }
 
         private string GenerateReceiptId()
