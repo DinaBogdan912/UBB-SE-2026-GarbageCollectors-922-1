@@ -76,6 +76,13 @@ namespace BankingAppTeamB.Services
             return amount >= TwoFaAmountThreshold;
         }
 
+
+        private String GenerateReceiptId()
+        {
+            const int receiptSuffixLength = 6;
+            string uniqueSuffix = Guid.NewGuid().ToString("N")[..receiptSuffixLength].ToUpper();
+            return $"RCP-{DateTime.UtcNow:yyyyMMdd}-{uniqueSuffix}";
+        }
         public BillPayment PayBill(BillPaymentDto dto)
         {
             var biller = billPaymentRepository.GetBillerById(dto.BillerId);
@@ -99,7 +106,6 @@ namespace BankingAppTeamB.Services
 
             var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
 
-            string receiptNumber = $"RCP-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()}";
 
             var billPayment = new BillPayment
             {
@@ -110,7 +116,7 @@ namespace BankingAppTeamB.Services
                 BillerReference = dto.BillerReference,
                 Amount = dto.Amount,
                 Fee = fee,
-                ReceiptNumber = receiptNumber,
+                ReceiptNumber = GenerateReceiptId(),
                 Status = PaymentStatus.Completed,
                 CreatedAt = DateTime.UtcNow
             };

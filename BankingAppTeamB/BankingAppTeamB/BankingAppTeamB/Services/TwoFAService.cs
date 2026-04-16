@@ -5,6 +5,7 @@ namespace BankingAppTeamB.Services
 {
     public class TwoFAService : ITwoFAService
     {
+        const string TFA_PLACEHOLDER = "123456";
         public bool Requires2FA(decimal amount)
         {
             return amount >= 1000;
@@ -26,7 +27,7 @@ namespace BankingAppTeamB.Services
         // TODO: replace with real OTP generation (e.g. TOTP, SMS, email code)
         public string GenerateToken(int userId)
         {
-            string placeholder = "123456";
+            string placeholder = TFA_PLACEHOLDER;
             Debug.WriteLine($"[2FA] Placeholder token generated for userId={userId}: {placeholder}");
             return placeholder;
         }
