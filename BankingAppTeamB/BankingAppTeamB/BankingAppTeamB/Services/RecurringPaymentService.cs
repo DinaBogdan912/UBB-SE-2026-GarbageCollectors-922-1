@@ -27,7 +27,7 @@ namespace BankingAppTeamB.Services
             this.billPaymentService = billPaymentService;
         }
 
-        /// <summary>Returns the next execution date calculated by advancing <paramref name="from"/> by the interval corresponding to <paramref name="frequency"/>.</summary>
+        /// <summary>Figures out the next date this payment should run based on how often it repeats.</summary>
         public DateTime ComputeNextRunDate(RecurringFrequency frequency, DateTime from)
         {
             if (!Enum.IsDefined(typeof(RecurringFrequency), frequency))
@@ -44,7 +44,7 @@ namespace BankingAppTeamB.Services
                 RecurringFrequency.Yearly => from.AddYears(YearlyIntervalInYears)
             };
         }
-        /// <summary>Creates a new active recurring payment from the DTO, computes the first execution date, persists it, and returns the saved entity.</summary>
+        /// <summary>Builds a new recurring payment from the form data, sets it active, and saves it.</summary>
         public RecurringPayment Create(RecurringPaymentDto recurringPaymentDto)
         {
             var recurringPayment = new RecurringPayment
@@ -65,13 +65,13 @@ namespace BankingAppTeamB.Services
             return recurringPaymentRepository.Add(recurringPayment);
         }
 
-        /// <summary>Returns all recurring payments registered for <paramref name="userId"/>.</summary>
+        /// <summary>Gets all recurring payments that belong to a user.</summary>
         public List<RecurringPayment> GetByUser(int userId)
         {
             return recurringPaymentRepository.GetByUserId(userId);
         }
 
-        /// <summary>Fetches the recurring payment by <paramref name="id"/> and throws <see cref="InvalidOperationException"/> if it does not exist.</summary>
+        /// <summary>Tries to load a recurring payment by ID and throws a clear error if it is missing.</summary>
         private RecurringPayment GetRequiredRecurringPayment(int id)
         {
             try
@@ -85,7 +85,7 @@ namespace BankingAppTeamB.Services
             }
         }
 
-        /// <summary>Sets the status of the recurring payment with <paramref name="id"/> to <see cref="PaymentStatus.Paused"/> and persists the change.</summary>
+        /// <summary>Marks a recurring payment as paused and saves that change.</summary>
         public void Pause(int id)
         {
             var payment = GetRequiredRecurringPayment(id);
@@ -94,7 +94,7 @@ namespace BankingAppTeamB.Services
             recurringPaymentRepository.Update(payment);
         }
 
-        /// <summary>Reactivates a paused recurring payment by setting its status to <see cref="PaymentStatus.Active"/> and persisting the change.</summary>
+        /// <summary>Turns a paused recurring payment back on and saves it.</summary>
         public void Resume(int recurringPaymentId)
         {
             var payment = GetRequiredRecurringPayment(recurringPaymentId);
@@ -103,7 +103,7 @@ namespace BankingAppTeamB.Services
             recurringPaymentRepository.Update(payment);
         }
 
-        /// <summary>Sets the status of the recurring payment to <see cref="PaymentStatus.Cancelled"/> and persists the change.</summary>
+        /// <summary>Marks a recurring payment as cancelled so it stops running.</summary>
         public void Cancel(int recurringPaymentId)
         {
             var payment = GetRequiredRecurringPayment(recurringPaymentId);
@@ -112,7 +112,7 @@ namespace BankingAppTeamB.Services
             recurringPaymentRepository.Update(payment);
         }
 
-        /// <summary>Executes all active recurring payments whose <c>NextExecutionDate</c> is in the past, advances their next run date, and marks any payment that fails as <see cref="PaymentStatus.Failed"/>.</summary>
+        /// <summary>Runs every active payment that is due now, then moves its next run date or marks it failed.</summary>
         public void ProcessDuePayments()
         {
             var duePayments = recurringPaymentRepository.GetDueBefore(DateTime.UtcNow)
@@ -147,7 +147,7 @@ namespace BankingAppTeamB.Services
             }
         }
 
-        /// <summary>Returns active recurring payments whose next execution date falls within the next 24 hours, logging a debug notification for each.</summary>
+        /// <summary>Gets active payments due in the next 24 hours and logs a reminder for each one.</summary>
         public List<RecurringPayment> GetDueSoon()
         {
             var dueSoon = recurringPaymentRepository.GetDueBefore(DateTime.UtcNow.AddHours(DueSoonWarningHours))

@@ -16,19 +16,19 @@ namespace BankingAppTeamB.Services
             beneficiaryRepository = inputRepository;
         }
 
-        /// <summary>Returns all beneficiaries registered for <paramref name="userId"/>.</summary>
+        /// <summary>Gets everyone saved as a beneficiary for a specific user.</summary>
         public List<Beneficiary> GetByUser(int userId)
         {
             return beneficiaryRepository.GetByUserId(userId);
         }
 
-        /// <summary>Returns <see langword="true"/> when <paramref name="iban"/> passes the structural IBAN validation rules.</summary>
+        /// <summary>Checks if an IBAN has the right format.</summary>
         public bool ValidateIBAN(string iban)
         {
             return IbanValidator.Validate(iban);
         }
 
-        /// <summary>Validates the IBAN and name, checks for duplicates, then creates and persists a new beneficiary for <paramref name="userId"/>.</summary>
+        /// <summary>Validates the IBAN and name, makes sure it's not a duplicate, then saves the new beneficiary.</summary>
         public Beneficiary Add(string name, string iban, int userId)
         {
             if (!ValidateIBAN(iban))
@@ -59,7 +59,7 @@ namespace BankingAppTeamB.Services
             return newBeneficiary;
         }
 
-        /// <summary>Validates that the beneficiary name is not empty, then persists the updated beneficiary.</summary>
+        /// <summary>Makes sure the name isn't empty and saves the changes.</summary>
         public void Update(Beneficiary beneficiary)
         {
             if (string.IsNullOrWhiteSpace(beneficiary.Name))
@@ -70,13 +70,13 @@ namespace BankingAppTeamB.Services
             beneficiaryRepository.Update(beneficiary);
         }
 
-        /// <summary>Permanently removes the beneficiary identified by <paramref name="beneficiaryId"/>.</summary>
+        /// <summary>Permanently removes a beneficiary — can't undo this.</summary>
         public void Delete(int beneficiaryId)
         {
             beneficiaryRepository.Delete(beneficiaryId);
         }
 
-        /// <summary>Creates a pre-populated <see cref="TransferDto"/> from the beneficiary's name and IBAN, ready to pass to the transfer flow.</summary>
+        /// <summary>Builds a ready-to-use transfer object from a beneficiary's info.</summary>
         public TransferDto BuildTransferDtoFrom(Beneficiary beneficiary, int sourceAccountId, int userId)
         {
             return new TransferDto
@@ -88,7 +88,7 @@ namespace BankingAppTeamB.Services
             };
         }
 
-        /// <summary>Overload used internally (e.g. from tests) to add a beneficiary with an explicit bank name.</summary>
+        /// <summary>Same as Add but also lets you set the bank name — mostly used in tests.</summary>
         internal object Add(string name, string iban, string bankName, int userId)
         {
             if (!ValidateIBAN(iban))

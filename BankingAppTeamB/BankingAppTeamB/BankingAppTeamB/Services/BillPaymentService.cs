@@ -24,13 +24,13 @@ namespace BankingAppTeamB.Services
             this.transactionPipelineService = transactionPipelineService;
         }
 
-        /// <summary>Returns the service fee for a bill payment: €0.50 for amounts ≤ €100, otherwise €1.00.</summary>
+        /// <summary>Works out the fee - up to 100 costs 0.50, above that costs 1.00.</summary>
         public decimal CalculateFee(decimal amount)
         {
             return amount <= SmallPaymentThreshold ? SmallPaymentFee : StandardPaymentFee;
         }
 
-        /// <summary>Returns all active billers; if <paramref name="category"/> is provided, filters to that category only.</summary>
+        /// <summary>Gets active billers, and if you pass a category it only returns that group.</summary>
         public List<Biller> GetBillerDirectory(string? category)
         {
             if (category == null)
@@ -41,25 +41,25 @@ namespace BankingAppTeamB.Services
             return billPaymentRepository.SearchBillers(string.Empty, category, isActive: true);
         }
 
-        /// <summary>Searches active billers by name containing <paramref name="query"/> across all categories.</summary>
+        /// <summary>Searches for active billers by name.</summary>
         public List<Biller> SearchBillers(string query)
         {
             return billPaymentRepository.SearchBillers(query, null, isActive: true);
         }
 
-        /// <summary>Searches active billers by name and optionally narrows results to <paramref name="category"/>.</summary>
+        /// <summary>Searches active billers by name and can narrow it to one category.</summary>
         public List<Biller> SearchBillers(string query, string? category)
         {
             return billPaymentRepository.SearchBillers(query ?? string.Empty, category, isActive: true);
         }
 
-        /// <summary>Returns the saved billers (with biller details) for the given user.</summary>
+        /// <summary>Gets the billers a user saved for quick payments.</summary>
         public List<SavedBiller> GetSavedBillers(int userId)
         {
             return billPaymentRepository.GetSavedBillers(userId);
         }
 
-        /// <summary>Persists a biller as a favourite for <paramref name="userId"/> so it can be selected quickly on future payments.</summary>
+        /// <summary>Saves a biller to the user's favorites list.</summary>
         public void SaveBiller(int userId, int billerId, string? nickname, string? defaultReference)
         {
             var savedBiller = new SavedBiller
@@ -74,19 +74,19 @@ namespace BankingAppTeamB.Services
             billPaymentRepository.SaveBiller(savedBiller);
         }
 
-        /// <summary>Removes a previously saved biller by its <paramref name="savedBillerId"/>.</summary>
+        /// <summary>Removes a saved biller from favorites.</summary>
         public void RemoveSavedBiller(int savedBillerId)
         {
             billPaymentRepository.DeleteSavedBiller(savedBillerId);
         }
 
-        /// <summary>Returns <see langword="true"/> when <paramref name="amount"/> meets or exceeds the €1 000 threshold that mandates two-factor authentication.</summary>
+        /// <summary>Returns true when the amount is 1000 or more, so 2FA is needed.</summary>
         public bool Requires2FA(decimal amount)
         {
             return amount >= TwoFaAmountThreshold;
         }
 
-        /// <summary>Generates a unique receipt number in the format <c>RCP-yyyyMMdd-XXXXXX</c> where the suffix is the first 6 hex characters of a new GUID.</summary>
+        /// <summary>Creates a unique receipt number like RCP-20260421-ABC123.</summary>
         private string GenerateReceiptNumber()
         {
             const int receiptSuffixLength = ReceiptUniqueSuffixLength;
@@ -94,7 +94,7 @@ namespace BankingAppTeamB.Services
             return $"RCP-{DateTime.UtcNow:yyyyMMdd}-{uniqueSuffix}";
         }
 
-        /// <summary>Looks up the biller by <paramref name="billerId"/> and throws <see cref="InvalidOperationException"/> if it does not exist.</summary>
+        /// <summary>Loads a biller by ID and throws a clear error if it does not exist.</summary>
         private Biller GetRequiredBiller(int billerId)
         {
             try
@@ -108,7 +108,7 @@ namespace BankingAppTeamB.Services
             }
         }
 
-        /// <summary>Runs the full payment pipeline (validate → authorise → debit → log) for the bill described by <paramref name="dto"/>, then persists and returns the <see cref="BillPayment"/> record.</summary>
+        /// <summary>Handles the full bill payment flow - validates biller, calculates fee, runs pipeline, and saves payment.</summary>
         public BillPayment PayBill(BillPaymentDto dto)
         {
             var biller = GetRequiredBiller(dto.BillerId);

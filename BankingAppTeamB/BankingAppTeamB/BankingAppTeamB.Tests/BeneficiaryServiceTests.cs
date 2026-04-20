@@ -82,7 +82,7 @@ public class BeneficiaryServiceTests
 
         // Assert
         addAction.Should().Throw<ArgumentException>().WithMessage("Invalid IBAN format.");
-        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Never);
+        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
     }
 
     [Fact]

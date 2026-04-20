@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace BankingAppTeamB.Commands
 {
-    /// <summary>An <see cref="ICommand"/> that wraps an async delegate and prevents re-entrant execution while a previous invocation is still running.</summary>
+    /// <summary>A command that runs async stuff and won't let you spam-click it while it's already running.</summary>
     public class AsyncRelayCommand : ICommand
     {
         private readonly Func<object?, Task> executeAsyncAction;
@@ -12,25 +12,25 @@ namespace BankingAppTeamB.Commands
 
         public event EventHandler? CanExecuteChanged;
 
-        /// <summary>Initialises the command with the async delegate to invoke on execution.</summary>
+        /// <summary>Sets it up with the async thing it's supposed to do.</summary>
         public AsyncRelayCommand(Func<object?, Task> executeAsyncAction)
         {
             this.executeAsyncAction = executeAsyncAction;
         }
 
-        /// <summary>Returns <see langword="false"/> while a previous execution is still in progress, preventing re-entrant calls.</summary>
+        /// <summary>Says no if it's already busy, so you can't start it twice.</summary>
         public bool CanExecute(object? parameter)
         {
             return !isExecutionInProgress;
         }
 
-        /// <summary>Fires and forgets <see cref="ExecuteAsync"/>; required by <see cref="ICommand"/>.</summary>
+        /// <summary>Starts the async version without waiting for it to finish.</summary>
         public void Execute(object? parameter)
         {
            var executeAsync = ExecuteAsync(parameter);
         }
 
-        /// <summary>Runs the wrapped async delegate, disabling the command for the duration and re-enabling it when finished.</summary>
+        /// <summary>Actually runs the async function and disables itself the whole time so nothing weird happens.</summary>
         public async Task ExecuteAsync(object? parameter)
         {
             isExecutionInProgress = true;
@@ -47,7 +47,7 @@ namespace BankingAppTeamB.Commands
             }
         }
 
-        /// <summary>Raises <see cref="CanExecuteChanged"/> to prompt the UI to re-query <see cref="CanExecute"/>.</summary>
+        /// <summary>Tells the UI to check again whether the button should be clickable or not.</summary>
         public void RaiseCanExecuteChanged()
         {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);

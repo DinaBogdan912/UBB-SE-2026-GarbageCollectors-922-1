@@ -8,7 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class BeneficiaryRepository : IBeneficiaryRepository
     {
-        /// <summary>Inserts a new beneficiary row and writes the generated identity back to <paramref name="beneficiary"/>.<see cref="Beneficiary.Id"/>.</summary>
+        /// <summary>Adds a new beneficiary row to the database and sets the new ID on the object.</summary>
         public void Add(Beneficiary beneficiary)
         {
             string sqlQuery = @"
@@ -39,7 +39,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        /// <summary>Returns the beneficiary with the given <paramref name="beneficiaryId"/>; throws <see cref="KeyNotFoundException"/> if not found.</summary>
+        /// <summary>Gets one beneficiary by ID or throws if it is not found.</summary>
         public Beneficiary GetById(int beneficiaryId)
         {
             string sqlQuery = "SELECT * FROM Beneficiaries WHERE Id = @Id";
@@ -63,7 +63,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Beneficiary with ID {beneficiaryId} was not found.");
         }
 
-        /// <summary>Returns all beneficiaries belonging to <paramref name="userId"/>, ordered alphabetically by name.</summary>
+        /// <summary>Gets all beneficiaries for one user, sorted by name.</summary>
         public List<Beneficiary> GetByUserId(int userId)
         {
             string sqlQuery = "SELECT * FROM Beneficiaries WHERE UserId = @UserId ORDER BY Name ASC";
@@ -88,7 +88,7 @@ namespace BankingAppTeamB.Repositories
             return beneficiaries;
         }
 
-        /// <summary>Updates the mutable fields (name, IBAN, bank name, transfer statistics) of an existing beneficiary row.</summary>
+        /// <summary>Updates an existing beneficiary's editable info and transfer stats.</summary>
         public void Update(Beneficiary beneficiary)
         {
             string sqlQuery = @"
@@ -118,7 +118,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        /// <summary>Permanently removes the beneficiary row with the given <paramref name="beneficiaryId"/>.</summary>
+        /// <summary>Deletes a beneficiary by ID.</summary>
         public void Delete(int beneficiaryId)
         {
             string sqlQuery = "DELETE FROM Beneficiaries WHERE Id = @Id";
@@ -134,7 +134,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        /// <summary>Returns <see langword="true"/> when a beneficiary with the given <paramref name="iban"/> already exists for <paramref name="userId"/>.</summary>
+        /// <summary>Checks if this user already has a beneficiary with the same IBAN.</summary>
         public bool ExistsByIBAN(int userId, string iban)
         {
             const int noRecordsFound = 0;
@@ -152,7 +152,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        /// <summary>Hydrates a <see cref="Beneficiary"/> from the current row of <paramref name="reader"/>.</summary>
+        /// <summary>Builds a Beneficiary object from the current database row.</summary>
         private Beneficiary MapBeneficiary(SqlDataReader reader)
         {
             return new Beneficiary

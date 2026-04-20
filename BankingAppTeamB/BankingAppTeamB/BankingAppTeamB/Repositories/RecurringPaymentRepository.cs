@@ -8,7 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class RecurringPaymentRepository : IRecurringPaymentRepository
     {
-        /// <summary>Inserts a new recurring payment row, writes the generated identity back, and returns the updated entity.</summary>
+        /// <summary>Adds a recurring payment record, sets its new ID, and returns it.</summary>
         public RecurringPayment Add(RecurringPayment recurringPayment)
         {
             string sqlQuery = @"
@@ -43,7 +43,7 @@ namespace BankingAppTeamB.Repositories
             return recurringPayment;
         }
 
-        /// <summary>Returns the recurring payment with the given <paramref name="recurringPaymentId"/>; throws <see cref="KeyNotFoundException"/> if not found.</summary>
+        /// <summary>Gets one recurring payment by ID or throws if it is missing.</summary>
         public RecurringPayment? GetById(int recurringPaymentId)
         {
             string sqlQuery = "SELECT * FROM RecurringPayment WHERE Id = @Id";
@@ -67,7 +67,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Recurring payment with ID {recurringPaymentId} was not found.");
         }
 
-        /// <summary>Returns all recurring payments belonging to <paramref name="userId"/>, ordered by next execution date ascending.</summary>
+        /// <summary>Gets all recurring payments for a user, sorted by next run date.</summary>
         public List<RecurringPayment> GetByUserId(int userId)
         {
             string sqlQuery = @"
@@ -95,7 +95,7 @@ namespace BankingAppTeamB.Repositories
             return recurringPayments;
         }
 
-        /// <summary>Returns all recurring payments whose <c>NextExecutionDate</c> is on or before <paramref name="dueBeforeDateTime"/>, ordered ascending.</summary>
+        /// <summary>Gets recurring payments due on or before a specific date and time.</summary>
         public List<RecurringPayment> GetDueBefore(DateTime dueBeforeDateTime)
         {
             string sqlQuery = @"
@@ -123,7 +123,7 @@ namespace BankingAppTeamB.Repositories
             return dueRecurringPayments;
         }
 
-        /// <summary>Updates mutable fields (amount, frequency, dates, status) of an existing recurring payment row.</summary>
+        /// <summary>Updates an existing recurring payment's editable fields.</summary>
         public void Update(RecurringPayment recurringPayment)
         {
             string sqlQuery = @"
@@ -156,7 +156,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        /// <summary>Permanently removes the recurring payment row with the given <paramref name="recurringPaymentId"/>.</summary>
+        /// <summary>Deletes a recurring payment by ID.</summary>
         public void Delete(int recurringPaymentId)
         {
             string sqlQuery = "DELETE FROM RecurringPayment WHERE Id = @Id";
@@ -172,7 +172,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        /// <summary>Hydrates a <see cref="RecurringPayment"/> from the current row of <paramref name="reader"/>.</summary>
+        /// <summary>Builds a RecurringPayment object from the current database row.</summary>
         private RecurringPayment MapRecurringPayment(SqlDataReader reader)
         {
             return new RecurringPayment
