@@ -20,7 +20,7 @@ namespace BankingAppTeamB.Commands
 
         public void Execute(object? parameter)
         {
-            _ = ExecuteAsync(parameter);
+           var executeAsync = ExecuteAsync(parameter);
         }
 
         public async Task ExecuteAsync(object? parameter)

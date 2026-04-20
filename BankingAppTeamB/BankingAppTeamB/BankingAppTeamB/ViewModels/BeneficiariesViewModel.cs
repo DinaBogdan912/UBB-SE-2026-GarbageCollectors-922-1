@@ -16,10 +16,8 @@ namespace BankingAppTeamB.ViewModels
 
         private readonly IBeneficiaryService beneficiaryService;
 
-        // Hardcoded for this example.
         private readonly int currentUserId = 1;
 
-        // Backing Fields
         private ObservableCollection<Beneficiary> beneficiaries = new ObservableCollection<Beneficiary>();
         private Beneficiary? selectedBeneficiary;
         private string newName = string.Empty;
@@ -28,7 +26,6 @@ namespace BankingAppTeamB.ViewModels
         private string errorMessage = string.Empty;
         private bool isAddFormVisible;
 
-        // Properties
         public ObservableCollection<Beneficiary> Beneficiaries
         {
             get => beneficiaries;
@@ -70,31 +67,27 @@ namespace BankingAppTeamB.ViewModels
             get => isAddFormVisible;
             set => SetProperty(ref isAddFormVisible, value);
         }
-
-        // Commands
         public AsyncRelayCommand AddCommand { get; }
         public RelayCommand DeleteCommand { get; }
         public RelayCommand ShowAddFormCommand { get; }
         public RelayCommand UseForTransferCommand { get; }
 
-        // Constructor
         public BeneficiariesViewModel(IBeneficiaryService beneficiaryService)
         {
             this.beneficiaryService = beneficiaryService;
 
-            // Initialize Commands
-            AddCommand = new AsyncRelayCommand(_ => AddBeneficiaryAsync());
+            AddCommand = new AsyncRelayCommand(commandParameter => AddBeneficiaryAsync());
             DeleteCommand = new RelayCommand(commandParameter => DeleteBeneficiary(commandParameter as Beneficiary));
-            ShowAddFormCommand = new RelayCommand(_ => ShowAddForm());
+            ShowAddFormCommand = new RelayCommand(commandParameter => ShowAddForm());
             UseForTransferCommand = new RelayCommand(commandParameter => UseForTransfer(commandParameter as Beneficiary));
         }
-        // Methods
+
         public async Task LoadAsync()
         {
-            var data = beneficiaryService.GetByUser(currentUserId);
+            List<Beneficiary> beneficiaries = beneficiaryService.GetByUser(currentUserId);
 
             Beneficiaries.Clear();
-            foreach (var beneficiary in data)
+            foreach (Beneficiary beneficiary in beneficiaries)
             {
                 Beneficiaries.Add(beneficiary);
             }
@@ -117,9 +110,9 @@ namespace BankingAppTeamB.ViewModels
 
                 await LoadAsync();
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException argumentException)
             {
-                ErrorMessage = ex.Message;
+                ErrorMessage = argumentException.Message;
             }
             catch (Exception)
             {

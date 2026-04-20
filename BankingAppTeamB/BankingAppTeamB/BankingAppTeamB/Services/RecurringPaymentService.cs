@@ -29,6 +29,10 @@ namespace BankingAppTeamB.Services
 
         public DateTime ComputeNextRunDate(RecurringFrequency frequency, DateTime from)
         {
+            if (!Enum.IsDefined(typeof(RecurringFrequency), frequency))
+            {
+                 throw new ArgumentOutOfRangeException(nameof(frequency), $"Unknown frequency: {frequency}");
+            }
             return frequency switch
             {
                 RecurringFrequency.Daily => from.AddDays(DailyIntervalInDays),
@@ -36,11 +40,9 @@ namespace BankingAppTeamB.Services
                 RecurringFrequency.BiWeekly => from.AddDays(BiweeklyIntervalInDays),
                 RecurringFrequency.Monthly => from.AddMonths(MonthlyIntervalInMonths),
                 RecurringFrequency.Quarterly => from.AddMonths(QuarterlyIntervalInMonths),
-                RecurringFrequency.Yearly => from.AddYears(YearlyIntervalInYears),
-                _ => throw new ArgumentOutOfRangeException(nameof(frequency), $"Unknown frequency: {frequency}")
+                RecurringFrequency.Yearly => from.AddYears(YearlyIntervalInYears)
             };
         }
-
         public RecurringPayment Create(RecurringPaymentDto recurringPaymentDto)
         {
             var recurringPayment = new RecurringPayment
@@ -128,11 +130,11 @@ namespace BankingAppTeamB.Services
                     payment.NextExecutionDate = ComputeNextRunDate(payment.Frequency, payment.NextExecutionDate);
                     recurringPaymentRepository.Update(payment);
                 }
-                catch (Exception ex)
+                catch (Exception paymentException)
                 {
                     payment.Status = PaymentStatus.Failed;
                     recurringPaymentRepository.Update(payment);
-                    Debug.WriteLine($"[RecurringPaymentService] Payment ID {payment.Id} failed: {ex.Message}");
+                    Debug.WriteLine($"[RecurringPaymentService] Payment ID {payment.Id} failed: {paymentException.Message}");
                 }
             }
         }

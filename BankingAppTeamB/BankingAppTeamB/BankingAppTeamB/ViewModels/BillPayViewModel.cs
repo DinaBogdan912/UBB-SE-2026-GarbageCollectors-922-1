@@ -23,7 +23,9 @@ namespace BankingAppTeamB.ViewModels
         private const int PaymentResultStep = 5;
         private const int MinimumTwoFactorToken = 100000;
         private const int MaximumTwoFactorTokenExclusive = 1000000;
-
+        private const int MinimumBillers = 0;
+        private const int MinimumAmount = 0;
+        private const int NoFee = 0;
         private readonly IBillPaymentService billPaymentService;
 
         private int currentStep;
@@ -229,7 +231,7 @@ namespace BankingAppTeamB.ViewModels
             set => SetProperty(ref shouldSaveBiller, value);
         }
 
-        public bool HasSavedBillers => SavedBillers != null && SavedBillers.Count > 0;
+        public bool HasSavedBillers => SavedBillers != null && SavedBillers.Count > MinimumBillers;
 
         public Visibility SavedBillersVisibility =>
             HasSavedBillers ? Visibility.Visible : Visibility.Collapsed;
@@ -241,7 +243,7 @@ namespace BankingAppTeamB.ViewModels
             SelectedBiller?.Name ?? "No biller selected";
 
         public string ReviewAmountText =>
-            Amount > 0 ? $"{Amount:0.00} RON" : "No amount entered";
+            Amount > MinimumAmount ? $"{Amount:0.00} RON" : "No amount entered";
 
         public string ReviewFeeText =>
             $"{Fee:0.00} RON";
@@ -265,17 +267,17 @@ namespace BankingAppTeamB.ViewModels
                 ErrorMessage = string.Empty;
                 ResetFormStateOnly();
 
-                var directory = await Task.Run(() => billPaymentService.GetBillerDirectory(null));
-                Billers = new ObservableCollection<Biller>(directory);
+                var billersDirectory = await Task.Run(() => billPaymentService.GetBillerDirectory(null));
+                Billers = new ObservableCollection<Biller>(billersDirectory);
 
-                var saved = await Task.Run(() => billPaymentService.GetSavedBillers(ServiceLocator.UserSessionService.CurrentUserId));
-                SavedBillers = new ObservableCollection<SavedBiller>(saved);
+                var savedBillers = await Task.Run(() => billPaymentService.GetSavedBillers(ServiceLocator.UserSessionService.CurrentUserId));
+                SavedBillers = new ObservableCollection<SavedBiller>(savedBillers);
 
                 Accounts = new ObservableCollection<Account>(UserSession.GetAccounts());
             }
-            catch (Exception ex)
+            catch (Exception loadException)
             {
-                ErrorMessage = $"Failed to load data: {ex.Message}";
+                ErrorMessage = $"Failed to load data: {loadException.Message}";
             }
         }
 
@@ -291,9 +293,9 @@ namespace BankingAppTeamB.ViewModels
 
                 Billers = new ObservableCollection<Biller>(results);
             }
-            catch (Exception ex)
+            catch (Exception searchException)
             {
-                ErrorMessage = $"Search failed: {ex.Message}";
+                ErrorMessage = $"Search failed: {searchException.Message}";
             }
         }
 
@@ -357,7 +359,7 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                if (Amount <= 0)
+                if (Amount <= MinimumAmount)
                 {
                     ErrorMessage = "Please enter a valid amount.";
                     return;
@@ -431,13 +433,13 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                if (Amount <= 0)
+                if (Amount <= MinimumAmount)
                 {
                     ErrorMessage = "Please enter a valid amount.";
                     return;
                 }
 
-                var dto = new BillPaymentDto
+                var billPaymentDto = new BillPaymentDto
                 {
                     UserId = ServiceLocator.UserSessionService.CurrentUserId,
                     SourceAccountId = SelectedAccount.Id,
@@ -448,7 +450,7 @@ namespace BankingAppTeamB.ViewModels
                     TwoFAToken = Requires2FA ? TwoFAToken : null
                 };
 
-                var result = await Task.Run(() => billPaymentService.PayBill(dto));
+                var billPayment = await Task.Run(() => billPaymentService.PayBill(billPaymentDto));
 
                 if (ShouldSaveBiller)
                 {
@@ -476,13 +478,13 @@ namespace BankingAppTeamB.ViewModels
                     }
                 }
 
-                ReceiptNumber = result.ReceiptNumber;
-                Fee = result.Fee;
+                ReceiptNumber = billPayment.ReceiptNumber;
+                Fee = billPayment.Fee;
                 CurrentStep = PaymentResultStep;
             }
-            catch (Exception ex)
+            catch (Exception paymentException)
             {
-                ErrorMessage = $"Payment failed: {ex.Message}";
+                ErrorMessage = $"Payment failed: {paymentException.Message}";
             }
         }
 
@@ -499,8 +501,8 @@ namespace BankingAppTeamB.ViewModels
             SearchQuery = string.Empty;
             SelectedCategory = null;
             BillerReference = string.Empty;
-            Amount = 0;
-            Fee = 0;
+            Amount = MinimumAmount;
+            Fee = NoFee;
             ReceiptNumber = string.Empty;
             SelectedAccount = null;
             IsPayInFull = false;
@@ -512,7 +514,7 @@ namespace BankingAppTeamB.ViewModels
 
         private void ApplySavedDefaultsForSelectedBiller()
         {
-            if (SelectedBiller == null || SavedBillers == null || SavedBillers.Count == 0)
+            if (SelectedBiller == null || SavedBillers == null || SavedBillers.Count == MinimumBillers)
             {
                 return;
             }
@@ -527,10 +529,10 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object? objectEntity)
         {
-            return obj is BillPayViewModel model &&
-                   isPayInFull == model.isPayInFull;
+            return objectEntity is BillPayViewModel billPayViewModel &&
+                   isPayInFull == billPayViewModel.isPayInFull;
         }
 
         public override int GetHashCode()

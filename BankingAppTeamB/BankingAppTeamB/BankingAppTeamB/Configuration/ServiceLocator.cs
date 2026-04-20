@@ -25,7 +25,6 @@ public static class ServiceLocator
     private static IRecurringPaymentService recurringPaymentService = new RecurringPaymentService(recurringPaymentRepository, billPaymentService);
     private static IBeneficiaryService beneficiaryService = new BeneficiaryService(beneficiaryRepository);
 
-    // mock
     private static readonly Timer RecurringSchedulerTimer = new Timer(RecurringSchedulerIntervalMilliseconds)
     {
         AutoReset = true

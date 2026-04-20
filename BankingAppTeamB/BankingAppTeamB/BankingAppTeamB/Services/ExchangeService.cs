@@ -14,6 +14,22 @@ namespace BankingAppTeamB.Services
         private const int ExchangeRatePrecisionDecimals = 2;
         private const int BaseCurrencyComponentIndex = 0;
         private const int TargetCurrencyComponentIndex = 1;
+        private const int CacheDurationSeconds = 30;
+        private const string EurUsdPair = "EUR/USD";
+        private const string EurGbpPair = "EUR/GBP";
+        private const string EurRonPair = "EUR/RON";
+        private const string UsdRonPair = "USD/RON";
+        private const string GbpRonPair = "GBP/RON";
+
+        private const decimal EurUsdSeedRate = 1.15m;
+        private const decimal EurGbpSeedRate = 0.86m;
+        private const decimal EurRonSeedRate = 5.09m;
+        private const decimal UsdRonSeedRate = 4.41m;
+        private const decimal GbpRonSeedRate = 5.90m;
+
+        private const decimal NoFee = 0m;
+        private const int NoRelatedEntityId = 0;
+        private const decimal MinimumAllowedRate = 0m;
 
         private readonly IExchangeRepository exchangeRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -23,7 +39,7 @@ namespace BankingAppTeamB.Services
         private DateTime ratesLastFetched;
 
         private readonly Dictionary<int, LockedRate> lockedRates = new Dictionary<int, LockedRate>();
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(CacheDurationSeconds);
 
         public ExchangeService(IExchangeRepository exchangeRepository,
             ITransactionPipelineService transactionPipelineService,
@@ -36,11 +52,11 @@ namespace BankingAppTeamB.Services
 
         private static Dictionary<string, decimal> GetSeedExchangeRates() => new ()
         {
-            { "EUR/USD", 1.15m },
-            { "EUR/GBP", 0.86m },
-            { "EUR/RON", 5.09m },
-            { "USD/RON", 4.41m },
-            { "GBP/RON", 5.90m }
+            { EurUsdPair, EurUsdSeedRate },
+            { EurGbpPair, EurGbpSeedRate },
+            { EurRonPair, EurRonSeedRate },
+            { UsdRonPair, UsdRonSeedRate },
+            { GbpRonPair, GbpRonSeedRate }
         };
 
         public Dictionary<string, decimal> GetLiveRates()
@@ -140,10 +156,10 @@ namespace BankingAppTeamB.Services
                 Amount = exchangeDto.SourceAmount,
                 Currency = exchangeDto.SourceCurrency,
                 Type = "Exchange",
-                Fee = 0,
+                Fee = NoFee,
                 CounterpartyName = $"Exchange to {exchangeDto.TargetCurrency}",
                 RelatedEntityType = "Exchange",
-                RelatedEntityId = 0
+                RelatedEntityId = NoRelatedEntityId
             };
 
             Transaction transactionLog = transactionPipelineService.RunPipeline(context);
@@ -199,7 +215,7 @@ namespace BankingAppTeamB.Services
                 throw new ArgumentException("Source currency cannot be the same as target currency.");
             }
 
-            if (rate <= 0)
+            if (rate <= MinimumAllowedRate)
             {
                 throw new ArgumentException("Rate cannot be zero or negative.");
             }
