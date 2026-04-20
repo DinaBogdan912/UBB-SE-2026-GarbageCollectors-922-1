@@ -97,7 +97,7 @@ public class BeneficiaryServiceTests
 
         // Assert
         addAction.Should().Throw<ArgumentException>().WithMessage("Name cannot be empty");
-        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Never);
+        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
     }
 
     [Fact]
@@ -111,14 +111,14 @@ public class BeneficiaryServiceTests
             new Beneficiary { IBAN = ValidIban }
         };
 
-        mockRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(existingBeneficiaries);
+        mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(existingBeneficiaries);
 
         // Act
         Action addAction = () => service.Add(DefaultName, ValidIban, DefaultUserId);
 
         // Assert
         addAction.Should().Throw<ArgumentException>().WithMessage("A beneficiary with this IBAN already exists for this user.");
-        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Never);
+        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
     }
 
     [Fact]
@@ -128,8 +128,8 @@ public class BeneficiaryServiceTests
         var mockRepository = new Mock<IBeneficiaryRepository>();
         var service = new BeneficiaryService(mockRepository.Object);
 
-        mockRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
-        mockRepository.Setup(r => r.Add(It.IsAny<Beneficiary>()));
+        mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
+        mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()));
 
         var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
@@ -142,7 +142,7 @@ public class BeneficiaryServiceTests
         result.Name.Should().Be(DefaultName);
         result.IBAN.Should().Be(ValidIban);
         result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
-        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Once);
+        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Once);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class BeneficiaryServiceTests
 
         // Assert
         updateAction.Should().Throw<ArgumentException>().WithMessage("Beneficiary name cannot be empty.");
-        mockRepository.Verify(r => r.Update(It.IsAny<Beneficiary>()), Times.Never);
+        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Update(It.IsAny<Beneficiary>()), Times.Never);
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class BeneficiaryServiceTests
         service.Update(beneficiary);
 
         // Assert
-        mockRepository.Verify(r => r.Update(beneficiary), Times.Once);
+        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Update(beneficiary), Times.Once);
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class BeneficiaryServiceTests
         service.Delete(DefaultBeneficiaryId);
 
         // Assert
-        mockRepository.Verify(r => r.Delete(DefaultBeneficiaryId), Times.Once);
+        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Delete(DefaultBeneficiaryId), Times.Once);
     }
 
     [Fact]
