@@ -7,7 +7,7 @@ namespace BankingAppTeamB.Commands
     public class AsyncRelayCommand : ICommand
     {
         private readonly Func<object?, Task> executeAsyncAction;
-        private bool isExecuting;
+        private bool isExecutionInProgress;
 
         public event EventHandler? CanExecuteChanged;
 
@@ -16,7 +16,10 @@ namespace BankingAppTeamB.Commands
             this.executeAsyncAction = executeAsyncAction;
         }
 
-        public bool CanExecute(object? parameter) => !isExecuting;
+        public bool CanExecute(object? parameter)
+        {
+            return !isExecutionInProgress;
+        }
 
         public void Execute(object? parameter)
         {
@@ -25,20 +28,23 @@ namespace BankingAppTeamB.Commands
 
         public async Task ExecuteAsync(object? parameter)
         {
-            isExecuting = true;
+            isExecutionInProgress = true;
             RaiseCanExecuteChanged();
+
             try
             {
                 await executeAsyncAction(parameter);
             }
             finally
             {
-                isExecuting = false;
+                isExecutionInProgress = false;
                 RaiseCanExecuteChanged();
             }
         }
 
         public void RaiseCanExecuteChanged()
-            => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

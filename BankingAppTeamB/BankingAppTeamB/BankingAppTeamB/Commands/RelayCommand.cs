@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Input;
 
 namespace BankingAppTeamB.Commands
@@ -17,12 +17,18 @@ namespace BankingAppTeamB.Commands
         }
 
         public bool CanExecute(object? parameter)
-            => canExecutePredicate == null || canExecutePredicate(parameter);
+        {
+            return canExecutePredicate == null || canExecutePredicate(parameter);
+        }
 
         public void Execute(object? parameter)
-            => executeAction(parameter);
+        {
+            executeAction(parameter);
+        }
 
         public void RaiseCanExecuteChanged()
-            => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

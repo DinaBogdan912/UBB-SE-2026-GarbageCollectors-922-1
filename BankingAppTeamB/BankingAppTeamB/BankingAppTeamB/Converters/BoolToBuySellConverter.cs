@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.UI.Xaml;
+using System;
 using Microsoft.UI.Xaml.Data;
 
 namespace BankingAppTeamB.Converters
@@ -11,9 +10,9 @@ namespace BankingAppTeamB.Converters
 
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value is bool isBuy)
+            if (value is bool isBuyAction)
             {
-                return isBuy ? BuyLabel : SellLabel;
+                return isBuyAction ? BuyLabel : SellLabel;
             }
 
             return SellLabel;
@@ -21,7 +20,8 @@ namespace BankingAppTeamB.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            return value?.ToString() == BuyLabel;
+            string actionLabel = value?.ToString() ?? string.Empty;
+            return actionLabel == BuyLabel;
         }
     }
 }

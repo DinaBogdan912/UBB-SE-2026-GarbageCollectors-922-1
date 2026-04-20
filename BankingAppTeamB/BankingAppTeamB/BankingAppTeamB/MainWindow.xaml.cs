@@ -21,7 +21,7 @@ namespace BankingAppTeamB
                 return;
             }
 
-            var selectedNavigationItem = selectionChangedEventArgs.SelectedItem as NavigationViewItem;
+            NavigationViewItem? selectedNavigationItem = args.SelectedItem as NavigationViewItem;
             if (selectedNavigationItem == null)
             {
                 return;
@@ -31,10 +31,10 @@ namespace BankingAppTeamB
             {
                 case NavigationTags.Transfer: NavigationService.NavigateTo<TransferPage>(); break;
                 case NavigationTags.Beneficiaries: NavigationService.NavigateTo<BeneficiariesPage>(); break;
-                case NavigationTags.Bill: NavigationService.NavigateTo<BillPayPage>(); break;
-                case NavigationTags.Recurring: NavigationService.NavigateTo<RecurringPaymentsPage>(); break;
-                case NavigationTags.Exchange: NavigationService.NavigateTo<FXPage>(); break;
-                case NavigationTags.Alerts: NavigationService.NavigateTo<RateAlertsPage>(); break;
+                case NavigationTags.BillPayments: NavigationService.NavigateTo<BillPayPage>(); break;
+                case NavigationTags.RecurringPayments: NavigationService.NavigateTo<RecurringPaymentsPage>(); break;
+                case NavigationTags.ForeignExchange: NavigationService.NavigateTo<FXPage>(); break;
+                case NavigationTags.ExchangeRateAlerts: NavigationService.NavigateTo<RateAlertsPage>(); break;
             }
         }
     }
