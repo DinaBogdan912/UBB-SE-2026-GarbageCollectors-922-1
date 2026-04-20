@@ -20,10 +20,12 @@ public class TransferViewModel : ViewModelBase
     private const int TransferErrorStep = 7;
     private const int MinimumTwoFactorToken = 100000;
     private const int MaximumTwoFactorTokenExclusive = 1000000;
+    private const int MinimumAmount = 0;
     private const decimal ZeroAmount = 0m;
     private const decimal IdentityExchangeRate = 1m;
     private const string DefaultTransferCurrency = "EUR";
-
+    private const int MinimumAccounts = 0;
+    private const int FirstAccountIndex = 0;
     private readonly ITransferService transferService;
 
     public TransferViewModel(ITransferService transferService)
@@ -191,7 +193,7 @@ public class TransferViewModel : ViewModelBase
             }
             else
             {
-                Amount = 0;
+                Amount = MinimumAmount;
             }
         }
     }
@@ -216,15 +218,15 @@ public class TransferViewModel : ViewModelBase
                     Accounts.Add(account);
                 }
 
-                if (Accounts.Count > 0)
+                if (Accounts.Count > MinimumAccounts)
                 {
-                    SelectedAccount = Accounts[0];
+                    SelectedAccount = Accounts[FirstAccountIndex];
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception loadAccountsException)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = loadAccountsException.Message;
         }
     }
 
@@ -293,7 +295,7 @@ public class TransferViewModel : ViewModelBase
                 throw new Exception("No account selected.");
             }
 
-            var dto = new TransferDto
+            var transferDto = new TransferDto
             {
                 UserId = ServiceLocator.UserSessionService.CurrentUserId,
                 SourceAccountId = SelectedAccount.Id,
@@ -304,7 +306,7 @@ public class TransferViewModel : ViewModelBase
                 TwoFAToken = Requires2FA ? TwoFAToken : null
             };
 
-            var result = await Task.Run(() => transferService.ExecuteTransfer(dto));
+            var result = await Task.Run(() => transferService.ExecuteTransfer(transferDto));
 
             TransactionRef = result.TransactionId.HasValue
                 ? $"TXN-{result.CreatedAt:yyyyMMdd}-{result.TransactionId:D4}"
@@ -312,9 +314,9 @@ public class TransferViewModel : ViewModelBase
 
             CurrentStep = TransferCompletedStep;
         }
-        catch (Exception ex)
+        catch (Exception executeTransferException)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = executeTransferException.Message;
             CurrentStep = TransferErrorStep;
         }
     }
@@ -325,7 +327,7 @@ public class TransferViewModel : ViewModelBase
 
     private void ExecuteSendAgain()
     {
-        SelectedAccount = Accounts.Count > 0 ? Accounts[0] : null;
+        SelectedAccount = Accounts.Count > MinimumAccounts ? Accounts[FirstAccountIndex] : null;
         RecipientName = string.Empty;
         RecipientIBAN = string.Empty;
         IsIBANValid = false;
@@ -369,7 +371,7 @@ public class TransferViewModel : ViewModelBase
     {
         try
         {
-            if (SelectedAccount == null || Amount <= 0 || string.IsNullOrWhiteSpace(Currency))
+            if (SelectedAccount == null || Amount <= ZeroAmount || string.IsNullOrWhiteSpace(Currency))
             {
                 FxPreviewText = string.Empty;
                 return;

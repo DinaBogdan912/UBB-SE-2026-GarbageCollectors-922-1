@@ -28,9 +28,9 @@ namespace BankingAppTeamB.Data
                     using var command = new SqlCommand(scriptContent, connection);
                     command.ExecuteNonQuery();
                 }
-                catch (Exception ex)
+                catch (Exception executeScriptException)
                 {
-                    throw new InvalidOperationException($"Failed to execute script '{script}': {ex.Message}", ex);
+                    throw new InvalidOperationException($"Failed to execute script '{script}': {executeScriptException.Message}", executeScriptException);
                 }
             }
         }

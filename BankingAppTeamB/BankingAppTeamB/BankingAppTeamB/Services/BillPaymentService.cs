@@ -12,6 +12,8 @@ namespace BankingAppTeamB.Services
         private const decimal SmallPaymentFee = 0.50m;
         private const decimal StandardPaymentFee = 1.00m;
         private const decimal TwoFaAmountThreshold = 1000m;
+        private const int ReceiptUniqueSuffixLength = 6;
+        private const int NoRelatedEntityId = 0;
 
         private readonly IBillPaymentRepository billPaymentRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -78,7 +80,7 @@ namespace BankingAppTeamB.Services
 
         private string GenerateReceiptNumber()
         {
-            const int receiptSuffixLength = 6;
+            const int receiptSuffixLength = ReceiptUniqueSuffixLength;
             string uniqueSuffix = Guid.NewGuid().ToString("N")[..receiptSuffixLength].ToUpper();
             return $"RCP-{DateTime.UtcNow:yyyyMMdd}-{uniqueSuffix}";
         }
@@ -102,7 +104,7 @@ namespace BankingAppTeamB.Services
                 Fee = fee,
                 CounterpartyName = biller.Name,
                 RelatedEntityType = "BillPayment",
-                RelatedEntityId = 0
+                RelatedEntityId = NoRelatedEntityId
             };
 
             var transaction = transactionPipelineService.RunPipeline(context, billPaymentDto.TwoFAToken);

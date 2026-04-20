@@ -17,11 +17,16 @@ public class FXViewModel : ViewModelBase
     private const int InitialStep = 1;
     private const int LockedRateStep = 4;
     private const int ExchangeResultStep = 5;
-    private const int ZeroAmount = 0;
+    private const int SecondsRemainingDeadline = 0;
     private const decimal NoCommission = 0m;
     private const decimal EqualCurrencyRate = 1m;
     private const int CountdownTickSeconds = 1;
-
+    private const int MinimumAmount = 0;
+    private const int DefaultAmount = 0;
+    private const int DefaultLiveRate = 0;
+    private const int DefaultCommission = 0;
+    private const int DefaultSecondsRemaining = 0;
+    private const int DefaultTargetAmount = 0;
     private readonly IExchangeService exchangeService;
 
     private int currentStep;
@@ -115,11 +120,11 @@ public class FXViewModel : ViewModelBase
             {
                 if (decimal.TryParse(value, out var parsed))
                 {
-                    Amount = parsed;   // this will trigger Recalculate()
+                    Amount = parsed;
                 }
                 else
                 {
-                    Amount = 0;
+                    Amount = MinimumAmount;
                 }
             }
         }
@@ -165,12 +170,12 @@ public class FXViewModel : ViewModelBase
         set => SetProperty(ref isRateExpired, value);
     }
 
-    private string transactionRef = string.Empty;
+    private string transactionReference = string.Empty;
 
-    public string TransactionRef
+    public string TransactionReference
     {
-        get => transactionRef;
-        set => SetProperty(ref transactionRef, value);
+        get => transactionReference;
+        set => SetProperty(ref transactionReference, value);
     }
 
     private string errorMessage = string.Empty;
@@ -201,9 +206,7 @@ public class FXViewModel : ViewModelBase
         ExecuteExchangeCommand = new AsyncRelayCommand(ExecuteExchanges);
         CancelCommand = new RelayCommand(Cancel);
         NewExchangeCommand = new RelayCommand(Reset);
-
-        // Load mock accounts immediately
-        _ = LoadAccountsAsync();
+        var commandParameter = LoadAccountsAsync();
     }
 
     private void Cancel(object? unusedParameter)
@@ -227,12 +230,12 @@ public class FXViewModel : ViewModelBase
         SourceCurrency = string.Empty;
         TargetCurrency = string.Empty;
 
-        Amount = 0;
-        LiveRate = 0;
-        Commission = 0;
-        TargetAmount = 0;
+        Amount = DefaultAmount;
+        LiveRate = DefaultLiveRate;
+        Commission = DefaultCommission;
+        TargetAmount = DefaultTargetAmount;
 
-        SecondsRemaining = 0;
+        SecondsRemaining = DefaultSecondsRemaining;
         IsRateExpired = false;
 
         ErrorMessage = string.Empty;
@@ -265,7 +268,7 @@ public class FXViewModel : ViewModelBase
                 return Task.CompletedTask;
             }
 
-            var dto = new ExchangeDto
+            var exchangeDto = new ExchangeDto
             {
                 UserId = ServiceLocator.UserSessionService.CurrentUserId,
                 SourceAccountId = SourceAccount!.Id,
@@ -276,17 +279,16 @@ public class FXViewModel : ViewModelBase
                 LockedRate = lockedRate!.Rate
             };
 
-            var result = exchangeService.ExecuteExchange(dto);
+            var exchangeTransaction = exchangeService.ExecuteExchange(exchangeDto);
 
             timer?.Stop();
 
-            TransactionRef = $"TX-{result.Id}";
-
+            TransactionReference = $"TX-{exchangeTransaction.Id}";
             CurrentStep = ExchangeResultStep;
         }
-        catch (Exception ex)
+        catch (Exception executeChangesException)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = executeChangesException.Message;
         }
 
         return Task.CompletedTask;
@@ -318,9 +320,9 @@ public class FXViewModel : ViewModelBase
 
             LiveRate = exchangeService.GetRate(SourceCurrency, TargetCurrency);
         }
-        catch (Exception ex)
+        catch (Exception executeException)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = executeException.Message;
         }
 
         return Task.CompletedTask;
@@ -334,12 +336,11 @@ public class FXViewModel : ViewModelBase
 
             if (string.IsNullOrWhiteSpace(SourceCurrency) ||
                 string.IsNullOrWhiteSpace(TargetCurrency) ||
-                Amount <= 0)
+                Amount <= MinimumAmount)
             {
                 return;
             }
 
-            // Same currency shortcut
             if (SourceCurrency == TargetCurrency)
             {
                 LiveRate = EqualCurrencyRate;
@@ -352,17 +353,12 @@ public class FXViewModel : ViewModelBase
             Commission = exchangeService.CalculateCommission(Amount);
             TargetAmount = exchangeService.CalculateTargetAmount(Amount, LiveRate);
         }
-        catch (Exception ex)
+        catch (Exception recalculateException)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = recalculateException.Message;
         }
     }
-
-<<<<<<< FilipB-refactor-tests-repo-model
     private void LockRate(object? commandParameter)
-=======
-    private void LockRate(object? unusedParameter)
->>>>>>> main
     {
         try
         {
@@ -374,9 +370,9 @@ public class FXViewModel : ViewModelBase
 
             StartCountdownTimer();
         }
-        catch (Exception ex)
+        catch (Exception lockRateException)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = lockRateException.Message;
         }
     }
 
@@ -398,7 +394,7 @@ public class FXViewModel : ViewModelBase
         {
             SecondsRemaining = lockedRate.GetSecondsRemaining();
 
-            if (SecondsRemaining <= ZeroAmount)
+            if (SecondsRemaining <= SecondsRemainingDeadline)
             {
                 timer.Stop();
                 IsRateExpired = true;
