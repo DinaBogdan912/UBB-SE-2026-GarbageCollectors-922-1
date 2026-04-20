@@ -38,10 +38,10 @@ public class NotificationServiceTests
         };
 
         // Act
-        Action notifyAction = () => notificationService.NotifyTransferCompleted(transfer);
+        Action sendNotificationOperation = () => notificationService.NotifyTransferCompleted(transfer);
 
         // Assert
-        notifyAction.Should().NotThrow();
+        sendNotificationOperation.Should().NotThrow();
     }
 
     [Fact]
@@ -58,10 +58,10 @@ public class NotificationServiceTests
         };
 
         // Act
-        Action notifyAction = () => notificationService.NotifyBeneficiaryStatsUpdated(beneficiary, DefaultAmount);
+        Action sendNotificationOperation = () => notificationService.NotifyBeneficiaryStatsUpdated(beneficiary, DefaultAmount);
 
         // Assert
-        notifyAction.Should().NotThrow();
+        sendNotificationOperation.Should().NotThrow();
     }
 
     [Fact]
@@ -72,10 +72,10 @@ public class NotificationServiceTests
         var rateAlert = new RateAlert(DefaultUserId, BaseCurrency, TargetCurrency, TargetRate, false);
 
         // Act
-        Action notifyAction = () => notificationService.NotifyRateAlertTriggered(rateAlert, ReachedRate);
+        Action sendNotificationOperation = () => notificationService.NotifyRateAlertTriggered(rateAlert, ReachedRate);
 
         // Assert
-        notifyAction.Should().NotThrow();
+        sendNotificationOperation.Should().NotThrow();
     }
 
     [Fact]
@@ -91,10 +91,10 @@ public class NotificationServiceTests
         };
 
         // Act
-        Action notifyAction = () => notificationService.NotifyRecurringPaymentDue(recurringPayment);
+        Action sendNotificationOperation = () => notificationService.NotifyRecurringPaymentDue(recurringPayment);
 
         // Assert
-        notifyAction.Should().NotThrow();
+        sendNotificationOperation.Should().NotThrow();
     }
 
     [Fact]
@@ -111,10 +111,10 @@ public class NotificationServiceTests
         var payments = new List<RecurringPayment> { duePayment };
 
         // Act
-        Action checkAction = () => notificationService.CheckAndNotifyDuePayments(payments, warningWindow);
+        Action checkNotificationConditionsOperation = () => notificationService.CheckAndNotifyDuePayments(payments, warningWindow);
 
         // Assert
-        checkAction.Should().NotThrow();
+        checkNotificationConditionsOperation.Should().NotThrow();
     }
 
     [Fact]
@@ -133,9 +133,9 @@ public class NotificationServiceTests
         };
 
         // Act
-        Action checkAction = () => notificationService.CheckAndNotifyRateAlerts(alerts, liveRates);
+        Action checkNotificationConditionsOperation = () => notificationService.CheckAndNotifyRateAlerts(alerts, liveRates);
 
         // Assert
-        checkAction.Should().NotThrow();
+        checkNotificationConditionsOperation.Should().NotThrow();
     }
 }

@@ -31,14 +31,14 @@ public class TransferServiceTests
         var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
-        var transferDto = new TransferDto { RecipientIBAN = InvalidIban };
+        var transferRequest = new TransferDto { RecipientIBAN = InvalidIban };
 
         // Act
-        Action executeAction = () => service.ExecuteTransfer(transferDto);
+        Action executeTransferOperation = () => service.ExecuteTransfer(transferRequest);
 
         // Assert
-        executeAction.Should().Throw<InvalidOperationException>().WithMessage("Recipient IBAN is invalid.");
-        mockPipelineService.Verify(s => s.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
+        executeTransferOperation.Should().Throw<InvalidOperationException>().WithMessage("Recipient IBAN is invalid.");
+        mockPipelineService.Verify(mockServiceDependency => mockServiceDependency.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class TransferServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-        var transferDto = new TransferDto
+        var transferRequest = new TransferDto
         {
             UserId = DefaultUserId,
             SourceAccountId = DefaultSourceAccountId,
@@ -65,30 +65,30 @@ public class TransferServiceTests
         var expectedTransactionId = 123;
         var transaction = new Transaction { Id = expectedTransactionId };
 
-        mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), ValidTwoFaToken)).Returns(transaction);
-        mockBeneficiaryRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
+        mockPipelineService.Setup(mockServiceDependency => mockServiceDependency.RunPipeline(It.IsAny<PipelineContext>(), ValidTwoFaToken)).Returns(transaction);
+        mockBeneficiaryRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
 
         var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
         // Act
-        var result = service.ExecuteTransfer(transferDto);
+        var actualResult = service.ExecuteTransfer(transferRequest);
 
         // Assert
-        result.Should().NotBeNull();
-        result.UserId.Should().Be(DefaultUserId);
-        result.SourceAccountId.Should().Be(DefaultSourceAccountId);
-        result.TransactionId.Should().Be(expectedTransactionId);
-        result.RecipientName.Should().Be(RecipientName);
-        result.RecipientIBAN.Should().Be(ValidIbanRomanian);
-        result.RecipientBankName.Should().Be("Romanian Bank");
-        result.Amount.Should().Be(ValidAmount);
-        result.Currency.Should().Be(ValidCurrency);
-        result.Fee.Should().Be(0);
-        result.Reference.Should().Be(DefaultReference);
-        result.Status.Should().Be(TransferStatus.Completed);
-        result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
+        actualResult.Should().NotBeNull();
+        actualResult.UserId.Should().Be(DefaultUserId);
+        actualResult.SourceAccountId.Should().Be(DefaultSourceAccountId);
+        actualResult.TransactionId.Should().Be(expectedTransactionId);
+        actualResult.RecipientName.Should().Be(RecipientName);
+        actualResult.RecipientIBAN.Should().Be(ValidIbanRomanian);
+        actualResult.RecipientBankName.Should().Be("Romanian Bank");
+        actualResult.Amount.Should().Be(ValidAmount);
+        actualResult.Currency.Should().Be(ValidCurrency);
+        actualResult.Fee.Should().Be(0);
+        actualResult.Reference.Should().Be(DefaultReference);
+        actualResult.Status.Should().Be(TransferStatus.Completed);
+        actualResult.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
 
-        mockTransferRepository.Verify(r => r.Add(It.IsAny<Transfer>()), Times.Once);
+        mockTransferRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Transfer>()), Times.Once);
     }
 
     [Fact]
@@ -100,14 +100,14 @@ public class TransferServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-        var transferDto = new TransferDto
+        var transferRequest = new TransferDto
         {
             UserId = DefaultUserId,
             RecipientIBAN = ValidIbanRomanian,
             Amount = ValidAmount
         };
 
-        mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>())).Returns(new Transaction());
+        mockPipelineService.Setup(mockServiceDependency => mockServiceDependency.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>())).Returns(new Transaction());
 
         var existingBeneficiary = new Beneficiary
         {
@@ -116,15 +116,15 @@ public class TransferServiceTests
             TotalAmountSent = 100m
         };
 
-        mockBeneficiaryRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary> { existingBeneficiary });
+        mockBeneficiaryRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary> { existingBeneficiary });
 
         // Act
-        service.ExecuteTransfer(transferDto);
+        service.ExecuteTransfer(transferRequest);
 
         // Assert
         existingBeneficiary.TransferCount.Should().Be(2);
         existingBeneficiary.TotalAmountSent.Should().Be(100m + ValidAmount);
-        mockBeneficiaryRepository.Verify(r => r.Update(existingBeneficiary), Times.Once);
+        mockBeneficiaryRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Update(existingBeneficiary), Times.Once);
     }
 
     [Fact]
@@ -137,10 +137,10 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
         // Act
-        var result = service.ValidateIBAN(ValidIbanRomanian);
+        var actualResult = service.ValidateIBAN(ValidIbanRomanian);
 
         // Assert
-        result.Should().BeTrue();
+        actualResult.Should().BeTrue();
     }
 
     [Fact]
@@ -153,10 +153,10 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
         // Act
-        var result = service.ValidateIBAN(InvalidIban);
+        var actualResult = service.ValidateIBAN(InvalidIban);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
@@ -169,10 +169,10 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
         // Act
-        var result = service.GetBankNameFromIBAN(string.Empty);
+        var actualResult = service.GetBankNameFromIBAN(string.Empty);
 
         // Assert
-        result.Should().Be("Unknown Bank");
+        actualResult.Should().Be("Unknown Bank");
     }
 
     [Fact]
@@ -185,10 +185,10 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
         // Act
-        var result = service.GetBankNameFromIBAN(ValidIbanRomanian);
+        var actualResult = service.GetBankNameFromIBAN(ValidIbanRomanian);
 
         // Assert
-        result.Should().Be("Romanian Bank");
+        actualResult.Should().Be("Romanian Bank");
     }
 
     [Fact]
@@ -202,12 +202,12 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object, mockExchangeService.Object);
 
         // Act
-        var result = service.GetFxPreview("EUR", "EUR", ValidAmount);
+        var actualResult = service.GetFxPreview("EUR", "EUR", ValidAmount);
 
         // Assert
-        result.ExchangeRate.Should().Be(1m);
-        result.ConvertedAmount.Should().Be(ValidAmount);
-        mockExchangeService.Verify(s => s.GetLiveRates(), Times.Never);
+        actualResult.ExchangeRate.Should().Be(1m);
+        actualResult.ConvertedAmount.Should().Be(ValidAmount);
+        mockExchangeService.Verify(mockServiceDependency => mockServiceDependency.GetLiveRates(), Times.Never);
     }
 
     [Fact]
@@ -220,11 +220,11 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object); // null exchange service
 
         // Act
-        var result = service.GetFxPreview("EUR", "USD", ValidAmount);
+        var actualResult = service.GetFxPreview("EUR", "USD", ValidAmount);
 
         // Assert
-        result.ExchangeRate.Should().Be(1m);
-        result.ConvertedAmount.Should().Be(ValidAmount);
+        actualResult.ExchangeRate.Should().Be(1m);
+        actualResult.ConvertedAmount.Should().Be(ValidAmount);
     }
 
     [Fact]
@@ -235,15 +235,15 @@ public class TransferServiceTests
         var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var mockExchangeService = new Mock<IExchangeService>();
-        mockExchangeService.Setup(s => s.GetLiveRates()).Returns(new Dictionary<string, decimal>());
+        mockExchangeService.Setup(mockServiceDependency => mockServiceDependency.GetLiveRates()).Returns(new Dictionary<string, decimal>());
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object, mockExchangeService.Object);
 
         // Act
-        var result = service.GetFxPreview("EUR", "USD", ValidAmount);
+        var actualResult = service.GetFxPreview("EUR", "USD", ValidAmount);
 
         // Assert
-        result.ExchangeRate.Should().Be(1m);
-        result.ConvertedAmount.Should().Be(ValidAmount);
+        actualResult.ExchangeRate.Should().Be(1m);
+        actualResult.ConvertedAmount.Should().Be(ValidAmount);
     }
 
     [Fact]
@@ -255,17 +255,17 @@ public class TransferServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var mockExchangeService = new Mock<IExchangeService>();
         var liveRates = new Dictionary<string, decimal> { { "EUR/USD", 1.2m } };
-        mockExchangeService.Setup(s => s.GetLiveRates()).Returns(liveRates);
+        mockExchangeService.Setup(mockServiceDependency => mockServiceDependency.GetLiveRates()).Returns(liveRates);
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object, mockExchangeService.Object);
         var amount = 100m;
         var expectedConvertedAmount = 120m;
 
         // Act
-        var result = service.GetFxPreview("EUR", "USD", amount);
+        var actualResult = service.GetFxPreview("EUR", "USD", amount);
 
         // Assert
-        result.ExchangeRate.Should().Be(1.2m);
-        result.ConvertedAmount.Should().Be(expectedConvertedAmount);
+        actualResult.ExchangeRate.Should().Be(1.2m);
+        actualResult.ConvertedAmount.Should().Be(expectedConvertedAmount);
     }
 
     [Fact]
@@ -277,13 +277,13 @@ public class TransferServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
         var expectedTransfers = new List<Transfer> { new Transfer { UserId = DefaultUserId } };
-        mockTransferRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(expectedTransfers);
+        mockTransferRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(expectedTransfers);
 
         // Act
-        var result = service.GetHistory(DefaultUserId);
+        var actualResult = service.GetHistory(DefaultUserId);
 
         // Assert
-        result.Should().BeEquivalentTo(expectedTransfers);
+        actualResult.Should().BeEquivalentTo(expectedTransfers);
     }
 
     [Fact]
@@ -296,10 +296,10 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
         // Act
-        var result = service.Requires2FA(ValidAmount);
+        var actualResult = service.Requires2FA(ValidAmount);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
@@ -312,9 +312,9 @@ public class TransferServiceTests
         var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
         // Act
-        var result = service.Requires2FA(AmountRequiringTwoFa);
+        var actualResult = service.Requires2FA(AmountRequiringTwoFa);
 
         // Assert
-        result.Should().BeTrue();
+        actualResult.Should().BeTrue();
     }
 }

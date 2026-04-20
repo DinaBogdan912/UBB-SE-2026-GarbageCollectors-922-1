@@ -28,10 +28,10 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
 
         // Act
-        Action debitAccountAction = () => accountService.DebitAccount(ValidAccountId, ZeroAmount);
+        Action debitAccountOperation = () => accountService.DebitAccount(ValidAccountId, ZeroAmount);
 
         // Assert
-        debitAccountAction.Should().Throw<ArgumentOutOfRangeException>()
+        debitAccountOperation.Should().Throw<ArgumentOutOfRangeException>()
             .WithMessage("*Amount must be > 0.*");
     }
 
@@ -43,10 +43,10 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
 
         // Act
-        Action debitAccountAction = () => accountService.DebitAccount(ValidAccountId, NegativeAmount);
+        Action debitAccountOperation = () => accountService.DebitAccount(ValidAccountId, NegativeAmount);
 
         // Assert
-        debitAccountAction.Should().Throw<ArgumentOutOfRangeException>()
+        debitAccountOperation.Should().Throw<ArgumentOutOfRangeException>()
             .WithMessage("*Amount must be > 0.*");
     }
 
@@ -61,10 +61,10 @@ public class AccountServiceTests
         mockUserSessionService.Setup(service => service.GetAccounts()).Returns(emptyAccountsList);
 
         // Act
-        Action debitAccountAction = () => accountService.DebitAccount(InvalidAccountId, ValidDebitAmount);
+        Action debitAccountOperation = () => accountService.DebitAccount(InvalidAccountId, ValidDebitAmount);
 
         // Assert
-        debitAccountAction.Should().Throw<ArgumentException>()
+        debitAccountOperation.Should().Throw<ArgumentException>()
             .WithMessage("*Account not found.*");
     }
 
@@ -84,10 +84,10 @@ public class AccountServiceTests
         mockUserSessionService.Setup(service => service.GetAccounts()).Returns(accountsList);
 
         // Act
-        Action debitAccountAction = () => accountService.DebitAccount(ValidAccountId, ValidDebitAmount);
+        Action debitAccountOperation = () => accountService.DebitAccount(ValidAccountId, ValidDebitAmount);
 
         // Assert
-        debitAccountAction.Should().Throw<InvalidOperationException>()
+        debitAccountOperation.Should().Throw<InvalidOperationException>()
             .WithMessage("Insufficient funds.");
     }
 
@@ -122,10 +122,10 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
 
         // Act
-        Action creditAccountAction = () => accountService.CreditAccount(ValidAccountId, ZeroAmount);
+        Action creditAccountOperation = () => accountService.CreditAccount(ValidAccountId, ZeroAmount);
 
         // Assert
-        creditAccountAction.Should().Throw<ArgumentOutOfRangeException>()
+        creditAccountOperation.Should().Throw<ArgumentOutOfRangeException>()
             .WithMessage("*Amount must be > 0.*");
     }
 
@@ -137,10 +137,10 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
 
         // Act
-        Action creditAccountAction = () => accountService.CreditAccount(ValidAccountId, NegativeAmount);
+        Action creditAccountOperation = () => accountService.CreditAccount(ValidAccountId, NegativeAmount);
 
         // Assert
-        creditAccountAction.Should().Throw<ArgumentOutOfRangeException>()
+        creditAccountOperation.Should().Throw<ArgumentOutOfRangeException>()
             .WithMessage("*Amount must be > 0.*");
     }
 
@@ -155,10 +155,10 @@ public class AccountServiceTests
         mockUserSessionService.Setup(service => service.GetAccounts()).Returns(emptyAccountsList);
 
         // Act
-        Action creditAccountAction = () => accountService.CreditAccount(InvalidAccountId, ValidCreditAmount);
+        Action creditAccountOperation = () => accountService.CreditAccount(InvalidAccountId, ValidCreditAmount);
 
         // Assert
-        creditAccountAction.Should().Throw<ArgumentException>()
+        creditAccountOperation.Should().Throw<ArgumentException>()
             .WithMessage("*Account not found.*");
     }
 

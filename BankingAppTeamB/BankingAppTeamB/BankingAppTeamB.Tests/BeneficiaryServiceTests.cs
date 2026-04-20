@@ -12,200 +12,199 @@ namespace BankingAppTeamB.Tests;
 
 public class BeneficiaryServiceTests
 {
-    private const int DefaultUserId = 1;
-    private const int DefaultBeneficiaryId = 10;
-    private const int DefaultSourceAccountId = 100;
-    private const string ValidIban = "RO12XXXX000000000000000";
-    private const string InvalidIban = "INVALID123";
-    private const string DefaultName = "John Doe";
-    private const string DefaultBankName = "Test Bank";
-    private const string EmptyName = "";
+	private const int DefaultUserId = 1;
+	private const int DefaultBeneficiaryId = 10;
+	private const int DefaultSourceAccountId = 100;
+	private const string ValidIban = "RO12XXXX000000000000000";
+	private const string InvalidIban = "INVALID123";
+	private const string DefaultName = "John Doe";
+	private const string EmptyName = "";
 
-    [Fact]
-    public void GetByUser_WhenCalled_ReturnsBeneficiaries()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
-        var expectedBeneficiaries = new List<Beneficiary>
-        {
-            new Beneficiary { Id = DefaultBeneficiaryId, UserId = DefaultUserId, Name = DefaultName, IBAN = ValidIban }
-        };
+	[Fact]
+	public void GetByUser_WhenCalled_ReturnsBeneficiaries()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
+		var expectedBeneficiaries = new List<Beneficiary>
+		{
+			new Beneficiary { Id = DefaultBeneficiaryId, UserId = DefaultUserId, Name = DefaultName, IBAN = ValidIban }
+		};
 
-        mockRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(expectedBeneficiaries);
+		mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(expectedBeneficiaries);
 
-        // Act
-        var result = service.GetByUser(DefaultUserId);
+		// Act
+		var beneficiariesForUser = beneficiaryService.GetByUser(DefaultUserId);
 
-        // Assert
-        result.Should().BeEquivalentTo(expectedBeneficiaries);
-        mockRepository.Verify(r => r.GetByUserId(DefaultUserId), Times.Once);
-    }
+		// Assert
+		beneficiariesForUser.Should().BeEquivalentTo(expectedBeneficiaries);
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId), Times.Once);
+	}
 
-    [Fact]
-    public void ValidateIBAN_WhenIbanIsValid_ReturnsTrue()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
+	[Fact]
+	public void ValidateIBAN_WhenIbanIsValid_ReturnsTrue()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
 
-        // Act
-        var result = service.ValidateIBAN(ValidIban);
+		// Act
+		var isIbanValid = beneficiaryService.ValidateIBAN(ValidIban);
 
-        // Assert
-        result.Should().BeTrue();
-    }
+		// Assert
+		isIbanValid.Should().BeTrue();
+	}
 
-    [Fact]
-    public void ValidateIBAN_WhenIbanIsInvalid_ReturnsFalse()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
+	[Fact]
+	public void ValidateIBAN_WhenIbanIsInvalid_ReturnsFalse()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
 
-        // Act
-        var result = service.ValidateIBAN(InvalidIban);
+		// Act
+		var isIbanValid = beneficiaryService.ValidateIBAN(InvalidIban);
 
-        // Assert
-        result.Should().BeFalse();
-    }
+		// Assert
+		isIbanValid.Should().BeFalse();
+	}
 
-    [Fact]
-    public void Add_WhenIbanIsInvalid_ThrowsArgumentException()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
+	[Fact]
+	public void Add_WhenIbanIsInvalid_ThrowsArgumentException()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
 
-        // Act
-        Action addAction = () => service.Add(DefaultName, InvalidIban, DefaultUserId);
+		// Act
+		Action attemptAddBeneficiaryOperation = () => beneficiaryService.Add(DefaultName, InvalidIban, DefaultUserId);
 
-        // Assert
-        addAction.Should().Throw<ArgumentException>().WithMessage("Invalid IBAN format.");
-        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
-    }
+		// Assert
+		attemptAddBeneficiaryOperation.Should().Throw<ArgumentException>().WithMessage("Invalid IBAN format.");
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
+	}
 
-    [Fact]
-    public void Add_WhenNameIsEmpty_ThrowsArgumentException()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
+	[Fact]
+	public void Add_WhenNameIsEmpty_ThrowsArgumentException()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
 
-        // Act
-        Action addAction = () => service.Add(EmptyName, ValidIban, DefaultUserId);
+		// Act
+		Action attemptAddBeneficiaryOperation = () => beneficiaryService.Add(EmptyName, ValidIban, DefaultUserId);
 
-        // Assert
-        addAction.Should().Throw<ArgumentException>().WithMessage("Name cannot be empty");
-        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
-    }
+		// Assert
+		attemptAddBeneficiaryOperation.Should().Throw<ArgumentException>().WithMessage("Name cannot be empty");
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
+	}
 
-    [Fact]
-    public void Add_WhenIbanAlreadyExists_ThrowsArgumentException()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
-        var existingBeneficiaries = new List<Beneficiary>
-        {
-            new Beneficiary { IBAN = ValidIban }
-        };
+	[Fact]
+	public void Add_WhenIbanAlreadyExists_ThrowsArgumentException()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
+		var existingBeneficiaries = new List<Beneficiary>
+		{
+			new Beneficiary { IBAN = ValidIban }
+		};
 
-        mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(existingBeneficiaries);
+		mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(existingBeneficiaries);
 
-        // Act
-        Action addAction = () => service.Add(DefaultName, ValidIban, DefaultUserId);
+		// Act
+		Action attemptAddBeneficiaryOperation = () => beneficiaryService.Add(DefaultName, ValidIban, DefaultUserId);
 
-        // Assert
-        addAction.Should().Throw<ArgumentException>().WithMessage("A beneficiary with this IBAN already exists for this user.");
-        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
-    }
+		// Assert
+		attemptAddBeneficiaryOperation.Should().Throw<ArgumentException>().WithMessage("A beneficiary with this IBAN already exists for this user.");
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Never);
+	}
 
-    [Fact]
-    public void Add_WhenDataIsValid_SavesAndReturnsBeneficiary()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
+	[Fact]
+	public void Add_WhenDataIsValid_SavesAndReturnsBeneficiary()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
 
-        mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
-        mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()));
+		mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
+		mockRepository.Setup(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()));
 
-        var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
+		var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
-        // Act
-        var result = service.Add(DefaultName, ValidIban, DefaultUserId);
+		// Act
+		var createdBeneficiary = beneficiaryService.Add(DefaultName, ValidIban, DefaultUserId);
 
-        // Assert
-        result.Should().NotBeNull();
-        result.UserId.Should().Be(DefaultUserId);
-        result.Name.Should().Be(DefaultName);
-        result.IBAN.Should().Be(ValidIban);
-        result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
-        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Once);
-    }
+		// Assert
+		createdBeneficiary.Should().NotBeNull();
+		createdBeneficiary.UserId.Should().Be(DefaultUserId);
+		createdBeneficiary.Name.Should().Be(DefaultName);
+		createdBeneficiary.IBAN.Should().Be(ValidIban);
+		createdBeneficiary.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Add(It.IsAny<Beneficiary>()), Times.Once);
+	}
 
-    [Fact]
-    public void Update_WhenNameIsEmpty_ThrowsArgumentException()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
-        var beneficiary = new Beneficiary { Name = EmptyName };
+	[Fact]
+	public void Update_WhenNameIsEmpty_ThrowsArgumentException()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
+		var beneficiaryToUpdate = new Beneficiary { Name = EmptyName };
 
-        // Act
-        Action updateAction = () => service.Update(beneficiary);
+		// Act
+		Action attemptUpdateBeneficiaryOperation = () => beneficiaryService.Update(beneficiaryToUpdate);
 
-        // Assert
-        updateAction.Should().Throw<ArgumentException>().WithMessage("Beneficiary name cannot be empty.");
-        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Update(It.IsAny<Beneficiary>()), Times.Never);
-    }
+		// Assert
+		attemptUpdateBeneficiaryOperation.Should().Throw<ArgumentException>().WithMessage("Beneficiary name cannot be empty.");
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Update(It.IsAny<Beneficiary>()), Times.Never);
+	}
 
-    [Fact]
-    public void Update_WhenDataIsValid_UpdatesBeneficiary()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
-        var beneficiary = new Beneficiary { Name = DefaultName };
+	[Fact]
+	public void Update_WhenDataIsValid_UpdatesBeneficiary()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
+		var beneficiaryToUpdate = new Beneficiary { Name = DefaultName };
 
-        // Act
-        service.Update(beneficiary);
+		// Act
+		beneficiaryService.Update(beneficiaryToUpdate);
 
-        // Assert
-        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Update(beneficiary), Times.Once);
-    }
+		// Assert
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Update(beneficiaryToUpdate), Times.Once);
+	}
 
-    [Fact]
-    public void Delete_WhenCalled_DeletesBeneficiary()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
+	[Fact]
+	public void Delete_WhenCalled_DeletesBeneficiary()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
 
-        // Act
-        service.Delete(DefaultBeneficiaryId);
+		// Act
+		beneficiaryService.Delete(DefaultBeneficiaryId);
 
-        // Assert
-        mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Delete(DefaultBeneficiaryId), Times.Once);
-    }
+		// Assert
+		mockRepository.Verify(mockRepositoryInstance => mockRepositoryInstance.Delete(DefaultBeneficiaryId), Times.Once);
+	}
 
-    [Fact]
-    public void BuildTransferDtoFrom_WhenCalled_ReturnsCorrectDto()
-    {
-        // Arrange
-        var mockRepository = new Mock<IBeneficiaryRepository>();
-        var service = new BeneficiaryService(mockRepository.Object);
-        var beneficiary = new Beneficiary { Name = DefaultName, IBAN = ValidIban };
+	[Fact]
+	public void BuildTransferDtoFrom_WhenCalled_ReturnsCorrectDto()
+	{
+		// Arrange
+		var mockRepository = new Mock<IBeneficiaryRepository>();
+		var beneficiaryService = new BeneficiaryService(mockRepository.Object);
+		var beneficiary = new Beneficiary { Name = DefaultName, IBAN = ValidIban };
 
-        // Act
-        var result = service.BuildTransferDtoFrom(beneficiary, DefaultSourceAccountId, DefaultUserId);
+		// Act
+		var createdTransferRequest = beneficiaryService.BuildTransferDtoFrom(beneficiary, DefaultSourceAccountId, DefaultUserId);
 
-        // Assert
-        result.Should().NotBeNull();
-        result.UserId.Should().Be(DefaultUserId);
-        result.SourceAccountId.Should().Be(DefaultSourceAccountId);
-        result.RecipientName.Should().Be(DefaultName);
-        result.RecipientIBAN.Should().Be(ValidIban);
-    }
+		// Assert
+		createdTransferRequest.Should().NotBeNull();
+		createdTransferRequest.UserId.Should().Be(DefaultUserId);
+		createdTransferRequest.SourceAccountId.Should().Be(DefaultSourceAccountId);
+		createdTransferRequest.RecipientName.Should().Be(DefaultName);
+		createdTransferRequest.RecipientIBAN.Should().Be(ValidIban);
+	}
 }
