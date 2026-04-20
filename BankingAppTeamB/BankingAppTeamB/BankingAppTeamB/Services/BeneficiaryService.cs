@@ -16,16 +16,19 @@ namespace BankingAppTeamB.Services
             beneficiaryRepository = inputRepository;
         }
 
+        /// <summary>Returns all beneficiaries registered for <paramref name="userId"/>.</summary>
         public List<Beneficiary> GetByUser(int userId)
         {
             return beneficiaryRepository.GetByUserId(userId);
         }
 
+        /// <summary>Returns <see langword="true"/> when <paramref name="iban"/> passes the structural IBAN validation rules.</summary>
         public bool ValidateIBAN(string iban)
         {
             return IbanValidator.Validate(iban);
         }
 
+        /// <summary>Validates the IBAN and name, checks for duplicates, then creates and persists a new beneficiary for <paramref name="userId"/>.</summary>
         public Beneficiary Add(string name, string iban, int userId)
         {
             if (!ValidateIBAN(iban))
@@ -56,6 +59,7 @@ namespace BankingAppTeamB.Services
             return newBeneficiary;
         }
 
+        /// <summary>Validates that the beneficiary name is not empty, then persists the updated beneficiary.</summary>
         public void Update(Beneficiary beneficiary)
         {
             if (string.IsNullOrWhiteSpace(beneficiary.Name))
@@ -66,11 +70,13 @@ namespace BankingAppTeamB.Services
             beneficiaryRepository.Update(beneficiary);
         }
 
+        /// <summary>Permanently removes the beneficiary identified by <paramref name="beneficiaryId"/>.</summary>
         public void Delete(int beneficiaryId)
         {
             beneficiaryRepository.Delete(beneficiaryId);
         }
 
+        /// <summary>Creates a pre-populated <see cref="TransferDto"/> from the beneficiary's name and IBAN, ready to pass to the transfer flow.</summary>
         public TransferDto BuildTransferDtoFrom(Beneficiary beneficiary, int sourceAccountId, int userId)
         {
             return new TransferDto
@@ -82,6 +88,7 @@ namespace BankingAppTeamB.Services
             };
         }
 
+        /// <summary>Overload used internally (e.g. from tests) to add a beneficiary with an explicit bank name.</summary>
         internal object Add(string name, string iban, string bankName, int userId)
         {
             if (!ValidateIBAN(iban))

@@ -6,6 +6,7 @@ namespace BankingAppTeamB.Data
 {
     public static class DatabaseInitializer
     {
+        /// <summary>Runs all <c>*.sql</c> scripts found in the <c>Database</c> sub-folder of the application base directory, in alphabetical order, to create or update the database schema. No-ops if the folder does not exist.</summary>
         public static void Initialize()
         {
             string databasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Database");

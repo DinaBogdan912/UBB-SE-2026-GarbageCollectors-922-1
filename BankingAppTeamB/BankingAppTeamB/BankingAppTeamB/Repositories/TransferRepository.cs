@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class TransferRepository : ITransferRepository
     {
+        /// <summary>Inserts a new transfer row and writes the generated identity back to <paramref name="transfer"/>.<see cref="Transfer.Id"/>.</summary>
         public void Add(Transfer transfer)
         {
             string sqlQuery = @"
@@ -51,6 +52,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Returns the transfer with the given <paramref name="transferId"/>; throws <see cref="KeyNotFoundException"/> if not found.</summary>
         public Transfer GetById(int transferId)
         {
             string sqlQuery = "SELECT * FROM Transfers WHERE Id = @Id";
@@ -75,6 +77,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Transfer with ID {transferId} was not found.");
         }
 
+        /// <summary>Returns all transfers belonging to <paramref name="userId"/>, ordered by creation date descending.</summary>
         public List<Transfer> GetByUserId(int userId)
         {
             string sqlQuery = "SELECT * FROM Transfers WHERE UserId = @UserId ORDER BY CreatedAt DESC";
@@ -100,6 +103,7 @@ namespace BankingAppTeamB.Repositories
             return transfers;
         }
 
+        /// <summary>Updates the <c>Status</c> column for the transfer identified by <paramref name="transferId"/>.</summary>
         public void UpdateStatus(int transferId, string transferStatus)
         {
             string sqlQuery = "UPDATE Transfers SET Status = @Status WHERE Id = @Id";
@@ -116,6 +120,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Hydrates a <see cref="Transfer"/> from the current row of <paramref name="reader"/>.</summary>
         private Transfer MapTransfer(SqlDataReader reader)
         {
             return new Transfer

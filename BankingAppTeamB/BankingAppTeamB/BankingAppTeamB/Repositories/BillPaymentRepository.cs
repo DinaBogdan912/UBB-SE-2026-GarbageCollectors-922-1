@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class BillPaymentRepository : IBillPaymentRepository
     {
+        /// <summary>Inserts a new bill payment row, writes the generated identity back to <paramref name="billPayment"/>.<see cref="BillPayment.Id"/>, and returns the updated entity.</summary>
         public BillPayment Add(BillPayment billPayment)
         {
             string sqlQuery = @"
@@ -41,6 +42,7 @@ namespace BankingAppTeamB.Repositories
             return billPayment;
         }
 
+        /// <summary>Returns all bill payments for <paramref name="userId"/>, ordered by creation date descending.</summary>
         public List<BillPayment> GetByUserId(int userId)
         {
             string sqlQuery = @"
@@ -68,6 +70,7 @@ namespace BankingAppTeamB.Repositories
             return billPayments;
         }
 
+        /// <summary>Returns all billers, optionally filtered by active status, ordered by category then name.</summary>
         public List<Biller> GetAllBillers(bool? isActive = null)
         {
             string sqlQuery = @"
@@ -95,6 +98,7 @@ namespace BankingAppTeamB.Repositories
             return billers;
         }
 
+        /// <summary>Returns billers whose name contains <paramref name="searchQuery"/> and optionally match <paramref name="category"/> and active status.</summary>
         public List<Biller> SearchBillers(string searchQuery, string? category, bool? isActive = null)
         {
             string sqlQuery = @"
@@ -126,6 +130,7 @@ namespace BankingAppTeamB.Repositories
             return billers;
         }
 
+        /// <summary>Returns the biller with the given <paramref name="billerId"/>; throws <see cref="KeyNotFoundException"/> if not found.</summary>
         public Biller? GetBillerById(int billerId)
         {
             string sqlQuery = "SELECT * FROM Biller WHERE Id = @Id";
@@ -149,6 +154,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Biller with ID {billerId} was not found.");
         }
 
+        /// <summary>Returns the saved billers for <paramref name="userId"/>, including the joined <see cref="Biller"/> details.</summary>
         public List<SavedBiller> GetSavedBillers(int userId)
         {
             string sqlQuery = @"
@@ -189,6 +195,7 @@ namespace BankingAppTeamB.Repositories
             return savedBillers;
         }
 
+        /// <summary>Inserts a new saved-biller row for the user so it can be selected quickly on future payments.</summary>
         public void SaveBiller(SavedBiller savedBiller)
         {
             string sqlQuery = @"
@@ -213,6 +220,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Permanently removes the saved-biller row with the given <paramref name="savedBillerId"/>.</summary>
         public void DeleteSavedBiller(int savedBillerId)
         {
             string sqlQuery = "DELETE FROM SavedBiller WHERE Id = @Id";
@@ -228,6 +236,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Hydrates a <see cref="BillPayment"/> from the current row of <paramref name="reader"/>.</summary>
         private BillPayment MapBillPayment(SqlDataReader reader)
         {
             return new BillPayment
@@ -246,6 +255,7 @@ namespace BankingAppTeamB.Repositories
             };
         }
 
+        /// <summary>Hydrates a <see cref="Biller"/> from the current row of <paramref name="reader"/>.</summary>
         private Biller MapBiller(SqlDataReader reader)
         {
             return new Biller
@@ -258,6 +268,7 @@ namespace BankingAppTeamB.Repositories
             };
         }
 
+        /// <summary>Hydrates a <see cref="SavedBiller"/> (without its navigation <see cref="Biller"/>) from the current row of <paramref name="reader"/>.</summary>
         private SavedBiller MapSavedBiller(SqlDataReader reader)
         {
             return new SavedBiller

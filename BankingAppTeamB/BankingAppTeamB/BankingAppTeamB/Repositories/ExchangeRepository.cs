@@ -10,6 +10,7 @@ public class ExchangeRepository : IExchangeRepository
 {
     private const bool TriggeredAlertState = true;
 
+    /// <summary>Inserts a new exchange transaction row, writes the generated identity back, and returns the updated entity.</summary>
     public ExchangeTransaction Add(ExchangeTransaction exchangeTransaction)
     {
         using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
@@ -43,6 +44,7 @@ public class ExchangeRepository : IExchangeRepository
         return exchangeTransaction;
     }
 
+    /// <summary>Returns all exchange transactions for <paramref name="userId"/>, ordered by creation date descending.</summary>
     public List<ExchangeTransaction> GetByUserId(int userId)
     {
         var exchangeTransactions = new List<ExchangeTransaction>();
@@ -80,6 +82,7 @@ public class ExchangeRepository : IExchangeRepository
         return exchangeTransactions;
     }
 
+    /// <summary>Returns rate alerts for <paramref name="userId"/>, optionally filtered by triggered state.</summary>
     public List<RateAlert> GetAlertsByUser(int userId, bool? isTriggered = null)
     {
         var rateAlerts = new List<RateAlert>();
@@ -105,6 +108,7 @@ public class ExchangeRepository : IExchangeRepository
         return rateAlerts;
     }
 
+    /// <summary>Hydrates a <see cref="RateAlert"/> from the current row of <paramref name="reader"/>.</summary>
     private RateAlert MapRateAlert(SqlDataReader reader)
     {
         return new RateAlert
@@ -120,6 +124,7 @@ public class ExchangeRepository : IExchangeRepository
         };
     }
 
+    /// <summary>Returns all rate alerts across all users, optionally filtered by triggered state.</summary>
     public List<RateAlert> GetAllAlerts(bool? isTriggered = null)
     {
         var rateAlerts = new List<RateAlert>();
@@ -140,6 +145,7 @@ public class ExchangeRepository : IExchangeRepository
         return rateAlerts;
     }
 
+    /// <summary>Inserts a new rate alert row, writes the generated identity back, and returns the updated entity.</summary>
     public RateAlert AddAlert(RateAlert rateAlert)
     {
         using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
@@ -166,6 +172,7 @@ public class ExchangeRepository : IExchangeRepository
         return rateAlert;
     }
 
+    /// <summary>Permanently removes the rate alert row with the given <paramref name="rateAlertId"/>.</summary>
     public void DeleteAlert(int rateAlertId)
     {
         using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
@@ -177,6 +184,7 @@ public class ExchangeRepository : IExchangeRepository
         command.ExecuteNonQuery();
     }
 
+    /// <summary>Sets <c>IsTriggered = true</c> for the rate alert identified by <paramref name="rateAlertId"/>.</summary>
     public void MarkAlertTriggered(int rateAlertId)
     {
         using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());

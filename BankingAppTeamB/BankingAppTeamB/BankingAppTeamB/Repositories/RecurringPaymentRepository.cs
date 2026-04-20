@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class RecurringPaymentRepository : IRecurringPaymentRepository
     {
+        /// <summary>Inserts a new recurring payment row, writes the generated identity back, and returns the updated entity.</summary>
         public RecurringPayment Add(RecurringPayment recurringPayment)
         {
             string sqlQuery = @"
@@ -42,6 +43,7 @@ namespace BankingAppTeamB.Repositories
             return recurringPayment;
         }
 
+        /// <summary>Returns the recurring payment with the given <paramref name="recurringPaymentId"/>; throws <see cref="KeyNotFoundException"/> if not found.</summary>
         public RecurringPayment? GetById(int recurringPaymentId)
         {
             string sqlQuery = "SELECT * FROM RecurringPayment WHERE Id = @Id";
@@ -65,6 +67,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Recurring payment with ID {recurringPaymentId} was not found.");
         }
 
+        /// <summary>Returns all recurring payments belonging to <paramref name="userId"/>, ordered by next execution date ascending.</summary>
         public List<RecurringPayment> GetByUserId(int userId)
         {
             string sqlQuery = @"
@@ -92,6 +95,7 @@ namespace BankingAppTeamB.Repositories
             return recurringPayments;
         }
 
+        /// <summary>Returns all recurring payments whose <c>NextExecutionDate</c> is on or before <paramref name="dueBeforeDateTime"/>, ordered ascending.</summary>
         public List<RecurringPayment> GetDueBefore(DateTime dueBeforeDateTime)
         {
             string sqlQuery = @"
@@ -119,6 +123,7 @@ namespace BankingAppTeamB.Repositories
             return dueRecurringPayments;
         }
 
+        /// <summary>Updates mutable fields (amount, frequency, dates, status) of an existing recurring payment row.</summary>
         public void Update(RecurringPayment recurringPayment)
         {
             string sqlQuery = @"
@@ -151,6 +156,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Permanently removes the recurring payment row with the given <paramref name="recurringPaymentId"/>.</summary>
         public void Delete(int recurringPaymentId)
         {
             string sqlQuery = "DELETE FROM RecurringPayment WHERE Id = @Id";
@@ -166,6 +172,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Hydrates a <see cref="RecurringPayment"/> from the current row of <paramref name="reader"/>.</summary>
         private RecurringPayment MapRecurringPayment(SqlDataReader reader)
         {
             return new RecurringPayment

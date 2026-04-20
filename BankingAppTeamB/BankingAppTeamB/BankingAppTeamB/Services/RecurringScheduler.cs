@@ -20,18 +20,21 @@ namespace BankingAppTeamB.Services
             this.timer.Elapsed += OnTick;
         }
 
+        /// <summary>Starts the underlying timer so background jobs run on every tick interval (default 30 seconds).</summary>
         public void Start()
         {
             timer.Start();
             Debug.WriteLine("[RecurringScheduler] Scheduler started.");
         }
 
+        /// <summary>Stops the timer, halting all background job execution.</summary>
         public void Stop()
         {
             timer.Stop();
             Debug.WriteLine("[RecurringScheduler] Scheduler stopped.");
         }
 
+        /// <summary>Timer callback: processes due recurring payments and checks rate alerts on each tick, swallowing and logging any exceptions so the scheduler keeps running.</summary>
         private void OnTick(object? sender, ElapsedEventArgs e)
         {
             Debug.WriteLine($"[RecurringScheduler] Tick at {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}");

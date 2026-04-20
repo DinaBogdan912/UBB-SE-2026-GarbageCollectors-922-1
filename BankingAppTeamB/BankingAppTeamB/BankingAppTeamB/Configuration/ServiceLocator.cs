@@ -45,6 +45,7 @@ public static class ServiceLocator
 
     public static IUserSessionService UserSessionService => UserSessionServiceInstance;
 
+    /// <summary>Starts the recurring scheduler so that background jobs (due payments, rate-alert checks) begin running on their 30-second timer interval.</summary>
     public static void Initialize()
     {
         RecurringSchedulerInstance.Start();

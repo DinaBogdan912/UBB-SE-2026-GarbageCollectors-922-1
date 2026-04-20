@@ -203,6 +203,7 @@ public class TransferViewModel : ViewModelBase
     public RelayCommand CancelCommand { get; }
     public RelayCommand SendAgainCommand { get; }
 
+    /// <summary>Populates <see cref="Accounts"/> from the current user session and pre-selects the first account.</summary>
     public void LoadAccounts()
     {
         try
@@ -233,12 +234,14 @@ public class TransferViewModel : ViewModelBase
     private const int TwoFaTokenMinValue = 100000;
     private const int TwoFaTokenMaxValue = 999999;
 
+    /// <summary>Generates a random six-digit 2FA token string for display to the user.</summary>
     private string GenerateTwoFAToken()
     {
         var random = new Random();
         return random.Next(MinimumTwoFactorToken, MaximumTwoFactorTokenExclusive).ToString();
     }
 
+    /// <summary>Advances the wizard to the next step, validating IBAN, amount, and 2FA confirmation before allowing progression.</summary>
     private void ExecuteNextStep()
     {
         ErrorMessage = string.Empty;
@@ -284,6 +287,7 @@ public class TransferViewModel : ViewModelBase
         CurrentStep++;
     }
 
+    /// <summary>Submits the transfer to the service on a background thread; on success advances to the completion step, on failure sets the error step.</summary>
     private async Task ExecuteTransferAsync()
     {
         try
@@ -325,6 +329,7 @@ public class TransferViewModel : ViewModelBase
     {
     }
 
+    /// <summary>Resets all form fields and returns the wizard to step 1 so the user can initiate another transfer.</summary>
     private void ExecuteSendAgain()
     {
         SelectedAccount = Accounts.Count > MinimumAccounts ? Accounts[FirstAccountIndex] : null;
@@ -345,6 +350,7 @@ public class TransferViewModel : ViewModelBase
         CurrentStep = AccountSelectionStep;
     }
 
+    /// <summary>Validates <paramref name="iban"/> and updates <see cref="IsIBANValid"/> and <see cref="BankName"/> accordingly.</summary>
     private void UpdateIBANValidation(string iban)
     {
         try
@@ -367,6 +373,7 @@ public class TransferViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Recalculates and updates <see cref="FxPreviewText"/> to show the converted amount and rate whenever the account, amount, or currency changes.</summary>
     private void UpdateFxPreview()
     {
         try
@@ -398,6 +405,7 @@ public class TransferViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Updates <see cref="Requires2FA"/> based on whether the current amount meets the 2FA threshold.</summary>
     private void UpdateRequires2FA()
     {
         try

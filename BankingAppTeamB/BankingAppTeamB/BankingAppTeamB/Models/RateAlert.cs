@@ -38,6 +38,7 @@ namespace BankingAppTeamB.Models
             }
         }
 
+        /// <summary>Creates a new rate alert for the specified user and currency pair, setting <see cref="IsTriggered"/> to <see langword="false"/> and stamping the creation time.</summary>
         public RateAlert(int userId, string baseCurrency, string targetCurrency, decimal targetRate, bool isBuyAlert)
         {
             UserId = userId;
@@ -53,46 +54,58 @@ namespace BankingAppTeamB.Models
         {
         }
 
+        /// <summary>Sets whether this alert fires when the rate reaches the target from a buy perspective.</summary>
         public void SetBuyAlertState(bool isBuyAlert)
         {
             IsBuyAlert = isBuyAlert;
         }
 
+        /// <summary>Returns the alert's database identifier.</summary>
         public int GetAlertId()
         {
             return Id;
         }
 
+        /// <summary>Marks the alert as triggered or untriggered, raising <see cref="PropertyChanged"/> when the value changes.</summary>
         public void SetTriggeredState(bool isTriggered)
         {
             IsTriggered = isTriggered;
         }
 
+        /// <summary>Returns the exchange rate that, when reached, fires this alert.</summary>
         public decimal GetAlertTargetRate()
         {
             return TargetRate;
         }
 
+        /// <summary>Returns the base currency code (e.g. <c>"EUR"</c>) of the monitored pair.</summary>
         public string GetAlertBaseCurrency()
         {
             return BaseCurrency;
         }
 
+        /// <summary>Returns the target currency code (e.g. <c>"USD"</c>) of the monitored pair.</summary>
         public string GetAlertTargetCurrency()
         {
             return TargetCurrency;
         }
 
+        /// <summary>Alias for <see cref="SetBuyAlertState"/>.</summary>
         public void SetBuyAlert(bool isBuyAlert) => SetBuyAlertState(isBuyAlert);
 
+        /// <summary>Alias for <see cref="GetAlertId"/>.</summary>
         public int GetId() => GetAlertId();
 
+        /// <summary>Alias for <see cref="SetTriggeredState"/>.</summary>
         public void SetTriggered(bool isTriggered) => SetTriggeredState(isTriggered);
 
+        /// <summary>Alias for <see cref="GetAlertTargetRate"/>.</summary>
         public decimal GetTargetRate() => GetAlertTargetRate();
 
+        /// <summary>Alias for <see cref="GetAlertBaseCurrency"/>.</summary>
         public string GetBaseCurrency() => GetAlertBaseCurrency();
 
+        /// <summary>Alias for <see cref="GetAlertTargetCurrency"/>.</summary>
         public string GetTargetCurrency() => GetAlertTargetCurrency();
     }
 }

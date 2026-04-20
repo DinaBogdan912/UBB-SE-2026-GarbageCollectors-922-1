@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class TransactionRepository : ITransactionRepository
     {
+        /// <summary>Inserts a new transaction row and writes the generated identity back to <paramref name="transaction"/>.<see cref="Transaction.Id"/>.</summary>
         public void Add(Transaction transaction)
         {
             string insertSql = @"
@@ -49,6 +50,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Returns the transaction with the given <paramref name="transactionId"/>; throws <see cref="KeyNotFoundException"/> if not found.</summary>
         public Transaction GetById(int transactionId)
         {
             string sqlQuery = "SELECT * FROM Transactions WHERE Id = @Id";
@@ -72,6 +74,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Transaction with ID {transactionId} was not found.");
         }
 
+        /// <summary>Returns all transactions whose <c>AccountId</c> matches <paramref name="userId"/>.</summary>
         public List<Transaction> GetByUserId(int userId)
         {
             string sqlQuery = "SELECT * FROM Transactions WHERE AccountId = @UserId";
@@ -96,6 +99,7 @@ namespace BankingAppTeamB.Repositories
             return transactions;
         }
 
+        /// <summary>Hydrates a <see cref="Transaction"/> from the current row of <paramref name="reader"/>.</summary>
         private Transaction MapTransaction(SqlDataReader reader)
         {
             return new Transaction

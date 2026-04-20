@@ -170,6 +170,7 @@ namespace BankingAppTeamB.ViewModels
         public ICommand ResumeCommand { get; }
         public ICommand CancelCommand { get; }
 
+        /// <summary>Loads the user's recurring payments and the biller directory from the services and refreshes the corresponding collections.</summary>
         public async Task LoadAsync()
         {
             try
@@ -191,26 +192,31 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Public facade that delegates to <see cref="ExecuteCreateAsync"/> for use in non-command contexts such as tests or code-behind.</summary>
         public Task CreateAsync()
         {
             return ExecuteCreateAsync();
         }
 
+        /// <summary>Public facade that delegates to <see cref="ExecutePause"/> for use in non-command contexts.</summary>
         public void Pause(RecurringPayment? payment)
         {
             ExecutePause(payment);
         }
 
+        /// <summary>Public facade that delegates to <see cref="ExecuteResume"/> for use in non-command contexts.</summary>
         public void Resume(RecurringPayment? payment)
         {
             ExecuteResume(payment);
         }
 
+        /// <summary>Public facade that delegates to <see cref="ExecuteCancel"/> for use in non-command contexts.</summary>
         public void Cancel(RecurringPayment? payment)
         {
             ExecuteCancel(payment);
         }
 
+        /// <summary>Validates form inputs, creates the recurring payment via the service on a background thread, and adds the result to the <see cref="Payments"/> collection.</summary>
         private async Task ExecuteCreateAsync()
         {
             try
@@ -265,6 +271,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Pauses the recurring payment supplied as <paramref name="parameter"/> and updates its status in the observable collection.</summary>
         private void ExecutePause(object? parameter)
         {
             try
@@ -293,6 +300,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Resumes the recurring payment supplied as <paramref name="parameter"/> and updates its status in the observable collection.</summary>
         private void ExecuteResume(object? parameter)
         {
             try
@@ -321,6 +329,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Cancels the recurring payment supplied as <paramref name="parameter"/> and updates its status in the observable collection.</summary>
         private void ExecuteCancel(object? parameter)
         {
             try
@@ -349,6 +358,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Resets all create-form fields to their initial values after a successful payment creation.</summary>
         private void ClearForm()
         {
             SelectedPayment = null;
