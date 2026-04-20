@@ -1,12 +1,12 @@
-﻿namespace BankingAppTeamB.Configuration
+namespace BankingAppTeamB.Configuration
 {
     public static class NavigationTags
     {
         public const string Transfer = "transfer";
         public const string Beneficiaries = "beneficiaries";
-        public const string Bill = "bill";
-        public const string Recurring = "recurring";
-        public const string Exchange = "exchange";
-        public const string Alerts = "alerts";
+        public const string BillPayments = "bill";
+        public const string RecurringPayments = "recurring";
+        public const string ForeignExchange = "exchange";
+        public const string ExchangeRateAlerts = "alerts";
     }
 }

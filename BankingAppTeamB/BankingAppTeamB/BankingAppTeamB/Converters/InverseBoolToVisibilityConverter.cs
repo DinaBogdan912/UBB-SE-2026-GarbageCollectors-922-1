@@ -7,9 +7,18 @@ namespace BankingAppTeamB.Converters
     public class InverseBoolToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
-            => value is bool b && b ? Visibility.Collapsed : Visibility.Visible;
+        {
+            if (value is bool isVisible)
+            {
+                return isVisible ? Visibility.Collapsed : Visibility.Visible;
+            }
+
+            return Visibility.Visible;
+        }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
-            => value is Visibility v && v == Visibility.Collapsed;
+        {
+            return value is Visibility visibility && visibility == Visibility.Collapsed;
+        }
     }
 }

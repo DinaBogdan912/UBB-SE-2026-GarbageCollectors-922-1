@@ -1,32 +1,34 @@
-﻿using System;
+using System;
 using System.Windows.Input;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankingAppTeamB.Commands
 {
     public class RelayCommand : ICommand
     {
-        private readonly Action<object?> execute;
-        private readonly Func<object?, bool>? canExecute;
+        private readonly Action<object?> executeAction;
+        private readonly Func<object?, bool>? canExecutePredicate;
 
         public event EventHandler? CanExecuteChanged;
 
-        public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+        public RelayCommand(Action<object?> executeAction, Func<object?, bool>? canExecutePredicate = null)
         {
-            this.execute = execute;
-            this.canExecute = canExecute;
+            this.executeAction = executeAction;
+            this.canExecutePredicate = canExecutePredicate;
         }
 
         public bool CanExecute(object? parameter)
-            => canExecute == null || canExecute(parameter);
+        {
+            return canExecutePredicate == null || canExecutePredicate(parameter);
+        }
 
         public void Execute(object? parameter)
-            => execute(parameter);
+        {
+            executeAction(parameter);
+        }
 
         public void RaiseCanExecuteChanged()
-            => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 }
