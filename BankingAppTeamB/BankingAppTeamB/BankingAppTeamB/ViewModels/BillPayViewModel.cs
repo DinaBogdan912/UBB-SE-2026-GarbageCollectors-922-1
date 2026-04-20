@@ -54,10 +54,13 @@ namespace BankingAppTeamB.ViewModels
             set => SetProperty(ref twoFAToken, value);
         }
 
+        private const int TwoFaTokenMinValue = 100000;
+        private const int TwoFaTokenMaxValue = 999999;
+
         private string GenerateTwoFAToken()
         {
             var rnd = new Random();
-            return rnd.Next(100000, 999999).ToString();
+            return rnd.Next(TwoFaTokenMinValue, TwoFaTokenMaxValue).ToString();
         }
 
         private bool shouldSaveBiller;
@@ -506,7 +509,7 @@ namespace BankingAppTeamB.ViewModels
                 return;
             }
 
-            var matchingSavedBiller = SavedBillers.FirstOrDefault(sb => sb.BillerId == SelectedBiller.Id);
+            var matchingSavedBiller = SavedBillers.FirstOrDefault(savedBillerEntry => savedBillerEntry.BillerId == SelectedBiller.Id);
 
             if (matchingSavedBiller != null &&
                 string.IsNullOrWhiteSpace(BillerReference) &&

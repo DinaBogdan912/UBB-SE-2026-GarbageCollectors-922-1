@@ -8,10 +8,10 @@ namespace BankingAppTeamB.Services
 {
     public class BillPaymentService : IBillPaymentService
     {
-        private const int SmallPaymentThreshold = 100;
-        private const float SmallPaymentFee = 0.50f;
-        private const float StandardPaymentFee = 1.00f;
-        private const int TwoFaAmountThreshold = 1000;
+        private const decimal SmallPaymentThreshold = 100m;
+        private const decimal SmallPaymentFee = 0.50m;
+        private const decimal StandardPaymentFee = 1.00m;
+        private const decimal TwoFaAmountThreshold = 1000m;
 
         private readonly IBillPaymentRepository billPaymentRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -24,8 +24,7 @@ namespace BankingAppTeamB.Services
 
         public decimal CalculateFee(decimal amount)
         {
-            var fee = amount <= SmallPaymentThreshold ? SmallPaymentFee : StandardPaymentFee;
-            return Convert.ToDecimal(fee);
+            return amount <= SmallPaymentThreshold ? SmallPaymentFee : StandardPaymentFee;
         }
 
         public List<Biller> GetBillerDirectory(string? category)
@@ -53,14 +52,14 @@ namespace BankingAppTeamB.Services
             return billPaymentRepository.GetSavedBillers(userId);
         }
 
-        public void SaveBiller(int userId, int billerId, string? nickname, string? defaultRef)
+        public void SaveBiller(int userId, int billerId, string? nickname, string? defaultReference)
         {
             var savedBiller = new SavedBiller
             {
                 UserId = userId,
                 BillerId = billerId,
                 Nickname = nickname,
-                DefaultReference = defaultRef,
+                DefaultReference = defaultReference,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -74,10 +73,10 @@ namespace BankingAppTeamB.Services
 
         public bool Requires2FA(decimal amount)
         {
-            return (float)amount >= TwoFaAmountThreshold;
+            return amount >= TwoFaAmountThreshold;
         }
 
-        private string GenerateReceiptId()
+        private string GenerateReceiptNumber()
         {
             const int receiptSuffixLength = 6;
             string uniqueSuffix = Guid.NewGuid().ToString("N")[..receiptSuffixLength].ToUpper();
@@ -117,7 +116,7 @@ namespace BankingAppTeamB.Services
                 BillerReference = dto.BillerReference,
                 Amount = dto.Amount,
                 Fee = fee,
-                ReceiptNumber = GenerateReceiptId(),
+                ReceiptNumber = GenerateReceiptNumber(),
                 Status = PaymentStatus.Completed,
                 CreatedAt = DateTime.UtcNow
             };
