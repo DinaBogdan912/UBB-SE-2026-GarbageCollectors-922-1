@@ -61,3 +61,16 @@ TestResults/
 coveragereport/
 /BankingAppTeamB/coverage-report
 /BankingAppTeamB/Temp
+# Added by code-review-graph
+.code-review-graph/
+.cursorrules
+.mcp.json
+.opencode.json
+.windsurfrules
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.claude
+.cursor
+
+.kiro/steering/code-review-graph.md

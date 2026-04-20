@@ -14,6 +14,22 @@ namespace BankingAppTeamB.Services
         private const int ExchangeRatePrecisionDecimals = 2;
         private const int BaseCurrencyComponentIndex = 0;
         private const int TargetCurrencyComponentIndex = 1;
+        private const int CacheDurationSeconds = 30;
+        private const string EurUsdPair = "EUR/USD";
+        private const string EurGbpPair = "EUR/GBP";
+        private const string EurRonPair = "EUR/RON";
+        private const string UsdRonPair = "USD/RON";
+        private const string GbpRonPair = "GBP/RON";
+
+        private const decimal EurUsdSeedRate = 1.15m;
+        private const decimal EurGbpSeedRate = 0.86m;
+        private const decimal EurRonSeedRate = 5.09m;
+        private const decimal UsdRonSeedRate = 4.41m;
+        private const decimal GbpRonSeedRate = 5.90m;
+
+        private const decimal NoFee = 0m;
+        private const int NoRelatedEntityId = 0;
+        private const decimal MinimumAllowedRate = 0m;
 
         private readonly IExchangeRepository exchangeRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -23,7 +39,7 @@ namespace BankingAppTeamB.Services
         private DateTime ratesLastFetched;
 
         private readonly Dictionary<int, LockedRate> lockedRates = new Dictionary<int, LockedRate>();
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(30);
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(CacheDurationSeconds);
 
         public ExchangeService(IExchangeRepository exchangeRepository,
             ITransactionPipelineService transactionPipelineService,
@@ -34,14 +50,13 @@ namespace BankingAppTeamB.Services
             this.accountService = accountService;
         }
 
-        // TODO: Replace hardcoded seed rates with live API call (FR-FX-001)
         private static Dictionary<string, decimal> GetSeedExchangeRates() => new ()
         {
-            { "EUR/USD", 1.15m },
-            { "EUR/GBP", 0.86m },
-            { "EUR/RON", 5.09m },
-            { "USD/RON", 4.41m },
-            { "GBP/RON", 5.90m }
+            { EurUsdPair, EurUsdSeedRate },
+            { EurGbpPair, EurGbpSeedRate },
+            { EurRonPair, EurRonSeedRate },
+            { UsdRonPair, UsdRonSeedRate },
+            { GbpRonPair, GbpRonSeedRate }
         };
 
         public Dictionary<string, decimal> GetLiveRates()
@@ -122,43 +137,43 @@ namespace BankingAppTeamB.Services
             return (sourceAmount * rate) - commission;
         }
 
-        public ExchangeTransaction ExecuteExchange(ExchangeDto dto)
+        public ExchangeTransaction ExecuteExchange(ExchangeDto exchangeDto)
         {
-            if (!IsRateLockValid(dto.UserId))
+            if (!IsRateLockValid(exchangeDto.UserId))
             {
                 throw new Exception("No valid rate lock found or the 3-second window has expired.");
             }
 
-            LockedRate lockedRateEntry = lockedRates[dto.UserId];
+            LockedRate lockedRateEntry = lockedRates[exchangeDto.UserId];
 
-            decimal commission = CalculateCommission(dto.SourceAmount);
-            decimal targetAmount = CalculateTargetAmount(dto.SourceAmount, lockedRateEntry.Rate);
+            decimal commission = CalculateCommission(exchangeDto.SourceAmount);
+            decimal targetAmount = CalculateTargetAmount(exchangeDto.SourceAmount, lockedRateEntry.Rate);
 
             PipelineContext context = new PipelineContext
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                Amount = dto.SourceAmount,
-                Currency = dto.SourceCurrency,
+                UserId = exchangeDto.UserId,
+                SourceAccountId = exchangeDto.SourceAccountId,
+                Amount = exchangeDto.SourceAmount,
+                Currency = exchangeDto.SourceCurrency,
                 Type = "Exchange",
-                Fee = 0,
-                CounterpartyName = $"Exchange to {dto.TargetCurrency}",
+                Fee = NoFee,
+                CounterpartyName = $"Exchange to {exchangeDto.TargetCurrency}",
                 RelatedEntityType = "Exchange",
-                RelatedEntityId = 0
+                RelatedEntityId = NoRelatedEntityId
             };
 
             Transaction transactionLog = transactionPipelineService.RunPipeline(context);
-            accountService.CreditAccount(dto.TargetAccountId, targetAmount);
+            accountService.CreditAccount(exchangeDto.TargetAccountId, targetAmount);
 
             ExchangeTransaction exchangeTransaction = new ExchangeTransaction
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                TargetAccountId = dto.TargetAccountId,
+                UserId = exchangeDto.UserId,
+                SourceAccountId = exchangeDto.SourceAccountId,
+                TargetAccountId = exchangeDto.TargetAccountId,
                 TransactionId = transactionLog.Id,
-                SourceCurrency = dto.SourceCurrency,
-                TargetCurrency = dto.TargetCurrency,
-                SourceAmount = dto.SourceAmount,
+                SourceCurrency = exchangeDto.SourceCurrency,
+                TargetCurrency = exchangeDto.TargetCurrency,
+                SourceAmount = exchangeDto.SourceAmount,
                 TargetAmount = targetAmount,
                 ExchangeRate = lockedRateEntry.Rate,
                 Commission = commission,
@@ -168,7 +183,7 @@ namespace BankingAppTeamB.Services
             };
 
             exchangeRepository.Add(exchangeTransaction);
-            lockedRates.Remove(dto.UserId);
+            lockedRates.Remove(exchangeDto.UserId);
 
             return exchangeTransaction;
         }
@@ -200,7 +215,7 @@ namespace BankingAppTeamB.Services
                 throw new ArgumentException("Source currency cannot be the same as target currency.");
             }
 
-            if (rate <= 0)
+            if (rate <= MinimumAllowedRate)
             {
                 throw new ArgumentException("Rate cannot be zero or negative.");
             }
@@ -209,9 +224,9 @@ namespace BankingAppTeamB.Services
             return exchangeRepository.AddAlert(rateAlert);
         }
 
-        public void DeleteAlert(int id)
+        public void DeleteAlert(int alertId)
         {
-            exchangeRepository.DeleteAlert(id);
+            exchangeRepository.DeleteAlert(alertId);
         }
 
         public void CheckRateAlerts()

@@ -7,6 +7,7 @@ namespace BankingAppTeamB.Services
 {
     public class AccountService : IAccountService
     {
+        private const int MinimumAmount = 0;
         private readonly IUserSessionService userSessionService;
 
         public AccountService(IUserSessionService userSessionService)
@@ -16,9 +17,9 @@ namespace BankingAppTeamB.Services
 
         public void DebitAccount(int accountId, decimal amount)
         {
-            if (amount <= 0)
+            if (amount <= MinimumAmount)
             {
-                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be > 0.");
+                throw new ArgumentOutOfRangeException(nameof(amount), $"Amount must be > {MinimumAmount}.");
             }
 
             List<Account> accounts = userSessionService.GetAccounts();
@@ -39,9 +40,9 @@ namespace BankingAppTeamB.Services
 
         public void CreditAccount(int accountId, decimal amount)
         {
-            if (amount <= 0)
+            if (amount <= MinimumAmount)
             {
-                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be > 0.");
+                throw new ArgumentOutOfRangeException(nameof(amount), $"Amount must be > {MinimumAmount}.");
             }
 
             List<Account> accounts = userSessionService.GetAccounts();
@@ -65,7 +66,7 @@ namespace BankingAppTeamB.Services
         {
             List<Account> accounts = userSessionService.GetAccounts();
             Account? account = accounts.SingleOrDefault(account => account.Id == accountId);
-            return account?.Balance ?? 0m;
+            return account?.Balance ?? MinimumAmount;
         }
     }
 }

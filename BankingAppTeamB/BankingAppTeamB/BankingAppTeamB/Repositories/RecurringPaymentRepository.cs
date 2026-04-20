@@ -10,7 +10,7 @@ namespace BankingAppTeamB.Repositories
     {
         public RecurringPayment Add(RecurringPayment recurringPayment)
         {
-            string sql = @"
+            string sqlQuery = @"
                 INSERT INTO RecurringPayment
                     (UserId, BillerId, SourceAccountId, Amount, IsPayInFull,
                      Frequency, StartDate, EndDate, NextExecutionDate, Status, CreatedAt)
@@ -22,7 +22,7 @@ namespace BankingAppTeamB.Repositories
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", recurringPayment.UserId));
                     command.Parameters.Add(new SqlParameter("@BillerId", recurringPayment.BillerId));
@@ -42,16 +42,16 @@ namespace BankingAppTeamB.Repositories
             return recurringPayment;
         }
 
-        public RecurringPayment? GetById(int id)
+        public RecurringPayment? GetById(int recurringPaymentId)
         {
-            string sql = "SELECT * FROM RecurringPayment WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM RecurringPayment WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", recurringPaymentId));
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -62,21 +62,21 @@ namespace BankingAppTeamB.Repositories
                     }
                 }
             }
-            return null;
+            throw new KeyNotFoundException($"Recurring payment with ID {recurringPaymentId} was not found.");
         }
 
         public List<RecurringPayment> GetByUserId(int userId)
         {
-            string sql = @"
+            string sqlQuery = @"
                 SELECT * FROM RecurringPayment
                 WHERE UserId = @UserId
                 ORDER BY NextExecutionDate ASC";
-            var results = new List<RecurringPayment>();
+            var recurringPayments = new List<RecurringPayment>();
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", userId));
 
@@ -84,44 +84,44 @@ namespace BankingAppTeamB.Repositories
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapRecurringPayment(reader));
+                            recurringPayments.Add(MapRecurringPayment(reader));
                         }
                     }
                 }
             }
-            return results;
+            return recurringPayments;
         }
 
-        public List<RecurringPayment> GetDueBefore(DateTime datetime)
+        public List<RecurringPayment> GetDueBefore(DateTime dueBeforeDateTime)
         {
-            string sql = @"
+            string sqlQuery = @"
                 SELECT * FROM RecurringPayment
                 WHERE NextExecutionDate <= @DateTime
                 ORDER BY NextExecutionDate ASC";
-            var results = new List<RecurringPayment>();
+            var dueRecurringPayments = new List<RecurringPayment>();
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@DateTime", datetime));
+                    command.Parameters.Add(new SqlParameter("@DateTime", dueBeforeDateTime));
 
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapRecurringPayment(reader));
+                            dueRecurringPayments.Add(MapRecurringPayment(reader));
                         }
                     }
                 }
             }
-            return results;
+            return dueRecurringPayments;
         }
 
         public void Update(RecurringPayment recurringPayment)
         {
-            string sql = @"
+            string sqlQuery = @"
                 UPDATE RecurringPayment SET
                     Amount              = @Amount,
                     IsPayInFull         = @IsPayInFull,
@@ -135,7 +135,7 @@ namespace BankingAppTeamB.Repositories
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@Amount", recurringPayment.Amount));
                     command.Parameters.Add(new SqlParameter("@IsPayInFull", recurringPayment.IsPayInFull));
@@ -151,16 +151,16 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        public void Delete(int id)
+        public void Delete(int recurringPaymentId)
         {
-            string sql = "DELETE FROM RecurringPayment WHERE Id = @Id";
+            string sqlQuery = "DELETE FROM RecurringPayment WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", recurringPaymentId));
                     command.ExecuteNonQuery();
                 }
             }

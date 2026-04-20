@@ -7,6 +7,7 @@ using BankingAppTeamB.Models;
 
 namespace BankingAppTeamB.Services
 {
+    // This is a mock implementation of IUserSessionService for demonstration purposes.
     public class UserSessionService : IUserSessionService
     {
         public int CurrentUserId { get; private set; } = 1;

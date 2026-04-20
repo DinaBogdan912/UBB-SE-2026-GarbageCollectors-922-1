@@ -10,7 +10,7 @@ namespace BankingAppTeamB.Repositories
     {
         public BillPayment Add(BillPayment billPayment)
         {
-            string sql = @"
+            string sqlQuery = @"
                 INSERT INTO BillPayment
                     (UserId, SourceAccountId, BillerId, TransactionId, BillerReference,
                      Amount, Fee, ReceiptNumber, Status, CreatedAt)
@@ -19,10 +19,10 @@ namespace BankingAppTeamB.Repositories
                     (@UserId, @SourceAccountId, @BillerId, @TransactionId, @BillerReference,
                      @Amount, @Fee, @ReceiptNumber, @Status, @CreatedAt)";
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", billPayment.UserId));
                     command.Parameters.Add(new SqlParameter("@SourceAccountId", billPayment.SourceAccountId));
@@ -43,16 +43,16 @@ namespace BankingAppTeamB.Repositories
 
         public List<BillPayment> GetByUserId(int userId)
         {
-            string sql = @"
+            string sqlQuery = @"
                 SELECT * FROM BillPayment
                 WHERE UserId = @UserId
                 ORDER BY CreatedAt DESC";
-            var results = new List<BillPayment>();
+            var billPayments = new List<BillPayment>();
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", userId));
 
@@ -60,26 +60,26 @@ namespace BankingAppTeamB.Repositories
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapBillPayment(reader));
+                            billPayments.Add(MapBillPayment(reader));
                         }
                     }
                 }
             }
-            return results;
+            return billPayments;
         }
 
         public List<Biller> GetAllBillers(bool? isActive = null)
         {
-            string sql = @"
+            string sqlQuery = @"
                 SELECT * FROM Biller
                 WHERE (@IsActive IS NULL OR IsActive = @IsActive)
                 ORDER BY Category ASC, Name ASC";
-            var results = new List<Biller>();
+            var billers = new List<Biller>();
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
                     command.Parameters.Add(new SqlParameter("@IsActive", (object?)isActive ?? DBNull.Value));
 
@@ -87,55 +87,55 @@ namespace BankingAppTeamB.Repositories
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapBiller(reader));
+                            billers.Add(MapBiller(reader));
                         }
                     }
                 }
             }
-            return results;
+            return billers;
         }
 
-        public List<Biller> SearchBillers(string query, string? category, bool? isActive = null)
+        public List<Biller> SearchBillers(string searchQuery, string? category, bool? isActive = null)
         {
-            string sql = @"
+            string sqlQuery = @"
                 SELECT * FROM Biller
                 WHERE (@IsActive IS NULL OR IsActive = @IsActive)
                 AND (@Query = '' OR Name LIKE '%' + @Query + '%')
                 AND (@Category IS NULL OR Category = @Category)
                 ORDER BY Category ASC, Name ASC";
-            var results = new List<Biller>();
+            var billers = new List<Biller>();
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
                     command.Parameters.Add(new SqlParameter("@IsActive", (object?)isActive ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@Query", query));
+                    command.Parameters.Add(new SqlParameter("@Query", searchQuery));
                     command.Parameters.Add(new SqlParameter("@Category", (object?)category ?? DBNull.Value));
 
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapBiller(reader));
+                            billers.Add(MapBiller(reader));
                         }
                     }
                 }
             }
-            return results;
+            return billers;
         }
 
-        public Biller? GetBillerById(int id)
+        public Biller? GetBillerById(int billerId)
         {
-            string sql = "SELECT * FROM Biller WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM Biller WHERE Id = @Id";
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", billerId));
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -146,12 +146,12 @@ namespace BankingAppTeamB.Repositories
                     }
                 }
             }
-            return null;
+            throw new KeyNotFoundException($"Biller with ID {billerId} was not found.");
         }
 
         public List<SavedBiller> GetSavedBillers(int userId)
         {
-            string sql = @"
+            string sqlQuery = @"
                 SELECT sb.Id, sb.UserId, sb.BillerId, sb.Nickname,
                        sb.DefaultReference, sb.CreatedAt,
                        b.Id AS B_Id, b.Name AS B_Name, b.Category AS B_Category,
@@ -159,12 +159,12 @@ namespace BankingAppTeamB.Repositories
                 FROM SavedBiller sb
                 INNER JOIN Biller b ON sb.BillerId = b.Id
                 WHERE sb.UserId = @UserId";
-            var results = new List<SavedBiller>();
+            var savedBillers = new List<SavedBiller>();
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", userId));
 
@@ -181,26 +181,26 @@ namespace BankingAppTeamB.Repositories
                                 LogoUrl = reader["B_LogoUrl"] == DBNull.Value ? null : (string)reader["B_LogoUrl"],
                                 IsActive = (bool)reader["B_IsActive"]
                             };
-                            results.Add(savedBiller);
+                            savedBillers.Add(savedBiller);
                         }
                     }
                 }
             }
-            return results;
+            return savedBillers;
         }
 
         public void SaveBiller(SavedBiller savedBiller)
         {
-            string sql = @"
+            string sqlQuery = @"
                 INSERT INTO SavedBiller
                     (UserId, BillerId, Nickname, DefaultReference, CreatedAt)
                 VALUES
                     (@UserId, @BillerId, @Nickname, @DefaultReference, @CreatedAt)";
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", savedBiller.UserId));
                     command.Parameters.Add(new SqlParameter("@BillerId", savedBiller.BillerId));
@@ -213,16 +213,16 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        public void DeleteSavedBiller(int id)
+        public void DeleteSavedBiller(int savedBillerId)
         {
-            string sql = "DELETE FROM SavedBiller WHERE Id = @Id";
+            string sqlQuery = "DELETE FROM SavedBiller WHERE Id = @Id";
 
-            using (var connection = AppDatabase.GetConnection())
+            using (var sqlConnection = AppDatabase.GetConnection())
             {
-                connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                sqlConnection.Open();
+                using (var command = new SqlCommand(sqlQuery, sqlConnection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", savedBillerId));
                     command.ExecuteNonQuery();
                 }
             }

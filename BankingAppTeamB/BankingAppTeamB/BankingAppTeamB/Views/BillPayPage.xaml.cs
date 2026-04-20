@@ -10,6 +10,8 @@ namespace BankingAppTeamB.Views
 {
     public sealed partial class BillPayPage : Page
     {
+        private const decimal ZeroAmount = 0m;
+
         public BillPayViewModel ViewModel { get; }
 
         public BillPayPage()
@@ -19,42 +21,42 @@ namespace BankingAppTeamB.Views
             DataContext = ViewModel;
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs navigationEventArgs)
         {
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(navigationEventArgs);
             await ViewModel.LoadAsync();
         }
 
-        private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs autoSuggestBoxTextChangedEventArgs)
         {
-            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            if (autoSuggestBoxTextChangedEventArgs.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
             {
                 ViewModel.SearchCommand.Execute(null);
             }
         }
 
-        private void CategoryCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CategoryCombo_SelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
         {
             ViewModel.SearchCommand.Execute(null);
         }
 
-        private void BillersList_ItemClick(object sender, ItemClickEventArgs e)
+        private void BillersList_ItemClick(object sender, ItemClickEventArgs itemClickEventArgs)
         {
-            if (e.ClickedItem is Biller biller)
+            if (itemClickEventArgs.ClickedItem is Biller biller)
             {
                 ViewModel.SelectBillerCommand.Execute(biller);
             }
         }
 
-        private void SavedBillersList_ItemClick(object sender, ItemClickEventArgs e)
+        private void SavedBillersList_ItemClick(object sender, ItemClickEventArgs itemClickEventArgs)
         {
-            if (e.ClickedItem is SavedBiller savedBiller)
+            if (itemClickEventArgs.ClickedItem is SavedBiller savedBiller)
             {
                 ViewModel.SelectBillerCommand.Execute(savedBiller);
             }
         }
 
-        private void AmountBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        private void AmountBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs numberBoxValueChangedEventArgs)
         {
             if (!double.IsNaN(sender.Value) && !double.IsInfinity(sender.Value))
             {
@@ -62,7 +64,7 @@ namespace BankingAppTeamB.Views
             }
             else
             {
-                ViewModel.Amount = 0;
+                ViewModel.Amount = ZeroAmount;
             }
         }
     }

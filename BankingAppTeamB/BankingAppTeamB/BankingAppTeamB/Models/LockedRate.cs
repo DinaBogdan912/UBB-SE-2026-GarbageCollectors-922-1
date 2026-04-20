@@ -4,21 +4,28 @@ namespace BankingAppTeamB.Models
 {
     public class LockedRate
     {
+        private const int LockDurationSeconds = 30;
+        private const int MinimumSecondsRemaining = 0;
         public int UserId { get; set; }
         public string CurrencyPair { get; set; }
         public decimal Rate { get; set; }
         public DateTime LockedAt { get; set; }
 
-        public bool IsExpired()
+        public bool IsLockExpired()
         {
-            return (DateTime.Now - LockedAt).TotalSeconds > 30;
+            var elapsedSeconds = (DateTime.Now - LockedAt).TotalSeconds;
+            return elapsedSeconds > LockDurationSeconds;
         }
 
-        public int SecondsRemaining()
+        public int GetSecondsRemaining()
         {
-            var elapsed = (DateTime.Now - LockedAt).TotalSeconds;
-            int remaining = 30 - (int)Math.Floor(elapsed);
-            return Math.Max(remaining, 0);
+            var elapsedSeconds = (DateTime.Now - LockedAt).TotalSeconds;
+            int remainingSeconds = LockDurationSeconds - (int)Math.Floor(elapsedSeconds);
+            return Math.Max(remainingSeconds, MinimumSecondsRemaining);
         }
+
+        public bool IsExpired() => IsLockExpired();
+
+        public int SecondsRemaining() => GetSecondsRemaining();
     }
 }

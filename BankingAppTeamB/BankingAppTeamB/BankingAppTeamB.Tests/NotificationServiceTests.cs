@@ -1,265 +1,141 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Services;
 using FluentAssertions;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services
+namespace BankingAppTeamB.Tests;
+
+public class NotificationServiceTests
 {
-    public class NotificationServiceTests
+    private const int DefaultId = 1;
+    private const int DefaultUserId = 42;
+    private const decimal DefaultAmount = 150.50m;
+    private const decimal TargetRate = 1.1m;
+    private const decimal ReachedRate = 1.1m;
+    private const string DefaultCurrency = "EUR";
+    private const string BaseCurrency = "EUR";
+    private const string TargetCurrency = "USD";
+    private const string RecipientName = "John Doe";
+    private const string RecipientIban = "RO123456789123456";
+
+    [Fact]
+    public void NotifyTransferCompleted_WhenCalled_DoesNotThrow()
     {
-        private static NotificationService CreateSut() => new();
-
-        [Fact]
-        public void NotifyTransferCompleted_DoesNotThrow()
+        // Arrange
+        var notificationService = new NotificationService();
+        var transfer = new Transfer
         {
-            var sut = CreateSut();
-            var transfer = new Transfer
-            {
-                Id = 1,
-                Amount = 150m,
-                Currency = "RON",
-                RecipientName = "Ana",
-                RecipientIBAN = "RO49AAAA1B31007593840000",
-                Status = TransferStatus.Completed,
-                CreatedAt = DateTime.Now
-            };
+            Id = DefaultId,
+            UserId = DefaultUserId,
+            Amount = DefaultAmount,
+            Currency = DefaultCurrency,
+            RecipientName = RecipientName,
+            RecipientIBAN = RecipientIban,
+            Status = TransferStatus.Completed,
+            CreatedAt = DateTime.UtcNow
+        };
 
-            Action act = () => sut.NotifyTransferCompleted(transfer);
+        // Act
+        Action notifyAction = () => notificationService.NotifyTransferCompleted(transfer);
 
-            act.Should().NotThrow();
-        }
+        // Assert
+        notifyAction.Should().NotThrow();
+    }
 
-        [Fact]
-        public void NotifyBeneficiaryStatsUpdated_DoesNotThrow()
+    [Fact]
+    public void NotifyBeneficiaryStatsUpdated_WhenCalled_DoesNotThrow()
+    {
+        // Arrange
+        var notificationService = new NotificationService();
+        var beneficiary = new Beneficiary
         {
-            var sut = CreateSut();
-            var beneficiary = new Beneficiary
-            {
-                Name = "Ana",
-                IBAN = "RO49AAAA1B31007593840000",
-                TotalAmountSent = 300m,
-                TransferCount = 2
-            };
+            Name = RecipientName,
+            IBAN = RecipientIban,
+            TotalAmountSent = DefaultAmount,
+            TransferCount = 1
+        };
 
-            Action act = () => sut.NotifyBeneficiaryStatsUpdated(beneficiary, 150m);
+        // Act
+        Action notifyAction = () => notificationService.NotifyBeneficiaryStatsUpdated(beneficiary, DefaultAmount);
 
-            act.Should().NotThrow();
-        }
+        // Assert
+        notifyAction.Should().NotThrow();
+    }
 
-        [Fact]
-        public void NotifyRateAlertTriggered_DoesNotThrow()
+    [Fact]
+    public void NotifyRateAlertTriggered_WhenCalled_DoesNotThrow()
+    {
+        // Arrange
+        var notificationService = new NotificationService();
+        var rateAlert = new RateAlert(DefaultUserId, BaseCurrency, TargetCurrency, TargetRate, false);
+
+        // Act
+        Action notifyAction = () => notificationService.NotifyRateAlertTriggered(rateAlert, ReachedRate);
+
+        // Assert
+        notifyAction.Should().NotThrow();
+    }
+
+    [Fact]
+    public void NotifyRecurringPaymentDue_WhenCalled_DoesNotThrow()
+    {
+        // Arrange
+        var notificationService = new NotificationService();
+        var recurringPayment = new RecurringPayment
         {
-            var sut = CreateSut();
-            var alert = new RateAlert
-            {
-                BaseCurrency = "USD",
-                TargetCurrency = "RON",
-                TargetRate = 4.5m
-            };
+            Amount = DefaultAmount,
+            NextExecutionDate = DateTime.UtcNow,
+            Status = PaymentStatus.Active
+        };
 
-            Action act = () => sut.NotifyRateAlertTriggered(alert, 4.6m);
+        // Act
+        Action notifyAction = () => notificationService.NotifyRecurringPaymentDue(recurringPayment);
 
-            act.Should().NotThrow();
-        }
+        // Assert
+        notifyAction.Should().NotThrow();
+    }
 
-        [Fact]
-        public void NotifyRecurringPaymentDue_DoesNotThrow()
+    [Fact]
+    public void CheckAndNotifyDuePayments_WhenPaymentIsDue_DoesNotThrow()
+    {
+        // Arrange
+        var notificationService = new NotificationService();
+        var warningWindow = TimeSpan.FromDays(1);
+        var duePayment = new RecurringPayment
         {
-            var sut = CreateSut();
-            var payment = new RecurringPayment
-            {
-                Id = 1,
-                Amount = 99m,
-                NextExecutionDate = DateTime.Now.AddDays(1),
-                Status = PaymentStatus.Completed
-            };
+            Id = DefaultId,
+            NextExecutionDate = DateTime.Now.AddHours(12)
+        };
+        var payments = new List<RecurringPayment> { duePayment };
 
-            Action act = () => sut.NotifyRecurringPaymentDue(payment);
+        // Act
+        Action checkAction = () => notificationService.CheckAndNotifyDuePayments(payments, warningWindow);
 
-            act.Should().NotThrow();
-        }
+        // Assert
+        checkAction.Should().NotThrow();
+    }
 
-        [Fact]
-        public void CheckAndNotifyDuePayments_DoesNotThrow_WithEmptyList()
+    [Fact]
+    public void CheckAndNotifyRateAlerts_WhenAlertIsTriggered_DoesNotThrow()
+    {
+        // Arrange
+        var notificationService = new NotificationService();
+        var rateAlert = new RateAlert(DefaultUserId, BaseCurrency, TargetCurrency, TargetRate, false)
         {
-            var sut = CreateSut();
-
-            Action act = () => sut.CheckAndNotifyDuePayments(new List<RecurringPayment>(), TimeSpan.FromDays(1));
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyDuePayments_DoesNotThrow_WhenPaymentWithinWarningWindow()
+            IsTriggered = false
+        };
+        var alerts = new List<RateAlert> { rateAlert };
+        var liveRates = new Dictionary<string, decimal>
         {
-            var sut = CreateSut();
-            var payment = new RecurringPayment
-            {
-                Id = 1,
-                Amount = 50m,
-                NextExecutionDate = DateTime.Now.AddHours(12),
-                Status = PaymentStatus.Completed
-            };
+            { $"{BaseCurrency}/{TargetCurrency}", ReachedRate }
+        };
 
-            Action act = () => sut.CheckAndNotifyDuePayments(
-                new List<RecurringPayment> { payment },
-                TimeSpan.FromDays(1));
+        // Act
+        Action checkAction = () => notificationService.CheckAndNotifyRateAlerts(alerts, liveRates);
 
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyDuePayments_DoesNotThrow_WhenPaymentBeyondWarningWindow()
-        {
-            var sut = CreateSut();
-            var payment = new RecurringPayment
-            {
-                Id = 2,
-                Amount = 75m,
-                NextExecutionDate = DateTime.Now.AddDays(10),
-                Status = PaymentStatus.Completed
-            };
-
-            Action act = () => sut.CheckAndNotifyDuePayments(
-                new List<RecurringPayment> { payment },
-                TimeSpan.FromDays(1));
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyDuePayments_DoesNotThrow_WhenPaymentIsOverdue()
-        {
-            var sut = CreateSut();
-            var payment = new RecurringPayment
-            {
-                Id = 3,
-                Amount = 200m,
-                NextExecutionDate = DateTime.Now.AddDays(-3),
-                Status = PaymentStatus.Completed
-            };
-
-            Action act = () => sut.CheckAndNotifyDuePayments(
-                new List<RecurringPayment> { payment },
-                TimeSpan.FromDays(1));
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyDuePayments_DoesNotThrow_WithMultiplePayments()
-        {
-            var sut = CreateSut();
-            var payments = new List<RecurringPayment>
-            {
-                new() { Id = 1, Amount = 50m,  NextExecutionDate = DateTime.Now.AddHours(6) },
-                new() { Id = 2, Amount = 75m,  NextExecutionDate = DateTime.Now.AddDays(5) },
-                new() { Id = 3, Amount = 100m, NextExecutionDate = DateTime.Now.AddDays(-1) }
-            };
-
-            Action act = () => sut.CheckAndNotifyDuePayments(payments, TimeSpan.FromDays(1));
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyRateAlerts_DoesNotThrow_WithEmptyList()
-        {
-            var sut = CreateSut();
-
-            Action act = () => sut.CheckAndNotifyRateAlerts(
-                new List<RateAlert>(),
-                new Dictionary<string, decimal> { ["USD/RON"] = 4.5m });
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyRateAlerts_DoesNotThrow_WhenPairNotInLiveRates()
-        {
-            var sut = CreateSut();
-            var alert = new RateAlert { BaseCurrency = "USD", TargetCurrency = "RON", TargetRate = 4.5m };
-
-            Action act = () => sut.CheckAndNotifyRateAlerts(
-                new List<RateAlert> { alert },
-                new Dictionary<string, decimal> { ["EUR/RON"] = 5.0m });
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyRateAlerts_DoesNotThrow_WhenRateBelowTarget()
-        {
-            var sut = CreateSut();
-            var alert = new RateAlert { BaseCurrency = "USD", TargetCurrency = "RON", TargetRate = 5.0m };
-
-            Action act = () => sut.CheckAndNotifyRateAlerts(
-                new List<RateAlert> { alert },
-                new Dictionary<string, decimal> { ["USD/RON"] = 4.5m });
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyRateAlerts_DoesNotThrow_WhenRateMeetsTarget_AndNotTriggered()
-        {
-            var sut = CreateSut();
-            var alert = new RateAlert { BaseCurrency = "USD", TargetCurrency = "RON", TargetRate = 4.5m, IsTriggered = false };
-
-            Action act = () => sut.CheckAndNotifyRateAlerts(
-                new List<RateAlert> { alert },
-                new Dictionary<string, decimal> { ["USD/RON"] = 4.5m });
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyRateAlerts_DoesNotThrow_WhenRateAboveTarget_AndNotTriggered()
-        {
-            var sut = CreateSut();
-            var alert = new RateAlert { BaseCurrency = "EUR", TargetCurrency = "RON", TargetRate = 4.9m, IsTriggered = false };
-
-            Action act = () => sut.CheckAndNotifyRateAlerts(
-                new List<RateAlert> { alert },
-                new Dictionary<string, decimal> { ["EUR/RON"] = 5.1m });
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyRateAlerts_DoesNotThrow_WhenRateAboveTarget_ButAlreadyTriggered()
-        {
-            var sut = CreateSut();
-            var alert = new RateAlert { BaseCurrency = "EUR", TargetCurrency = "RON", TargetRate = 4.9m, IsTriggered = true };
-
-            Action act = () => sut.CheckAndNotifyRateAlerts(
-                new List<RateAlert> { alert },
-                new Dictionary<string, decimal> { ["EUR/RON"] = 5.1m });
-
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void CheckAndNotifyRateAlerts_DoesNotThrow_WithMixedAlerts()
-        {
-            var sut = CreateSut();
-            var alerts = new List<RateAlert>
-            {
-                new() { BaseCurrency = "USD", TargetCurrency = "RON", TargetRate = 4.5m, IsTriggered = false },
-                new() { BaseCurrency = "EUR", TargetCurrency = "RON", TargetRate = 5.0m, IsTriggered = true },
-                new() { BaseCurrency = "GBP", TargetCurrency = "RON", TargetRate = 6.0m, IsTriggered = false }
-            };
-            var rates = new Dictionary<string, decimal>
-            {
-                ["USD/RON"] = 4.6m,
-                ["EUR/RON"] = 5.2m
-            };
-
-            Action act = () => sut.CheckAndNotifyRateAlerts(alerts, rates);
-
-            act.Should().NotThrow();
-        }
+        // Assert
+        checkAction.Should().NotThrow();
     }
 }

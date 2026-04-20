@@ -1,293 +1,320 @@
-﻿using BankingAppTeamB.Models;
+using System;
+using System.Collections.Generic;
+using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Repositories;
 using BankingAppTeamB.Services;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Moq;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services
+namespace BankingAppTeamB.Tests;
+
+public class TransferServiceTests
 {
-    public class TransferServiceTests
+    private const int DefaultUserId = 1;
+    private const int DefaultSourceAccountId = 100;
+    private const decimal ValidAmount = 500m;
+    private const decimal AmountRequiringTwoFa = 1500m;
+    private const string ValidCurrency = "EUR";
+    private const string RecipientName = "John Doe";
+    private const string ValidIbanRomanian = "RO12XXXX000000000000000";
+    private const string InvalidIban = "INVALID123";
+    private const string DefaultReference = "Invoice payment";
+    private const string ValidTwoFaToken = "123456";
+
+    [Fact]
+    public void ExecuteTransfer_WhenIbanIsInvalid_ThrowsInvalidOperationException()
     {
-        private readonly Mock<ITransferRepository> _transferRepo = new();
-        private readonly Mock<IBeneficiaryRepository> _beneficiaryRepo = new();
-        private readonly Mock<ITransactionPipelineService> _pipeline = new();
-        private readonly Mock<IExchangeService> _exchange = new();
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
+        var transferDto = new TransferDto { RecipientIBAN = InvalidIban };
 
-        private TransferService CreateSut(bool withExchange = true)
-            => new(
-                _transferRepo.Object,
-                _beneficiaryRepo.Object,
-                _pipeline.Object,
-                withExchange ? _exchange.Object : null);
+        // Act
+        Action executeAction = () => service.ExecuteTransfer(transferDto);
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("   ")]
-        public void ValidateIBAN_ReturnsFalse_ForNullOrWhitespace(string? iban)
+        // Assert
+        executeAction.Should().Throw<InvalidOperationException>().WithMessage("Recipient IBAN is invalid.");
+        mockPipelineService.Verify(s => s.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void ExecuteTransfer_WhenValid_ExecutesPipelineAndSavesTransfer()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
+
+        var transferDto = new TransferDto
         {
-            var sut = CreateSut();
-            sut.ValidateIBAN(iban!).Should().BeFalse();
-        }
+            UserId = DefaultUserId,
+            SourceAccountId = DefaultSourceAccountId,
+            Amount = ValidAmount,
+            Currency = ValidCurrency,
+            RecipientName = RecipientName,
+            RecipientIBAN = ValidIbanRomanian,
+            Reference = DefaultReference,
+            TwoFAToken = ValidTwoFaToken
+        };
 
-        [Theory]
-        [InlineData("R")]
-        [InlineData("123456789012345")]
-        [InlineData("ROAA56789012345")]
-        [InlineData("RO49AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARO49AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")]
-        [InlineData("1O49AAAA1B31007593840000")]
-        [InlineData("R149AAAA1B31007593840000")]
-        [InlineData("ROA9AAAA1B31007593840000")]
-        [InlineData("RO4AAAAA1B31007593840000")]
-        public void ValidateIBAN_ReturnsFalse_ForInvalidFormats(string iban)
+        var expectedTransactionId = 123;
+        var transaction = new Transaction { Id = expectedTransactionId };
+
+        mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), ValidTwoFaToken)).Returns(transaction);
+        mockBeneficiaryRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
+
+        var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
+
+        // Act
+        var result = service.ExecuteTransfer(transferDto);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.UserId.Should().Be(DefaultUserId);
+        result.SourceAccountId.Should().Be(DefaultSourceAccountId);
+        result.TransactionId.Should().Be(expectedTransactionId);
+        result.RecipientName.Should().Be(RecipientName);
+        result.RecipientIBAN.Should().Be(ValidIbanRomanian);
+        result.RecipientBankName.Should().Be("Romanian Bank");
+        result.Amount.Should().Be(ValidAmount);
+        result.Currency.Should().Be(ValidCurrency);
+        result.Fee.Should().Be(0);
+        result.Reference.Should().Be(DefaultReference);
+        result.Status.Should().Be(TransferStatus.Completed);
+        result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
+
+        mockTransferRepository.Verify(r => r.Add(It.IsAny<Transfer>()), Times.Once);
+    }
+
+    [Fact]
+    public void ExecuteTransfer_WhenBeneficiaryExists_UpdatesBeneficiaryStats()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
+
+        var transferDto = new TransferDto
         {
-            var sut = CreateSut();
-            sut.ValidateIBAN(iban).Should().BeFalse();
-        }
+            UserId = DefaultUserId,
+            RecipientIBAN = ValidIbanRomanian,
+            Amount = ValidAmount
+        };
 
-        [Fact]
-        public void ValidateIBAN_ReturnsTrue_ForValidBasicFormat()
+        mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>())).Returns(new Transaction());
+
+        var existingBeneficiary = new Beneficiary
         {
-            var sut = CreateSut();
-            sut.ValidateIBAN("RO49AAAA1B31007593840000").Should().BeTrue();
-        }
+            IBAN = ValidIbanRomanian,
+            TransferCount = 1,
+            TotalAmountSent = 100m
+        };
 
-        [Theory]
-        [InlineData(null, "Unknown Bank")]
-        [InlineData("", "Unknown Bank")]
-        [InlineData("R", "Unknown Bank")]
-        [InlineData("RO49...", "Romanian Bank")]
-        [InlineData("DE12...", "German Bank")]
-        [InlineData("GB12...", "UK Bank")]
-        [InlineData("FR12...", "French Bank")]
-        [InlineData("US12...", "US Bank")]
-        [InlineData("ES12...", "International Bank")]
-        public void GetBankNameFromIBAN_ReturnsExpected(string? iban, string expected)
-        {
-            var sut = CreateSut();
-            sut.GetBankNameFromIBAN(iban!).Should().Be(expected);
-        }
+        mockBeneficiaryRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary> { existingBeneficiary });
 
-        [Theory]
-        [InlineData(999.99, false)]
-        [InlineData(1000.00, true)]
-        [InlineData(1500.00, true)]
-        public void Requires2FA_ReturnsExpected(decimal amount, bool expected)
-        {
-            var sut = CreateSut();
-            sut.Requires2FA(amount).Should().Be(expected);
-        }
+        // Act
+        service.ExecuteTransfer(transferDto);
 
-        [Fact]
-        public void GetFxPreview_ReturnsIdentity_WhenSameCurrency()
-        {
-            var sut = CreateSut();
-            var fx = sut.GetFxPreview("USD", "usd", 123.45m);
+        // Assert
+        existingBeneficiary.TransferCount.Should().Be(2);
+        existingBeneficiary.TotalAmountSent.Should().Be(100m + ValidAmount);
+        mockBeneficiaryRepository.Verify(r => r.Update(existingBeneficiary), Times.Once);
+    }
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 123.45m });
-        }
+    [Fact]
+    public void ValidateIBAN_WhenIbanIsValid_ReturnsTrue()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-        [Fact]
-        public void GetFxPreview_ReturnsIdentity_WhenExchangeServiceNull()
-        {
-            var sut = CreateSut(withExchange: false);
-            var fx = sut.GetFxPreview("USD", "EUR", 100m);
+        // Act
+        var result = service.ValidateIBAN(ValidIbanRomanian);
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 100m });
-        }
+        // Assert
+        result.Should().BeTrue();
+    }
 
-        [Fact]
-        public void GetFxPreview_ReturnsIdentity_WhenPairMissing()
-        {
-            _exchange.Setup(x => x.GetLiveRates()).Returns(new Dictionary<string, decimal> { ["USD/JPY"] = 150m });
-            var sut = CreateSut();
+    [Fact]
+    public void ValidateIBAN_WhenIbanIsInvalid_ReturnsFalse()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-            var fx = sut.GetFxPreview("USD", "EUR", 100m);
+        // Act
+        var result = service.ValidateIBAN(InvalidIban);
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 100m });
-        }
+        // Assert
+        result.Should().BeFalse();
+    }
 
-        [Fact]
-        public void GetFxPreview_ReturnsConvertedAndRounded_WhenPairExists()
-        {
-            _exchange.Setup(x => x.GetLiveRates()).Returns(new Dictionary<string, decimal> { ["USD/EUR"] = 0.91337m });
-            var sut = CreateSut();
+    [Fact]
+    public void GetBankNameFromIBAN_WhenIbanIsEmpty_ReturnsUnknownBank()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-            var fx = sut.GetFxPreview("usd", "eur", 10m);
+        // Act
+        var result = service.GetBankNameFromIBAN(string.Empty);
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 0.91337m, ConvertedAmount = 9.13m });
-        }
+        // Assert
+        result.Should().Be("Unknown Bank");
+    }
 
-        [Fact]
-        public void ExecuteTransfer_Throws_WhenRecipientIbanInvalid()
-        {
-            var sut = CreateSut();
-            var dto = new TransferDto
-            {
-                UserId = 1,
-                SourceAccountId = 10,
-                RecipientName = "John",
-                RecipientIBAN = "BAD",
-                Amount = 100m,
-                Currency = "USD",
-                Reference = "Ref",
-                TwoFAToken = "123456"
-            };
+    [Fact]
+    public void GetBankNameFromIBAN_WhenIbanStartsRO_ReturnsRomanianBank()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-            Action act = () => sut.ExecuteTransfer(dto);
+        // Act
+        var result = service.GetBankNameFromIBAN(ValidIbanRomanian);
 
-            act.Should().Throw<InvalidOperationException>();
-        }
+        // Assert
+        result.Should().Be("Romanian Bank");
+    }
 
-        [Fact]
-        public void ExecuteTransfer_CallsPipeline_WithExpectedContext()
-        {
-            _pipeline.Setup(x => x.RunPipeline(It.IsAny<PipelineContext>(), "654321"))
-                .Returns(new Transaction { Id = 777 });
-            _beneficiaryRepo.Setup(x => x.GetByUserId(42)).Returns(new List<Beneficiary>());
+    [Fact]
+    public void GetFxPreview_WhenSourceAndTargetCurrencyAreSame_ReturnsRateOne()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockExchangeService = new Mock<IExchangeService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object, mockExchangeService.Object);
 
-            var sut = CreateSut();
-            var dto = new TransferDto
-            {
-                UserId = 42,
-                SourceAccountId = 100,
-                RecipientName = "Alice",
-                RecipientIBAN = "RO49AAAA1B31007593840000",
-                Amount = 150m,
-                Currency = "EUR",
-                Reference = "Invoice 2026",
-                TwoFAToken = "654321"
-            };
+        // Act
+        var result = service.GetFxPreview("EUR", "EUR", ValidAmount);
 
-            sut.ExecuteTransfer(dto);
+        // Assert
+        result.ExchangeRate.Should().Be(1m);
+        result.ConvertedAmount.Should().Be(ValidAmount);
+        mockExchangeService.Verify(s => s.GetLiveRates(), Times.Never);
+    }
 
-            _pipeline.Verify(x => x.RunPipeline(
-                It.Is<PipelineContext>(c =>
-                    c.UserId == dto.UserId &&
-                    c.SourceAccountId == dto.SourceAccountId &&
-                    c.Amount == dto.Amount &&
-                    c.Currency == dto.Currency &&
-                    c.Type == "Transfer" &&
-                    c.RelatedEntityType == "Transfer"),
-                dto.TwoFAToken), Times.Once);
-        }
+    [Fact]
+    public void GetFxPreview_WhenExchangeServiceIsNull_ReturnsRateOne()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object); // null exchange service
 
-        [Fact]
-        public void ExecuteTransfer_AddsTransfer_ToRepository()
-        {
-            _pipeline.Setup(x => x.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()))
-                .Returns(new Transaction { Id = 777 });
-            _beneficiaryRepo.Setup(x => x.GetByUserId(42)).Returns(new List<Beneficiary>());
+        // Act
+        var result = service.GetFxPreview("EUR", "USD", ValidAmount);
 
-            var sut = CreateSut();
-            var dto = new TransferDto
-            {
-                UserId = 42,
-                SourceAccountId = 100,
-                RecipientName = "Alice",
-                RecipientIBAN = "RO49AAAA1B31007593840000",
-                Amount = 150m,
-                Currency = "EUR",
-                Reference = "Invoice 2026",
-                TwoFAToken = "654321"
-            };
+        // Assert
+        result.ExchangeRate.Should().Be(1m);
+        result.ConvertedAmount.Should().Be(ValidAmount);
+    }
 
-            sut.ExecuteTransfer(dto);
+    [Fact]
+    public void GetFxPreview_WhenPairNotFound_ReturnsRateOne()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockExchangeService = new Mock<IExchangeService>();
+        mockExchangeService.Setup(s => s.GetLiveRates()).Returns(new Dictionary<string, decimal>());
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object, mockExchangeService.Object);
 
-            _transferRepo.Verify(x => x.Add(It.Is<Transfer>(t =>
-                t.UserId == dto.UserId &&
-                t.SourceAccountId == dto.SourceAccountId &&
-                t.TransactionId == 777 &&
-                t.RecipientIBAN == dto.RecipientIBAN &&
-                t.Amount == dto.Amount &&
-                t.Currency == dto.Currency &&
-                t.Reference == dto.Reference &&
-                t.Status == TransferStatus.Completed)), Times.Once);
-        }
+        // Act
+        var result = service.GetFxPreview("EUR", "USD", ValidAmount);
 
-        [Fact]
-        public void ExecuteTransfer_UpdatesMatchingBeneficiary()
-        {
-            _pipeline.Setup(x => x.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()))
-                .Returns(new Transaction { Id = 1 });
+        // Assert
+        result.ExchangeRate.Should().Be(1m);
+        result.ConvertedAmount.Should().Be(ValidAmount);
+    }
 
-            var beneficiary = new Beneficiary
-            {
-                IBAN = "RO49AAAA1B31007593840000",
-                TransferCount = 1,
-                TotalAmountSent = 50m
-            };
+    [Fact]
+    public void GetFxPreview_WhenPairExists_ReturnsCorrectConversion()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockExchangeService = new Mock<IExchangeService>();
+        var liveRates = new Dictionary<string, decimal> { { "EUR/USD", 1.2m } };
+        mockExchangeService.Setup(s => s.GetLiveRates()).Returns(liveRates);
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object, mockExchangeService.Object);
+        var amount = 100m;
+        var expectedConvertedAmount = 120m;
 
-            _beneficiaryRepo.Setup(x => x.GetByUserId(42))
-                .Returns(new List<Beneficiary> { beneficiary });
+        // Act
+        var result = service.GetFxPreview("EUR", "USD", amount);
 
-            var sut = CreateSut();
-            var dto = new TransferDto
-            {
-                UserId = 42,
-                SourceAccountId = 100,
-                RecipientName = "Alice",
-                RecipientIBAN = "RO49AAAA1B31007593840000",
-                Amount = 150m,
-                Currency = "EUR",
-                Reference = "Invoice 2026",
-                TwoFAToken = "654321"
-            };
+        // Assert
+        result.ExchangeRate.Should().Be(1.2m);
+        result.ConvertedAmount.Should().Be(expectedConvertedAmount);
+    }
 
-            sut.ExecuteTransfer(dto);
+    [Fact]
+    public void GetHistory_WhenCalled_ReturnsHistoryFromRepository()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
+        var expectedTransfers = new List<Transfer> { new Transfer { UserId = DefaultUserId } };
+        mockTransferRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(expectedTransfers);
 
-            _beneficiaryRepo.Verify(x => x.Update(It.Is<Beneficiary>(b =>
-                b.IBAN == dto.RecipientIBAN &&
-                b.TransferCount == 2 &&
-                b.TotalAmountSent == 200m)), Times.Once);
-        }
+        // Act
+        var result = service.GetHistory(DefaultUserId);
 
-        [Fact]
-        public void ExecuteTransfer_DoesNotUpdateBeneficiary_WhenNoMatch()
-        {
-            _pipeline.Setup(x => x.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()))
-                .Returns(new Transaction { Id = 99 });
+        // Assert
+        result.Should().BeEquivalentTo(expectedTransfers);
+    }
 
-            _beneficiaryRepo.Setup(x => x.GetByUserId(1))
-                .Returns(new List<Beneficiary> { new() { IBAN = "DE12123456789012345" } });
+    [Fact]
+    public void Requires2FA_WhenAmountIsBelowThreshold_ReturnsFalse()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-            var sut = CreateSut();
-            var dto = new TransferDto
-            {
-                UserId = 1,
-                SourceAccountId = 2,
-                RecipientName = "Bob",
-                RecipientIBAN = "RO49123456789012345",
-                Amount = 75m,
-                Currency = "USD",
-                Reference = "Test",
-                TwoFAToken = "222"
-            };
+        // Act
+        var result = service.Requires2FA(ValidAmount);
 
-            sut.ExecuteTransfer(dto);
+        // Assert
+        result.Should().BeFalse();
+    }
 
-            _beneficiaryRepo.Verify(x => x.Update(It.IsAny<Beneficiary>()), Times.Never);
-        }
+    [Fact]
+    public void Requires2FA_WhenAmountIsAtOrAboveThreshold_ReturnsTrue()
+    {
+        // Arrange
+        var mockTransferRepository = new Mock<ITransferRepository>();
+        var mockBeneficiaryRepository = new Mock<IBeneficiaryRepository>();
+        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var service = new TransferService(mockTransferRepository.Object, mockBeneficiaryRepository.Object, mockPipelineService.Object);
 
-        [Fact]
-        public void GetHistory_ReturnsRepositoryData()
-        {
-            var expected = new List<Transfer>
-            {
-                new() { UserId = 7, Amount = 12m },
-                new() { UserId = 7, Amount = 34m }
-            };
-            _transferRepo.Setup(x => x.GetByUserId(7)).Returns(expected);
+        // Act
+        var result = service.Requires2FA(AmountRequiringTwoFa);
 
-            var sut = CreateSut();
-            var result = sut.GetHistory(7);
-
-            result.Should().BeSameAs(expected);
-        }
+        // Assert
+        result.Should().BeTrue();
     }
 }

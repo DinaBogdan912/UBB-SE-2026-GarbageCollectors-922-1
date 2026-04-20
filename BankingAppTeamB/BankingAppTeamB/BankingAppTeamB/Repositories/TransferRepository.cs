@@ -10,7 +10,7 @@ namespace BankingAppTeamB.Repositories
     {
         public void Add(Transfer transfer)
         {
-            string sql = @"
+            string sqlQuery = @"
                 INSERT INTO Transfers
                     (UserId, SourceAccountId, TransactionId, RecipientName, RecipientIBAN,
                      RecipientBankName, Amount, Currency, ConvertedAmount, ExchangeRate,
@@ -24,7 +24,7 @@ namespace BankingAppTeamB.Repositories
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", transfer.UserId));
                     command.Parameters.Add(new SqlParameter("@SourceAccountId", transfer.SourceAccountId));
@@ -51,16 +51,16 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
-        public Transfer GetById(int id)
+        public Transfer GetById(int transferId)
         {
-            string sql = "SELECT * FROM Transfers WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM Transfers WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", transferId));
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -72,18 +72,18 @@ namespace BankingAppTeamB.Repositories
                 }
             }
 
-            return null;
+            throw new KeyNotFoundException($"Transfer with ID {transferId} was not found.");
         }
 
         public List<Transfer> GetByUserId(int userId)
         {
-            string sql = "SELECT * FROM Transfers WHERE UserId = @UserId ORDER BY CreatedAt DESC";
-            var results = new List<Transfer>();
+            string sqlQuery = "SELECT * FROM Transfers WHERE UserId = @UserId ORDER BY CreatedAt DESC";
+            var transfers = new List<Transfer>();
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", userId));
 
@@ -91,26 +91,26 @@ namespace BankingAppTeamB.Repositories
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapTransfer(reader));
+                            transfers.Add(MapTransfer(reader));
                         }
                     }
                 }
             }
 
-            return results;
+            return transfers;
         }
 
-        public void UpdateStatus(int id, string newStatus)
+        public void UpdateStatus(int transferId, string transferStatus)
         {
-            string sql = "UPDATE Transfers SET Status = @Status WHERE Id = @Id";
+            string sqlQuery = "UPDATE Transfers SET Status = @Status WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Status", newStatus));
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Status", transferStatus));
+                    command.Parameters.Add(new SqlParameter("@Id", transferId));
                     command.ExecuteNonQuery();
                 }
             }

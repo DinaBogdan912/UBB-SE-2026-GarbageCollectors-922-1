@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 
 namespace BankingAppTeamB.Data
@@ -28,13 +24,13 @@ namespace BankingAppTeamB.Data
             {
                 try
                 {
-                    string sql = File.ReadAllText(script);
-                    using var command = new SqlCommand(sql, connection);
+                    string scriptContent = File.ReadAllText(script);
+                    using var command = new SqlCommand(scriptContent, connection);
                     command.ExecuteNonQuery();
                 }
-                catch (Exception ex)
+                catch (Exception executeScriptException)
                 {
-                    throw new InvalidOperationException($"Failed to execute script '{script}': {ex.Message}", ex);
+                    throw new InvalidOperationException($"Failed to execute script '{script}': {executeScriptException.Message}", executeScriptException);
                 }
             }
         }

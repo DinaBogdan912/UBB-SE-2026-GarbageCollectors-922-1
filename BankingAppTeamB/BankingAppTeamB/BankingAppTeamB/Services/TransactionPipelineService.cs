@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Services
     {
         private const int ExpectedCurrencyCodeLength = 3;
         private const int TwoFaAmountThreshold = 1000;
+        private const int MinimumAmount = 0;
 
         private readonly ITransactionRepository transactionRepository;
         private readonly IAccountService accountService;
@@ -18,19 +19,19 @@ namespace BankingAppTeamB.Services
             this.accountService = accountService;
         }
 
-        public ValidationResult Validate(PipelineContext ctx)
+        public ValidationResult Validate(PipelineContext pipelineContext)
         {
-            if (ctx.Amount <= 0)
+            if (pipelineContext.Amount <= MinimumAmount)
             {
                 return ValidationResult.Failure("Amount must be greater than zero.");
             }
 
-            if (ctx.Currency == null || ctx.Currency.Length != ExpectedCurrencyCodeLength)
+            if (pipelineContext.Currency == null || pipelineContext.Currency.Length != ExpectedCurrencyCodeLength)
             {
                 return ValidationResult.Failure("Currency code must be exactly 3 characters.");
             }
 
-            if (!accountService.IsAccountValid(ctx.SourceAccountId))
+            if (!accountService.IsAccountValid(pipelineContext.SourceAccountId))
             {
                 return ValidationResult.Failure("Source account is invalid or does not exist.");
             }
@@ -38,9 +39,9 @@ namespace BankingAppTeamB.Services
             return ValidationResult.Success();
         }
 
-        public AuthResult Authorize(PipelineContext ctx, string? twoFAToken = null)
+        public AuthResult Authorize(PipelineContext pipelineContext, string? twoFAToken = null)
         {
-            if (ctx.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
+            if (pipelineContext.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
             {
                 return AuthResult.Failure("A 2FA token is required for transfers of 1000 or more.");
             }
@@ -52,17 +53,17 @@ namespace BankingAppTeamB.Services
             return accountService;
         }
 
-        public ExecutionResult Execute(PipelineContext ctx)
+        public ExecutionResult Execute(PipelineContext pipelineContext)
         {
             try
             {
-                decimal totalDebit = ctx.Amount + ctx.Fee;
-                accountService.DebitAccount(ctx.SourceAccountId, totalDebit);
+                decimal totalDebit = pipelineContext.Amount + pipelineContext.Fee;
+                accountService.DebitAccount(pipelineContext.SourceAccountId, totalDebit);
                 return ExecutionResult.Success();
             }
-            catch (Exception ex)
+            catch (Exception debitException)
             {
-                return ExecutionResult.Failure($"Debit failed: {ex.Message}");
+                return ExecutionResult.Failure($"Debit failed: {debitException.Message}");
             }
         }
 
@@ -72,44 +73,44 @@ namespace BankingAppTeamB.Services
             return transaction;
         }
 
-        public Transaction RunPipeline(PipelineContext ctx, string? twoFAToken = null)
+        public Transaction RunPipeline(PipelineContext pipelineContext, string? twoFAToken = null)
         {
-            var validation = Validate(ctx);
-            if (!validation.IsValid)
+            var validationResult = Validate(pipelineContext);
+            if (!validationResult.IsValid)
             {
-                throw new InvalidOperationException(validation.Message);
+                throw new InvalidOperationException(validationResult.Message);
             }
 
-            var auth = Authorize(ctx, twoFAToken);
-            if (!auth.IsAuthorized)
+            var authorizationResult = Authorize(pipelineContext, twoFAToken);
+            if (!authorizationResult.IsAuthorized)
             {
-                throw new InvalidOperationException(auth.Message);
+                throw new InvalidOperationException(authorizationResult.Message);
             }
 
-            var execution = Execute(ctx);
-            if (!execution.IsSuccess)
+            var executionResult = Execute(pipelineContext);
+            if (!executionResult.IsSuccess)
             {
-                throw new InvalidOperationException(execution.Message);
+                throw new InvalidOperationException(executionResult.Message);
             }
 
-            return LogTransaction(BuildTransaction(ctx));
+            return LogTransaction(BuildTransaction(pipelineContext));
         }
 
-        private Transaction BuildTransaction(PipelineContext ctx)
+        private Transaction BuildTransaction(PipelineContext pipelineContext)
         {
             return new Transaction
             {
-                AccountId = ctx.SourceAccountId,
-                Type = ctx.Type,
+                AccountId = pipelineContext.SourceAccountId,
+                Type = pipelineContext.Type,
                 Direction = "Debit",
-                Amount = ctx.Amount,
-                Currency = ctx.Currency,
-                BalanceAfter = accountService.GetBalance(ctx.SourceAccountId),
-                CounterpartyName = ctx.CounterpartyName,
-                Fee = ctx.Fee,
+                Amount = pipelineContext.Amount,
+                Currency = pipelineContext.Currency,
+                BalanceAfter = accountService.GetBalance(pipelineContext.SourceAccountId),
+                CounterpartyName = pipelineContext.CounterpartyName,
+                Fee = pipelineContext.Fee,
                 Status = "Completed",
-                RelatedEntityType = ctx.RelatedEntityType,
-                RelatedEntityId = ctx.RelatedEntityId,
+                RelatedEntityType = pipelineContext.RelatedEntityType,
+                RelatedEntityId = pipelineContext.RelatedEntityId,
                 CreatedAt = DateTime.Now
             };
         }

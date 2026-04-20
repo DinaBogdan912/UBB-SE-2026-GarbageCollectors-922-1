@@ -14,6 +14,9 @@ namespace BankingAppTeamB.ViewModels
 {
     public class RecurringPaymentViewModel : ViewModelBase
     {
+        private const int NoBillerSelected = 0;
+        private const decimal NoAmount = 0m;
+
         private readonly IRecurringPaymentService recurringPaymentService;
         private readonly IBillPaymentService billPaymentService;
 
@@ -50,8 +53,8 @@ namespace BankingAppTeamB.ViewModels
             };
 
             selectedPayment = null;
-            selectedBillerId = 0;
-            amount = 0;
+            selectedBillerId = NoBillerSelected;
+            amount = NoAmount;
             frequency = RecurringFrequency.Weekly;
             startDate = DateTime.Today;
             endDate = null;
@@ -122,8 +125,6 @@ namespace BankingAppTeamB.ViewModels
 
         public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
 
-        // Compute error visibility here as a property to bind the xaml to it
-        // (avoid view logic here)
         public Microsoft.UI.Xaml.Visibility ErrorMessageVisibility => HasError ?
             Microsoft.UI.Xaml.Visibility.Visible :
             Microsoft.UI.Xaml.Visibility.Collapsed;
@@ -153,7 +154,7 @@ namespace BankingAppTeamB.ViewModels
             {
                 if (SetProperty(ref selectedBiller, value))
                 {
-                    SelectedBillerId = value?.Id ?? 0;
+                    SelectedBillerId = value?.Id ?? NoBillerSelected;
                 }
             }
         }
@@ -178,15 +179,15 @@ namespace BankingAppTeamB.ViewModels
                 var payments = await Task.Run(() =>
                     recurringPaymentService.GetByUser(ServiceLocator.UserSessionService.CurrentUserId));
 
-                var billers = await Task.Run(() =>
+                var availableBillers = await Task.Run(() =>
                     billPaymentService.GetBillerDirectory(null));
 
                 Payments = new ObservableCollection<RecurringPayment>(payments);
-                Billers = new ObservableCollection<Biller>(billers);
+                Billers = new ObservableCollection<Biller>(availableBillers);
             }
-            catch (Exception ex)
+            catch (Exception loadException)
             {
-                ErrorMessage = $"Failed to load recurring payments: {ex.Message}";
+                ErrorMessage = $"Failed to load recurring payments: {loadException.Message}";
             }
         }
 
@@ -228,7 +229,7 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                if (Amount <= 0)
+                if (Amount <= NoAmount)
                 {
                     ErrorMessage = "Please enter a valid amount.";
                     return;
@@ -240,7 +241,7 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                var dto = new RecurringPaymentDto
+                var recurringPaymentDto = new RecurringPaymentDto
                 {
                     UserId = ServiceLocator.UserSessionService.CurrentUserId,
                     BillerId = SelectedBiller.Id,
@@ -253,14 +254,14 @@ namespace BankingAppTeamB.ViewModels
                 };
 
                 var createdPayment = await Task.Run(() =>
-                    recurringPaymentService.Create(dto));
+                    recurringPaymentService.Create(recurringPaymentDto));
 
                 Payments.Add(createdPayment);
                 ClearForm();
             }
-            catch (Exception ex)
+            catch (Exception createPaymentException)
             {
-                ErrorMessage = $"Failed to create recurring payment: {ex.Message}";
+                ErrorMessage = $"Failed to create recurring payment: {createPaymentException.Message}";
             }
         }
 
@@ -278,17 +279,17 @@ namespace BankingAppTeamB.ViewModels
 
                 recurringPaymentService.Pause(payment.Id);
 
-                var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
-                if (existing != null)
+                var existingPayment = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
+                if (existingPayment != null)
                 {
-                    var index = Payments.IndexOf(existing);
-                    existing.Status = PaymentStatus.Paused;
-                    Payments[index] = existing;
+                    var index = Payments.IndexOf(existingPayment);
+                    existingPayment.Status = PaymentStatus.Paused;
+                    Payments[index] = existingPayment;
                 }
             }
-            catch (Exception ex)
+            catch (Exception executePauseException)
             {
-                ErrorMessage = $"Failed to pause recurring payment: {ex.Message}";
+                ErrorMessage = $"Failed to pause recurring payment: {executePauseException.Message}";
             }
         }
 
@@ -306,17 +307,17 @@ namespace BankingAppTeamB.ViewModels
 
                 recurringPaymentService.Resume(payment.Id);
 
-                var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
-                if (existing != null)
+                var existingPayment = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
+                if (existingPayment != null)
                 {
-                    var index = Payments.IndexOf(existing);
-                    existing.Status = PaymentStatus.Active;
-                    Payments[index] = existing;
+                    var index = Payments.IndexOf(existingPayment);
+                    existingPayment.Status = PaymentStatus.Active;
+                    Payments[index] = existingPayment;
                 }
             }
-            catch (Exception ex)
+            catch (Exception executeResumeException)
             {
-                ErrorMessage = $"Failed to resume recurring payment: {ex.Message}";
+                ErrorMessage = $"Failed to resume recurring payment: {executeResumeException.Message}";
             }
         }
 
@@ -334,17 +335,17 @@ namespace BankingAppTeamB.ViewModels
 
                 recurringPaymentService.Cancel(payment.Id);
 
-                var existing = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
-                if (existing != null)
+                var existingPayment = Payments.FirstOrDefault(paymentEntry => paymentEntry.Id == payment.Id);
+                if (existingPayment != null)
                 {
-                    var index = Payments.IndexOf(existing);
-                    existing.Status = PaymentStatus.Cancelled;
-                    Payments[index] = existing;
+                    var index = Payments.IndexOf(existingPayment);
+                    existingPayment.Status = PaymentStatus.Cancelled;
+                    Payments[index] = existingPayment;
                 }
             }
-            catch (Exception ex)
+            catch (Exception executeCancelException)
             {
-                ErrorMessage = $"Failed to cancel recurring payment: {ex.Message}";
+                ErrorMessage = $"Failed to cancel recurring payment: {executeCancelException.Message}";
             }
         }
 
@@ -352,9 +353,9 @@ namespace BankingAppTeamB.ViewModels
         {
             SelectedPayment = null;
             SelectedBiller = null;
-            SelectedBillerId = 0;
+            SelectedBillerId = NoBillerSelected;
             SelectedAccount = null;
-            Amount = 0;
+            Amount = NoAmount;
             Frequency = RecurringFrequency.Weekly;
             StartDate = DateTime.Today;
             EndDate = null;

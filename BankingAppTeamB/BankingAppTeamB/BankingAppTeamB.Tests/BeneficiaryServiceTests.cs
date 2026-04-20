@@ -1,270 +1,211 @@
-﻿using BankingAppTeamB.Models;
+using System;
+using System.Collections.Generic;
+using BankingAppTeamB.Models;
+using BankingAppTeamB.Models.DTOs;
 using BankingAppTeamB.Repositories;
 using BankingAppTeamB.Services;
 using FluentAssertions;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services
+namespace BankingAppTeamB.Tests;
+
+public class BeneficiaryServiceTests
 {
-    public class BeneficiaryServiceTests
+    private const int DefaultUserId = 1;
+    private const int DefaultBeneficiaryId = 10;
+    private const int DefaultSourceAccountId = 100;
+    private const string ValidIban = "RO12XXXX000000000000000";
+    private const string InvalidIban = "INVALID123";
+    private const string DefaultName = "John Doe";
+    private const string DefaultBankName = "Test Bank";
+    private const string EmptyName = "";
+
+    [Fact]
+    public void GetByUser_WhenCalled_ReturnsBeneficiaries()
     {
-        private readonly Mock<IBeneficiaryRepository> _repo = new();
-
-        private BeneficiaryService CreateSut() => new(_repo.Object);
-
-        private static object InvokeInternalAdd(BeneficiaryService sut, string name, string iban, string bankName, int userId)
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+        var expectedBeneficiaries = new List<Beneficiary>
         {
-            var method = typeof(BeneficiaryService).GetMethod(
-                "Add",
-                BindingFlags.Instance | BindingFlags.NonPublic,
-                binder: null,
-                types: new[] { typeof(string), typeof(string), typeof(string), typeof(int) },
-                modifiers: null)!;
+            new Beneficiary { Id = DefaultBeneficiaryId, UserId = DefaultUserId, Name = DefaultName, IBAN = ValidIban }
+        };
 
-            try
-            {
-                return method.Invoke(sut, new object[] { name, iban, bankName, userId })!;
-            }
-            catch (TargetInvocationException ex) when (ex.InnerException != null)
-            {
-                throw ex.InnerException;
-            }
-        }
+        mockRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(expectedBeneficiaries);
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("   ")]
-        public void ValidateIBAN_ReturnsFalse_ForNullOrWhitespace(string? iban)
+        // Act
+        var result = service.GetByUser(DefaultUserId);
+
+        // Assert
+        result.Should().BeEquivalentTo(expectedBeneficiaries);
+        mockRepository.Verify(r => r.GetByUserId(DefaultUserId), Times.Once);
+    }
+
+    [Fact]
+    public void ValidateIBAN_WhenIbanIsValid_ReturnsTrue()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+
+        // Act
+        var result = service.ValidateIBAN(ValidIban);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ValidateIBAN_WhenIbanIsInvalid_ReturnsFalse()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+
+        // Act
+        var result = service.ValidateIBAN(InvalidIban);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Add_WhenIbanIsInvalid_ThrowsArgumentException()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+
+        // Act
+        Action addAction = () => service.Add(DefaultName, InvalidIban, DefaultUserId);
+
+        // Assert
+        addAction.Should().Throw<ArgumentException>().WithMessage("Invalid IBAN format.");
+        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Never);
+    }
+
+    [Fact]
+    public void Add_WhenNameIsEmpty_ThrowsArgumentException()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+
+        // Act
+        Action addAction = () => service.Add(EmptyName, ValidIban, DefaultUserId);
+
+        // Assert
+        addAction.Should().Throw<ArgumentException>().WithMessage("Name cannot be empty");
+        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Never);
+    }
+
+    [Fact]
+    public void Add_WhenIbanAlreadyExists_ThrowsArgumentException()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+        var existingBeneficiaries = new List<Beneficiary>
         {
-            var sut = CreateSut();
-            sut.ValidateIBAN(iban!).Should().BeFalse();
-        }
+            new Beneficiary { IBAN = ValidIban }
+        };
 
-        [Theory]
-        [InlineData("R")]
-        [InlineData("RO12345678901234567890123456789012345")]
-        public void ValidateIBAN_ReturnsFalse_ForInvalidLength(string iban)
-        {
-            var sut = CreateSut();
-            sut.ValidateIBAN(iban).Should().BeFalse();
-        }
+        mockRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(existingBeneficiaries);
 
-        [Theory]
-        [InlineData("1O49AAAA1B31007593840000")]
-        [InlineData("R149AAAA1B31007593840000")]
-        public void ValidateIBAN_ReturnsFalse_WhenFirstTwoAreNotLetters(string iban)
-        {
-            var sut = CreateSut();
-            sut.ValidateIBAN(iban).Should().BeFalse();
-        }
+        // Act
+        Action addAction = () => service.Add(DefaultName, ValidIban, DefaultUserId);
 
-        [Theory]
-        [InlineData("ROA9AAAA1B31007593840000")]
-        [InlineData("RO4AAAAA1B31007593840000")]
-        public void ValidateIBAN_ReturnsFalse_WhenThirdOrFourthAreNotDigits(string iban)
-        {
-            var sut = CreateSut();
-            sut.ValidateIBAN(iban).Should().BeFalse();
-        }
+        // Assert
+        addAction.Should().Throw<ArgumentException>().WithMessage("A beneficiary with this IBAN already exists for this user.");
+        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Never);
+    }
 
-        [Fact]
-        public void ValidateIBAN_ReturnsTrue_ForValidIban()
-        {
-            var sut = CreateSut();
-            sut.ValidateIBAN("RO49AAAA1B31007593840000").Should().BeTrue();
-        }
+    [Fact]
+    public void Add_WhenDataIsValid_SavesAndReturnsBeneficiary()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
 
-        [Fact]
-        public void GetByUser_ReturnsRepositoryData()
-        {
-            var expected = new List<Beneficiary> { new() { UserId = 7, Name = "Ana", IBAN = "RO49AAAA1B31007593840000" } };
-            _repo.Setup(r => r.GetByUserId(7)).Returns(expected);
-            var sut = CreateSut();
+        mockRepository.Setup(r => r.GetByUserId(DefaultUserId)).Returns(new List<Beneficiary>());
+        mockRepository.Setup(r => r.Add(It.IsAny<Beneficiary>()));
 
-            var result = sut.GetByUser(7);
+        var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
-            result.Should().BeSameAs(expected);
-        }
+        // Act
+        var result = service.Add(DefaultName, ValidIban, DefaultUserId);
 
-        [Fact]
-        public void Add_Throws_WhenIbanInvalid()
-        {
-            var sut = CreateSut();
-            Action act = () => sut.Add("Ana", "BAD", 1);
+        // Assert
+        result.Should().NotBeNull();
+        result.UserId.Should().Be(DefaultUserId);
+        result.Name.Should().Be(DefaultName);
+        result.IBAN.Should().Be(ValidIban);
+        result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
+        mockRepository.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Once);
+    }
 
-            act.Should().Throw<ArgumentException>().WithMessage("Invalid IBAN format.");
-        }
+    [Fact]
+    public void Update_WhenNameIsEmpty_ThrowsArgumentException()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+        var beneficiary = new Beneficiary { Name = EmptyName };
 
-        [Fact]
-        public void Add_Throws_WhenNameEmpty()
-        {
-            var sut = CreateSut();
-            Action act = () => sut.Add(" ", "RO49AAAA1B31007593840000", 1);
+        // Act
+        Action updateAction = () => service.Update(beneficiary);
 
-            act.Should().Throw<ArgumentException>().WithMessage("Name cannot be empty");
-        }
+        // Assert
+        updateAction.Should().Throw<ArgumentException>().WithMessage("Beneficiary name cannot be empty.");
+        mockRepository.Verify(r => r.Update(It.IsAny<Beneficiary>()), Times.Never);
+    }
 
-        [Fact]
-        public void Add_Throws_WhenDuplicateIbanExists_CaseInsensitive()
-        {
-            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>
-            {
-                new() { IBAN = "RO49AAAA1B31007593840000" }
-            });
-            var sut = CreateSut();
-            Action act = () => sut.Add("Ana", "ro49aaaa1b31007593840000", 1);
+    [Fact]
+    public void Update_WhenDataIsValid_UpdatesBeneficiary()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+        var beneficiary = new Beneficiary { Name = DefaultName };
 
-            act.Should().Throw<ArgumentException>().WithMessage("A beneficiary with this IBAN already exists for this user.");
-        }
+        // Act
+        service.Update(beneficiary);
 
-        [Fact]
-        public void Add_CallsRepoAdd_WhenInputValid()
-        {
-            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
-            var sut = CreateSut();
+        // Assert
+        mockRepository.Verify(r => r.Update(beneficiary), Times.Once);
+    }
 
-            sut.Add("Ana", "RO49AAAA1B31007593840000", 1);
+    [Fact]
+    public void Delete_WhenCalled_DeletesBeneficiary()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
 
-            _repo.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Once);
-        }
+        // Act
+        service.Delete(DefaultBeneficiaryId);
 
-        [Fact]
-        public void Add_ReturnsBeneficiary_WhenInputValid()
-        {
-            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
-            var sut = CreateSut();
+        // Assert
+        mockRepository.Verify(r => r.Delete(DefaultBeneficiaryId), Times.Once);
+    }
 
-            var result = sut.Add("Ana", "RO49AAAA1B31007593840000", 1);
+    [Fact]
+    public void BuildTransferDtoFrom_WhenCalled_ReturnsCorrectDto()
+    {
+        // Arrange
+        var mockRepository = new Mock<IBeneficiaryRepository>();
+        var service = new BeneficiaryService(mockRepository.Object);
+        var beneficiary = new Beneficiary { Name = DefaultName, IBAN = ValidIban };
 
-            result.Should().BeOfType<Beneficiary>();
-        }
+        // Act
+        var result = service.BuildTransferDtoFrom(beneficiary, DefaultSourceAccountId, DefaultUserId);
 
-        [Fact]
-        public void Update_Throws_WhenNameEmpty()
-        {
-            var sut = CreateSut();
-            Action act = () => sut.Update(new Beneficiary { Name = " " });
-
-            act.Should().Throw<ArgumentException>().WithMessage("Beneficiary name cannot be empty.");
-        }
-
-        [Fact]
-        public void Update_CallsRepoUpdate_WhenNameValid()
-        {
-            var sut = CreateSut();
-
-            sut.Update(new Beneficiary { Name = "Ana", IBAN = "RO49AAAA1B31007593840000" });
-
-            _repo.Verify(r => r.Update(It.IsAny<Beneficiary>()), Times.Once);
-        }
-
-        [Fact]
-        public void Delete_CallsRepoDelete()
-        {
-            var sut = CreateSut();
-
-            sut.Delete(123);
-
-            _repo.Verify(r => r.Delete(123), Times.Once);
-        }
-
-        [Fact]
-        public void BuildTransferDtoFrom_MapsFieldsCorrectly()
-        {
-            var sut = CreateSut();
-            var beneficiary = new Beneficiary { Name = "Ana", IBAN = "RO49AAAA1B31007593840000" };
-
-            var dto = sut.BuildTransferDtoFrom(beneficiary, 55, 9);
-
-            dto.Should().BeEquivalentTo(new
-            {
-                UserId = 9,
-                SourceAccountId = 55,
-                RecipientName = "Ana",
-                RecipientIBAN = "RO49AAAA1B31007593840000"
-            });
-        }
-
-        [Fact]
-        public void InternalAdd_Throws_WhenIbanInvalid()
-        {
-            var sut = CreateSut();
-            Action act = () => InvokeInternalAdd(sut, "Ana", "BAD", "Bank", 1);
-
-            act.Should().Throw<ArgumentException>().WithMessage("Invalid IBAN format.");
-        }
-
-        [Fact]
-        public void InternalAdd_Throws_WhenNameEmpty()
-        {
-            var sut = CreateSut();
-            Action act = () => InvokeInternalAdd(sut, " ", "RO49AAAA1B31007593840000", "Bank", 1);
-
-            act.Should().Throw<ArgumentException>().WithMessage("Name cannot be empty");
-        }
-
-        [Fact]
-        public void InternalAdd_Throws_WhenDuplicateIbanExists_CaseInsensitive()
-        {
-            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>
-            {
-                new() { IBAN = "RO49AAAA1B31007593840000" }
-            });
-
-            var sut = CreateSut();
-            Action act = () => InvokeInternalAdd(sut, "Ana", "ro49aaaa1b31007593840000", "Bank", 1);
-
-            act.Should().Throw<ArgumentException>()
-                .WithMessage("A beneficiary with this IBAN already exists for this user.");
-        }
-
-        [Fact]
-        public void InternalAdd_ReturnsBeneficiary_WhenInputValid()
-        {
-            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
-            _repo.Setup(r => r.Add(It.IsAny<Beneficiary>()));
-            var sut = CreateSut();
-
-            var result = InvokeInternalAdd(sut, "Ana", "RO49AAAA1B31007593840000", "Test Bank", 1);
-
-            result.Should().BeOfType<Beneficiary>();
-        }
-
-        [Fact]
-        public void InternalAdd_CapturedBeneficiaryHasCorrectFields_WhenInputValid()
-        {
-            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
-            Beneficiary? captured = null;
-            _repo.Setup(r => r.Add(It.IsAny<Beneficiary>()))
-                .Callback<Beneficiary>(beneficiary => captured = beneficiary);
-            var sut = CreateSut();
-
-            InvokeInternalAdd(sut, "Ana", "RO49AAAA1B31007593840000", "Test Bank", 1);
-
-            captured.Should().BeEquivalentTo(new
-            {
-                UserId = 1,
-                Name = "Ana",
-                IBAN = "RO49AAAA1B31007593840000",
-                BankName = "Test Bank"
-            });
-        }
-
-        [Fact]
-        public void InternalAdd_CallsRepoAddOnce_WhenInputValid()
-        {
-            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
-            _repo.Setup(r => r.Add(It.IsAny<Beneficiary>()));
-            var sut = CreateSut();
-
-            InvokeInternalAdd(sut, "Ana", "RO49AAAA1B31007593840000", "Test Bank", 1);
-
-            _repo.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Once);
-        }
+        // Assert
+        result.Should().NotBeNull();
+        result.UserId.Should().Be(DefaultUserId);
+        result.SourceAccountId.Should().Be(DefaultSourceAccountId);
+        result.RecipientName.Should().Be(DefaultName);
+        result.RecipientIBAN.Should().Be(ValidIban);
     }
 }

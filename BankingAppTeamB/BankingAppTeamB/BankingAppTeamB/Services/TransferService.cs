@@ -10,7 +10,11 @@ namespace BankingAppTeamB.Services
     {
         private const int IbanCountryCodeLength = 2;
         private const decimal TwoFaAmountThreshold = 1000m;
-
+        private const string SwitchDefault = null;
+        private const int DecimalRoundingPlaces = 2;
+        private const int DefaultExchangeRate = 1;
+        private const int NoFee = 0;
+        private const int NoRelatedEntityId = 0;
         private readonly ITransferRepository transferRepository;
         private readonly IBeneficiaryRepository beneficiaryRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -28,52 +32,52 @@ namespace BankingAppTeamB.Services
             this.exchangeService = exchangeService;
         }
 
-        public Transfer ExecuteTransfer(TransferDto dto)
+        public Transfer ExecuteTransfer(TransferDto transferDto)
         {
-            if (!ValidateIBAN(dto.RecipientIBAN))
+            if (!ValidateIBAN(transferDto.RecipientIBAN))
             {
                 throw new InvalidOperationException("Recipient IBAN is invalid.");
             }
 
-            var context = new PipelineContext
+            var pipelineContext = new PipelineContext
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                Amount = dto.Amount,
-                Currency = dto.Currency,
+                UserId = transferDto.UserId,
+                SourceAccountId = transferDto.SourceAccountId,
+                Amount = transferDto.Amount,
+                Currency = transferDto.Currency,
                 Type = "Transfer",
-                Fee = 0,
-                CounterpartyName = dto.RecipientName,
+                Fee = NoFee,
+                CounterpartyName = transferDto.RecipientName,
                 RelatedEntityType = "Transfer",
-                RelatedEntityId = 0
+                RelatedEntityId = NoRelatedEntityId
             };
 
-            var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
+            var transaction = transactionPipelineService.RunPipeline(pipelineContext, transferDto.TwoFAToken);
 
             var transfer = new Transfer
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
+                UserId = transferDto.UserId,
+                SourceAccountId = transferDto.SourceAccountId,
                 TransactionId = transaction.Id,
-                RecipientName = dto.RecipientName,
-                RecipientIBAN = dto.RecipientIBAN,
-                RecipientBankName = GetBankNameFromIBAN(dto.RecipientIBAN),
-                Amount = dto.Amount,
-                Currency = dto.Currency,
-                Fee = 0,
-                Reference = dto.Reference,
+                RecipientName = transferDto.RecipientName,
+                RecipientIBAN = transferDto.RecipientIBAN,
+                RecipientBankName = GetBankNameFromIBAN(transferDto.RecipientIBAN),
+                Amount = transferDto.Amount,
+                Currency = transferDto.Currency,
+                Fee = NoFee,
+                Reference = transferDto.Reference,
                 Status = TransferStatus.Completed,
                 CreatedAt = DateTime.UtcNow
             };
 
             transferRepository.Add(transfer);
 
-            var beneficiaries = beneficiaryRepository.GetByUserId(dto.UserId);
-            var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == dto.RecipientIBAN);
+            var beneficiaries = beneficiaryRepository.GetByUserId(transferDto.UserId);
+            var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == transferDto.RecipientIBAN);
             if (match != null)
             {
                 match.TransferCount++;
-                match.TotalAmountSent += dto.Amount;
+                match.TotalAmountSent += transferDto.Amount;
                 match.LastTransferDate = DateTime.UtcNow;
                 beneficiaryRepository.Update(match);
             }
@@ -101,7 +105,7 @@ namespace BankingAppTeamB.Services
                 "GB" => "UK Bank",
                 "FR" => "French Bank",
                 "US" => "US Bank",
-                _ => "International Bank"
+                SwitchDefault => "International Bank"
             };
         }
 
@@ -109,12 +113,12 @@ namespace BankingAppTeamB.Services
         {
             if (sourceCurrency.Equals(targetCurrency, StringComparison.OrdinalIgnoreCase))
             {
-                return new FxPreview { Rate = 1, ConvertedAmount = amount };
+                return new FxPreview { ExchangeRate = DefaultExchangeRate, ConvertedAmount = amount };
             }
 
             if (exchangeService == null)
             {
-                return new FxPreview { Rate = 1, ConvertedAmount = amount };
+                return new FxPreview { ExchangeRate = DefaultExchangeRate, ConvertedAmount = amount };
             }
 
             var rates = exchangeService.GetLiveRates();
@@ -122,14 +126,14 @@ namespace BankingAppTeamB.Services
 
             if (!rates.ContainsKey(pair))
             {
-                return new FxPreview { Rate = 1, ConvertedAmount = amount };
+                return new FxPreview { ExchangeRate = DefaultExchangeRate, ConvertedAmount = amount };
             }
 
             decimal rate = rates[pair];
             return new FxPreview
             {
-                Rate = rate,
-                ConvertedAmount = Math.Round(amount * rate, 2)
+                ExchangeRate = rate,
+                ConvertedAmount = Math.Round(amount * rate, DecimalRoundingPlaces)
             };
         }
 

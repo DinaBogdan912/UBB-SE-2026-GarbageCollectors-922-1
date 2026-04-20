@@ -12,6 +12,7 @@ namespace BankingAppTeamB.ViewModels
 {
     public class RateAlertViewModel : ViewModelBase
     {
+        private const int MinimumRate = 0;
         private readonly IExchangeService exchangeService;
         private readonly int userId;
 
@@ -96,12 +97,12 @@ namespace BankingAppTeamB.ViewModels
 
         private async Task LoadRatesAsync()
         {
-            var rates = await Task.Run(() => exchangeService.GetLiveRates());
-            LiveRates = rates;
+            var liveRates = await Task.Run(() => exchangeService.GetLiveRates());
+            LiveRates = liveRates;
 
             AvailableCurrencies.Clear();
 
-            var currencies = rates.Keys
+            var currencies = liveRates.Keys
                 .SelectMany(currencyPair => currencyPair.Split('/'))
                 .Distinct()
                 .OrderBy(currencyCode => currencyCode);
@@ -145,19 +146,19 @@ namespace BankingAppTeamB.ViewModels
                 return;
             }
 
-            var text = TargetRateText.Trim();
-            if (text.Contains(',') && text.Contains('.'))
+            var targetRateText = TargetRateText.Trim();
+            if (targetRateText.Contains(',') && targetRateText.Contains('.'))
             {
                 ErrorMessage = "Invalid number format.";
                 return;
             }
 
-            text = text.Replace('.', ',');
+            targetRateText = targetRateText.Replace('.', ',');
 
-            if (!decimal.TryParse(text,
+            if (!decimal.TryParse(targetRateText,
                 System.Globalization.NumberStyles.Number,
                 new System.Globalization.CultureInfo("ro-RO"),
-                out decimal parsedRate) || parsedRate <= 0)
+                out decimal parsedRate) || parsedRate <= MinimumRate)
             {
                 ErrorMessage = "Target rate must be a valid number (ex: 1,2 or 1.2).";
                 return;
@@ -175,9 +176,9 @@ namespace BankingAppTeamB.ViewModels
                 TargetRateText = string.Empty;
                 ErrorMessage = string.Empty;
             }
-            catch (Exception ex)
+            catch (Exception createAlertException)
             {
-                ErrorMessage = ex.Message;
+                ErrorMessage = createAlertException.Message;
             }
         }
 
@@ -190,11 +191,11 @@ namespace BankingAppTeamB.ViewModels
 
         private void OnAlertTriggered(RateAlert alert)
         {
-            foreach (var existing in Alerts)
+            foreach (var existingAlert in Alerts)
             {
-                if (existing.Id == alert.Id)
+                if (existingAlert.Id == alert.Id)
                 {
-                    existing.IsTriggered = true;
+                    existingAlert.IsTriggered = true;
                     break;
                 }
             }

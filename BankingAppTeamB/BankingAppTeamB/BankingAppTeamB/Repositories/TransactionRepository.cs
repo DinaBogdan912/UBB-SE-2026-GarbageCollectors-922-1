@@ -8,7 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class TransactionRepository : ITransactionRepository
     {
-        public void Add(Transaction t)
+        public void Add(Transaction transaction)
         {
             string insertSql = @"
                 INSERT INTO Transactions
@@ -27,38 +27,38 @@ namespace BankingAppTeamB.Repositories
 
                 using (var command = new SqlCommand(insertSql, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@AccountId", t.AccountId));
-                    command.Parameters.Add(new SqlParameter("@CardId", (object?)t.CardId ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@TransactionRef", t.TransactionRef));
-                    command.Parameters.Add(new SqlParameter("@Type", t.Type));
-                    command.Parameters.Add(new SqlParameter("@Direction", t.Direction));
-                    command.Parameters.Add(new SqlParameter("@Amount", t.Amount));
-                    command.Parameters.Add(new SqlParameter("@Currency", t.Currency));
-                    command.Parameters.Add(new SqlParameter("@BalanceAfter", t.BalanceAfter));
-                    command.Parameters.Add(new SqlParameter("@CounterpartyName", t.CounterpartyName));
-                    command.Parameters.Add(new SqlParameter("@CounterpartyIBAN", (object?)t.CounterpartyIBAN ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@Fee", t.Fee));
-                    command.Parameters.Add(new SqlParameter("@ExchangeRate", (object?)t.ExchangeRate ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@Status", t.Status));
-                    command.Parameters.Add(new SqlParameter("@RelatedEntityType", (object?)t.RelatedEntityType ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@RelatedEntityId", (object?)t.RelatedEntityId ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@CreatedAt", t.CreatedAt));
+                    command.Parameters.Add(new SqlParameter("@AccountId", transaction.AccountId));
+                    command.Parameters.Add(new SqlParameter("@CardId", (object?)transaction.CardId ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@TransactionRef", transaction.TransactionRef));
+                    command.Parameters.Add(new SqlParameter("@Type", transaction.Type));
+                    command.Parameters.Add(new SqlParameter("@Direction", transaction.Direction));
+                    command.Parameters.Add(new SqlParameter("@Amount", transaction.Amount));
+                    command.Parameters.Add(new SqlParameter("@Currency", transaction.Currency));
+                    command.Parameters.Add(new SqlParameter("@BalanceAfter", transaction.BalanceAfter));
+                    command.Parameters.Add(new SqlParameter("@CounterpartyName", transaction.CounterpartyName));
+                    command.Parameters.Add(new SqlParameter("@CounterpartyIBAN", (object?)transaction.CounterpartyIBAN ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@Fee", transaction.Fee));
+                    command.Parameters.Add(new SqlParameter("@ExchangeRate", (object?)transaction.ExchangeRate ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@Status", transaction.Status));
+                    command.Parameters.Add(new SqlParameter("@RelatedEntityType", (object?)transaction.RelatedEntityType ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@RelatedEntityId", (object?)transaction.RelatedEntityId ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@CreatedAt", transaction.CreatedAt));
 
-                    t.Id = (int)command.ExecuteScalar();
+                    transaction.Id = (int)command.ExecuteScalar();
                 }
             }
         }
 
-        public Transaction GetById(int id)
+        public Transaction GetById(int transactionId)
         {
-            string sql = "SELECT * FROM Transactions WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM Transactions WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", transactionId));
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -69,18 +69,18 @@ namespace BankingAppTeamB.Repositories
                     }
                 }
             }
-            return null;
+            throw new KeyNotFoundException($"Transaction with ID {transactionId} was not found.");
         }
 
         public List<Transaction> GetByUserId(int userId)
         {
-            string sql = "SELECT * FROM Transactions WHERE AccountId = @UserId";
-            var results = new List<Transaction>();
+            string sqlQuery = "SELECT * FROM Transactions WHERE AccountId = @UserId";
+            var transactions = new List<Transaction>();
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", userId));
 
@@ -88,12 +88,12 @@ namespace BankingAppTeamB.Repositories
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapTransaction(reader));
+                            transactions.Add(MapTransaction(reader));
                         }
                     }
                 }
             }
-            return results;
+            return transactions;
         }
 
         private Transaction MapTransaction(SqlDataReader reader)

@@ -10,6 +10,8 @@ namespace BankingAppTeamB.Views
 {
     public sealed partial class RecurringPaymentsPage : Page
     {
+        private const decimal ZeroAmount = 0m;
+
         private readonly RecurringPaymentViewModel viewModel;
 
         public RecurringPaymentsPage()
@@ -23,18 +25,18 @@ namespace BankingAppTeamB.Views
             EndDatePicker.Date = DateTimeOffset.Now;
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs navigationEventArgs)
         {
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(navigationEventArgs);
             await viewModel.LoadAsync();
         }
 
-        private void AmountNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        private void AmountNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs numberBoxValueChangedEventArgs)
         {
-            viewModel.Amount = double.IsNaN(sender.Value) ? 0 : (decimal)sender.Value;
+            viewModel.Amount = double.IsNaN(sender.Value) ? ZeroAmount : (decimal)sender.Value;
         }
 
-        private void StartDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs args)
+        private void StartDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs datePickerValueChangedEventArgs)
         {
             if (sender is DatePicker picker)
             {
@@ -42,7 +44,7 @@ namespace BankingAppTeamB.Views
             }
         }
 
-        private void EndDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs args)
+        private void EndDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs datePickerValueChangedEventArgs)
         {
             if (sender is DatePicker picker)
             {
@@ -50,12 +52,12 @@ namespace BankingAppTeamB.Views
             }
         }
 
-        private async void CreateButton_Click(object sender, RoutedEventArgs e)
+        private async void CreateButton_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             await viewModel.CreateAsync();
         }
 
-        private void PauseButton_Click(object sender, RoutedEventArgs e)
+        private void PauseButton_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (sender is Button button && button.Tag is RecurringPayment payment)
             {
@@ -63,7 +65,7 @@ namespace BankingAppTeamB.Views
             }
         }
 
-        private void ResumeButton_Click(object sender, RoutedEventArgs e)
+        private void ResumeButton_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (sender is Button button && button.Tag is RecurringPayment payment)
             {
@@ -71,7 +73,7 @@ namespace BankingAppTeamB.Views
             }
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        private void CancelButton_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (sender is Button button && button.Tag is RecurringPayment payment)
             {

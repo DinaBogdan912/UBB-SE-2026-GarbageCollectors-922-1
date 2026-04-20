@@ -27,9 +27,9 @@ namespace BankingAppTeamB.Models
         {
             return Status;
         }
-        public void SetStatus(TransferStatus s)
+        public void SetStatus(TransferStatus transferStatus)
         {
-            Status = s;
+            Status = transferStatus;
         }
         public decimal GetExchangeRate()
         {

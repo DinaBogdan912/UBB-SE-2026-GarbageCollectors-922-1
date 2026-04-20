@@ -12,6 +12,8 @@ namespace BankingAppTeamB.Services
         private const decimal SmallPaymentFee = 0.50m;
         private const decimal StandardPaymentFee = 1.00m;
         private const decimal TwoFaAmountThreshold = 1000m;
+        private const int ReceiptUniqueSuffixLength = 6;
+        private const int NoRelatedEntityId = 0;
 
         private readonly IBillPaymentRepository billPaymentRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -66,9 +68,9 @@ namespace BankingAppTeamB.Services
             billPaymentRepository.SaveBiller(savedBiller);
         }
 
-        public void RemoveSavedBiller(int id)
+        public void RemoveSavedBiller(int savedBillerId)
         {
-            billPaymentRepository.DeleteSavedBiller(id);
+            billPaymentRepository.DeleteSavedBiller(savedBillerId);
         }
 
         public bool Requires2FA(decimal amount)
@@ -78,17 +80,27 @@ namespace BankingAppTeamB.Services
 
         private string GenerateReceiptNumber()
         {
-            const int receiptSuffixLength = 6;
+            const int receiptSuffixLength = ReceiptUniqueSuffixLength;
             string uniqueSuffix = Guid.NewGuid().ToString("N")[..receiptSuffixLength].ToUpper();
             return $"RCP-{DateTime.UtcNow:yyyyMMdd}-{uniqueSuffix}";
         }
+
+        private Biller GetRequiredBiller(int billerId)
+        {
+            try
+            {
+                return billPaymentRepository.GetBillerById(billerId)
+                    ?? throw new InvalidOperationException($"Biller with ID {billerId} does not exist.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new InvalidOperationException($"Biller with ID {billerId} does not exist.", ex);
+            }
+        }
+
         public BillPayment PayBill(BillPaymentDto dto)
         {
-            var biller = billPaymentRepository.GetBillerById(dto.BillerId);
-            if (biller == null)
-            {
-                throw new InvalidOperationException($"Biller with ID {dto.BillerId} does not exist.");
-            }
+            var biller = GetRequiredBiller(dto.BillerId);
 
             decimal fee = CalculateFee(dto.Amount);
 
@@ -102,7 +114,7 @@ namespace BankingAppTeamB.Services
                 Fee = fee,
                 CounterpartyName = biller.Name,
                 RelatedEntityType = "BillPayment",
-                RelatedEntityId = 0
+                RelatedEntityId = NoRelatedEntityId
             };
 
             var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);

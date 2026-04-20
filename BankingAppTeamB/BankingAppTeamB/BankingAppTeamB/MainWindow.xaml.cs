@@ -14,7 +14,7 @@ namespace BankingAppTeamB
             NavigationService.Frame = MainFrame;
         }
 
-        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void NavView_SelectionChanged(NavigationView navigationView, NavigationViewSelectionChangedEventArgs selectionChangedEventArgs)
         {
             if (NavigationService.Frame == null)
             {

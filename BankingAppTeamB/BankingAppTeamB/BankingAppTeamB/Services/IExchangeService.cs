@@ -11,8 +11,8 @@ namespace BankingAppTeamB.Services
         void CheckRateAlerts();
         void ClearLocks(int userId);
         RateAlert CreateAlert(int userId, string sourceCurrency, string targetCurrency, decimal rate, bool isBuyAlert);
-        void DeleteAlert(int id);
-        ExchangeTransaction ExecuteExchange(ExchangeDto dto);
+        void DeleteAlert(int alertId);
+        ExchangeTransaction ExecuteExchange(ExchangeDto exchangeDto);
         Dictionary<string, decimal> GetLiveRates();
         decimal GetRate(string sourceCurrency, string targetCurrency);
         List<RateAlert> GetUserAlerts(int userId);
