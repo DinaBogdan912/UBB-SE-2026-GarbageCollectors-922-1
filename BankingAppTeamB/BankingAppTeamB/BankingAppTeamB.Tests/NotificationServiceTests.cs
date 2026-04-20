@@ -5,7 +5,7 @@ using BankingAppTeamB.Services;
 using FluentAssertions;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services;
+namespace BankingAppTeamB.Tests;
 
 public class NotificationServiceTests
 {

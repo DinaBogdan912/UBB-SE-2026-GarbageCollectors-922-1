@@ -8,7 +8,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services;
+namespace BankingAppTeamB.Tests;
 
 public class ExchangeServiceTests
 {
@@ -187,7 +187,12 @@ public class ExchangeServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
         var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
-        var dto = new ExchangeDto { UserId = DefaultUserId };
+        var dto = new ExchangeDto
+        {
+            UserId = DefaultUserId, 
+            SourceCurrency = BaseCurrency,
+            TargetCurrency = TargetCurrency
+        };
 
         // Act
         Action executeAction = () => service.ExecuteExchange(dto);

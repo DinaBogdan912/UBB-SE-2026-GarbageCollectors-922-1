@@ -79,4 +79,11 @@
 		<CodeAnalysisRuleSet>SE.ruleset</CodeAnalysisRuleSet>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
+
+	<!-- Expose internals to tests -->
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>BankingAppTeamB.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>

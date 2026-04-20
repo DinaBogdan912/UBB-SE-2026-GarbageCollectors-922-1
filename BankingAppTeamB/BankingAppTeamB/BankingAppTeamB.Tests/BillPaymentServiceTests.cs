@@ -8,7 +8,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services;
+namespace BankingAppTeamB.Tests;
 
 public class BillPaymentServiceTests
 {
@@ -269,7 +269,12 @@ public class BillPaymentServiceTests
         mockRepository.Setup(r => r.GetBillerById(DefaultBillerId)).Returns(biller);
         mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), ValidTwoFaToken)).Returns(transaction);
         
-        var expectedBillPayment = new BillPayment { Id = 456 };
+        var expectedBillPayment = new BillPayment
+        {
+            Id = 456 ,
+            BillerReference = BillerReference,
+            ReceiptNumber = "some-receipt"
+        };
         mockRepository.Setup(r => r.Add(It.IsAny<BillPayment>())).Returns(expectedBillPayment);
 
         // Act

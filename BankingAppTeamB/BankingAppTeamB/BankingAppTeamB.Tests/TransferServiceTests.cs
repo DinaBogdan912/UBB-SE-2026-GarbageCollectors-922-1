@@ -8,7 +8,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services;
+namespace BankingAppTeamB.Tests;
 
 public class TransferServiceTests
 {
