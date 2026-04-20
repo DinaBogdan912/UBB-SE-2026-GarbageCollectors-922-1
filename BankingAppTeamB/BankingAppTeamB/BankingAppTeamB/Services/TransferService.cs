@@ -32,6 +32,7 @@ namespace BankingAppTeamB.Services
             this.exchangeService = exchangeService;
         }
 
+        /// <summary>Validates the recipient IBAN, runs the transaction pipeline (debit source account), persists the transfer record, and updates beneficiary statistics if the recipient is a saved beneficiary.</summary>
         public Transfer ExecuteTransfer(TransferDto transferDto)
         {
             if (!ValidateIBAN(transferDto.RecipientIBAN))
@@ -85,11 +86,13 @@ namespace BankingAppTeamB.Services
             return transfer;
         }
 
+        /// <summary>Returns true when iban passes the structural IBAN validation rules.</summary>
         public bool ValidateIBAN(string iban)
         {
             return IbanValidator.Validate(iban);
         }
 
+        /// <summary>Infers a human-readable bank name from the two-letter country code at the start of iban.</summary>
         public string GetBankNameFromIBAN(string iban)
         {
             if (string.IsNullOrWhiteSpace(iban) || iban.Length < IbanCountryCodeLength)
@@ -109,6 +112,7 @@ namespace BankingAppTeamB.Services
             };
         }
 
+        /// <summary>Returns a preview of the converted amount and rate for a cross-currency transfer; returns a 1:1 identity preview when currencies match or no exchange service is wired.</summary>
         public FxPreview GetFxPreview(string sourceCurrency, string targetCurrency, decimal amount)
         {
             if (sourceCurrency.Equals(targetCurrency, StringComparison.OrdinalIgnoreCase))
@@ -137,11 +141,13 @@ namespace BankingAppTeamB.Services
             };
         }
 
+        /// <summary>Returns all transfer records for userId, ordered by creation date descending.</summary>
         public List<Transfer> GetHistory(int userId)
         {
             return transferRepository.GetByUserId(userId);
         }
 
+        /// <summary>Returns true when amount meets or exceeds the 1 000 threshold that mandates two-factor authentication.</summary>
         public bool Requires2FA(decimal amount)
         {
             return amount >= TwoFaAmountThreshold;

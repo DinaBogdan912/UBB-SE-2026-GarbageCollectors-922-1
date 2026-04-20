@@ -9,6 +9,7 @@ public static class ConnectionConfigHelper
     private const string AppSettingsFileName = "appsettings.json";
     private const string BankingApplicationConnectionStringKey = "BankingApp";
 
+    /// <summary>Reads the BankingApp connection string from appsettings.json and returns it; throws if the key is absent or blank.</summary>
     public static string GetConnectionString()
     {
         IConfigurationRoot configuration = new ConfigurationBuilder()

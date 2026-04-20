@@ -7,6 +7,7 @@ namespace BankingAppTeamB.Services
 {
     public class NotificationService : INotificationService
     {
+        /// <summary>Logs a message saying a transfer finished successfully.</summary>
         public void NotifyTransferCompleted(Transfer transfer)
         {
             string message = $"[NOTIFICATION] Transfer completed: " +
@@ -18,6 +19,7 @@ namespace BankingAppTeamB.Services
             Log(message);
         }
 
+        /// <summary>Logs updated info about how much has been sent to a beneficiary overall.</summary>
         public void NotifyBeneficiaryStatsUpdated(Beneficiary beneficiary, decimal amountSent)
         {
             string message = $"[NOTIFICATION] Beneficiary stats updated: " +
@@ -29,6 +31,7 @@ namespace BankingAppTeamB.Services
             Log(message);
         }
 
+        /// <summary>Logs a message when a rate alert fires, showing the current rate vs. what you were waiting for.</summary>
         public void NotifyRateAlertTriggered(RateAlert alert, decimal currentRate)
         {
             string message = $"[NOTIFICATION] Rate alert triggered: " +
@@ -39,6 +42,7 @@ namespace BankingAppTeamB.Services
             Log(message);
         }
 
+        /// <summary>Logs a warning that a recurring payment is coming up soon.</summary>
         public void NotifyRecurringPaymentDue(RecurringPayment payment)
         {
             string message = $"[NOTIFICATION] Recurring payment due soon: " +
@@ -49,6 +53,7 @@ namespace BankingAppTeamB.Services
             Log(message);
         }
 
+        /// <summary>Goes through a list of payments and sends a notification for any that are due within the warning window.</summary>
         public void CheckAndNotifyDuePayments(List<RecurringPayment> payments, TimeSpan warningWindow)
         {
             var now = DateTime.Now;
@@ -63,6 +68,7 @@ namespace BankingAppTeamB.Services
             }
         }
 
+        /// <summary>Goes through alerts and fires a notification for any where the live rate hit or passed the target.</summary>
         public void CheckAndNotifyRateAlerts(List<RateAlert> alerts, Dictionary<string, decimal> liveRates)
         {
             foreach (var alert in alerts)
@@ -83,6 +89,7 @@ namespace BankingAppTeamB.Services
             }
         }
 
+        /// <summary>Writes a message to both the debug output and the console.</summary>
         private void Log(string message)
         {
             Debug.WriteLine(message);

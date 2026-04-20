@@ -19,22 +19,31 @@ namespace BankingAppTeamB.Models
         public TransferStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        /// <summary>Returns the database identifier of this exchange transaction.</summary>
         public int GetId()
         {
             return Id;
         }
+
+        /// <summary>Returns the current processing status of this transaction.</summary>
         public TransferStatus GetStatus()
         {
             return Status;
         }
+
+        /// <summary>Updates the processing status of this transaction.</summary>
         public void SetStatus(TransferStatus transferStatus)
         {
             Status = transferStatus;
         }
+
+        /// <summary>Returns the exchange rate applied when this transaction was executed.</summary>
         public decimal GetExchangeRate()
         {
             return ExchangeRate;
         }
+
+        /// <summary>Returns the amount credited to the target account after commission deduction.</summary>
         public decimal GetTargetAmount()
         {
             return TargetAmount;

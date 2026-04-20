@@ -24,11 +24,13 @@ namespace BankingAppTeamB.Services
             this.transactionPipelineService = transactionPipelineService;
         }
 
+        /// <summary>Works out the fee - up to 100 costs 0.50, above that costs 1.00.</summary>
         public decimal CalculateFee(decimal amount)
         {
             return amount <= SmallPaymentThreshold ? SmallPaymentFee : StandardPaymentFee;
         }
 
+        /// <summary>Gets active billers, and if you pass a category it only returns that group.</summary>
         public List<Biller> GetBillerDirectory(string? category)
         {
             if (category == null)
@@ -39,21 +41,25 @@ namespace BankingAppTeamB.Services
             return billPaymentRepository.SearchBillers(string.Empty, category, isActive: true);
         }
 
+        /// <summary>Searches for active billers by name.</summary>
         public List<Biller> SearchBillers(string query)
         {
             return billPaymentRepository.SearchBillers(query, null, isActive: true);
         }
 
+        /// <summary>Searches active billers by name and can narrow it to one category.</summary>
         public List<Biller> SearchBillers(string query, string? category)
         {
             return billPaymentRepository.SearchBillers(query ?? string.Empty, category, isActive: true);
         }
 
+        /// <summary>Gets the billers a user saved for quick payments.</summary>
         public List<SavedBiller> GetSavedBillers(int userId)
         {
             return billPaymentRepository.GetSavedBillers(userId);
         }
 
+        /// <summary>Saves a biller to the user's favorites list.</summary>
         public void SaveBiller(int userId, int billerId, string? nickname, string? defaultReference)
         {
             var savedBiller = new SavedBiller
@@ -68,16 +74,19 @@ namespace BankingAppTeamB.Services
             billPaymentRepository.SaveBiller(savedBiller);
         }
 
+        /// <summary>Removes a saved biller from favorites.</summary>
         public void RemoveSavedBiller(int savedBillerId)
         {
             billPaymentRepository.DeleteSavedBiller(savedBillerId);
         }
 
+        /// <summary>Returns true when the amount is 1000 or more, so 2FA is needed.</summary>
         public bool Requires2FA(decimal amount)
         {
             return amount >= TwoFaAmountThreshold;
         }
 
+        /// <summary>Creates a unique receipt number like RCP-20260421-ABC123.</summary>
         private string GenerateReceiptNumber()
         {
             const int receiptSuffixLength = ReceiptUniqueSuffixLength;
@@ -85,6 +94,7 @@ namespace BankingAppTeamB.Services
             return $"RCP-{DateTime.UtcNow:yyyyMMdd}-{uniqueSuffix}";
         }
 
+        /// <summary>Loads a biller by ID and throws a clear error if it does not exist.</summary>
         private Biller GetRequiredBiller(int billerId)
         {
             try
@@ -98,6 +108,7 @@ namespace BankingAppTeamB.Services
             }
         }
 
+        /// <summary>Handles the full bill payment flow - validates biller, calculates fee, runs pipeline, and saves payment.</summary>
         public BillPayment PayBill(BillPaymentDto dto)
         {
             var biller = GetRequiredBiller(dto.BillerId);

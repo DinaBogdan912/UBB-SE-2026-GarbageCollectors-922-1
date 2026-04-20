@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 
@@ -6,6 +6,7 @@ namespace BankingAppTeamB.Converters
 {
     public class StepToVisibilityConverter : IValueConverter
     {
+        /// <summary>Returns Visibility.Visible when the current wizard step (int) matches the target step number supplied as a string converter parameter; collapses otherwise.</summary>
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             if (value is int currentStepNumber
@@ -18,6 +19,7 @@ namespace BankingAppTeamB.Converters
             return Visibility.Collapsed;
         }
 
+        /// <summary>Not supported — this converter is one-way only.</summary>
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
             throw new NotImplementedException();

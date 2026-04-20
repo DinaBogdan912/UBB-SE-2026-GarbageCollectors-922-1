@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class TransferRepository : ITransferRepository
     {
+        /// <summary>Adds a transfer record and sets the generated ID on the transfer object.</summary>
         public void Add(Transfer transfer)
         {
             string sqlQuery = @"
@@ -51,6 +52,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Gets one transfer by ID or throws if it does not exist.</summary>
         public Transfer GetById(int transferId)
         {
             string sqlQuery = "SELECT * FROM Transfers WHERE Id = @Id";
@@ -75,6 +77,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Transfer with ID {transferId} was not found.");
         }
 
+        /// <summary>Gets all transfers for a user, newest first.</summary>
         public List<Transfer> GetByUserId(int userId)
         {
             string sqlQuery = "SELECT * FROM Transfers WHERE UserId = @UserId ORDER BY CreatedAt DESC";
@@ -100,6 +103,7 @@ namespace BankingAppTeamB.Repositories
             return transfers;
         }
 
+        /// <summary>Updates the status text for a transfer.</summary>
         public void UpdateStatus(int transferId, string transferStatus)
         {
             string sqlQuery = "UPDATE Transfers SET Status = @Status WHERE Id = @Id";
@@ -116,6 +120,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Builds a Transfer object from the current database row.</summary>
         private Transfer MapTransfer(SqlDataReader reader)
         {
             return new Transfer

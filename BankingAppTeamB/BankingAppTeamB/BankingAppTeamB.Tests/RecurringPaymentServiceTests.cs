@@ -134,10 +134,10 @@ public class RecurringPaymentServiceTests
         var invalidFrequency = (RecurringFrequency)999;
 
         // Act
-        Action computeNextRunDateAction = () => recurringPaymentService.ComputeNextRunDate(invalidFrequency, baseReferenceDate);
+        Action computeNextRunDateOperation = () => recurringPaymentService.ComputeNextRunDate(invalidFrequency, baseReferenceDate);
 
         // Assert
-        computeNextRunDateAction.Should().Throw<ArgumentOutOfRangeException>();
+        computeNextRunDateOperation.Should().Throw<ArgumentOutOfRangeException>();
     }
 
     [Fact]
@@ -226,10 +226,10 @@ public class RecurringPaymentServiceTests
             .Returns((RecurringPayment)null!);
 
         // Act
-        Action pausePaymentAction = () => recurringPaymentService.Pause(InvalidRecurringPaymentId);
+        Action pausePaymentOperation = () => recurringPaymentService.Pause(InvalidRecurringPaymentId);
 
         // Assert
-        pausePaymentAction.Should().Throw<InvalidOperationException>()
+        pausePaymentOperation.Should().Throw<InvalidOperationException>()
             .WithMessage($"Recurring payment with ID {InvalidRecurringPaymentId} does not exist.");
 
         mockRecurringPaymentRepository.Verify(repository => repository.Update(It.IsAny<RecurringPayment>()), Times.Never);
@@ -274,10 +274,10 @@ public class RecurringPaymentServiceTests
             .Returns((RecurringPayment)null!);
 
         // Act
-        Action resumePaymentAction = () => recurringPaymentService.Resume(InvalidRecurringPaymentId);
+        Action resumePaymentOperation = () => recurringPaymentService.Resume(InvalidRecurringPaymentId);
 
         // Assert
-        resumePaymentAction.Should().Throw<InvalidOperationException>()
+        resumePaymentOperation.Should().Throw<InvalidOperationException>()
             .WithMessage($"Recurring payment with ID {InvalidRecurringPaymentId} does not exist.");
 
         mockRecurringPaymentRepository.Verify(repository => repository.Update(It.IsAny<RecurringPayment>()), Times.Never);
@@ -322,10 +322,10 @@ public class RecurringPaymentServiceTests
             .Returns((RecurringPayment)null!);
 
         // Act
-        Action cancelPaymentAction = () => recurringPaymentService.Cancel(InvalidRecurringPaymentId);
+        Action cancelPaymentOperation = () => recurringPaymentService.Cancel(InvalidRecurringPaymentId);
 
         // Assert
-        cancelPaymentAction.Should().Throw<InvalidOperationException>()
+        cancelPaymentOperation.Should().Throw<InvalidOperationException>()
             .WithMessage($"Recurring payment with ID {InvalidRecurringPaymentId} does not exist.");
 
         mockRecurringPaymentRepository.Verify(repository => repository.Update(It.IsAny<RecurringPayment>()), Times.Never);

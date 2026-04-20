@@ -16,16 +16,19 @@ namespace BankingAppTeamB.Services
             beneficiaryRepository = inputRepository;
         }
 
+        /// <summary>Gets everyone saved as a beneficiary for a specific user.</summary>
         public List<Beneficiary> GetByUser(int userId)
         {
             return beneficiaryRepository.GetByUserId(userId);
         }
 
+        /// <summary>Checks if an IBAN has the right format.</summary>
         public bool ValidateIBAN(string iban)
         {
             return IbanValidator.Validate(iban);
         }
 
+        /// <summary>Validates the IBAN and name, makes sure it's not a duplicate, then saves the new beneficiary.</summary>
         public Beneficiary Add(string name, string iban, int userId)
         {
             if (!ValidateIBAN(iban))
@@ -56,6 +59,7 @@ namespace BankingAppTeamB.Services
             return newBeneficiary;
         }
 
+        /// <summary>Makes sure the name isn't empty and saves the changes.</summary>
         public void Update(Beneficiary beneficiary)
         {
             if (string.IsNullOrWhiteSpace(beneficiary.Name))
@@ -66,11 +70,13 @@ namespace BankingAppTeamB.Services
             beneficiaryRepository.Update(beneficiary);
         }
 
+        /// <summary>Permanently removes a beneficiary — can't undo this.</summary>
         public void Delete(int beneficiaryId)
         {
             beneficiaryRepository.Delete(beneficiaryId);
         }
 
+        /// <summary>Builds a ready-to-use transfer object from a beneficiary's info.</summary>
         public TransferDto BuildTransferDtoFrom(Beneficiary beneficiary, int sourceAccountId, int userId)
         {
             return new TransferDto
@@ -82,6 +88,7 @@ namespace BankingAppTeamB.Services
             };
         }
 
+        /// <summary>Same as Add but also lets you set the bank name — mostly used in tests.</summary>
         internal object Add(string name, string iban, string bankName, int userId)
         {
             if (!ValidateIBAN(iban))

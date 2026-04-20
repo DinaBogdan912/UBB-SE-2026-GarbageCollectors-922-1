@@ -22,10 +22,10 @@ public class TwoFAServiceTests
         var twoFactorService = new TwoFAService();
 
         // Act
-        var result = twoFactorService.Requires2FA(AmountNotRequiringTwoFactor);
+        var actualResult = twoFactorService.Requires2FA(AmountNotRequiringTwoFactor);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
@@ -35,10 +35,10 @@ public class TwoFAServiceTests
         var twoFactorService = new TwoFAService();
 
         // Act
-        var result = twoFactorService.Requires2FA(AmountRequiringTwoFactor);
+        var actualResult = twoFactorService.Requires2FA(AmountRequiringTwoFactor);
 
         // Assert
-        result.Should().BeTrue();
+        actualResult.Should().BeTrue();
     }
 
     [Fact]
@@ -48,10 +48,10 @@ public class TwoFAServiceTests
         var twoFactorService = new TwoFAService();
 
         // Act
-        var result = twoFactorService.ValidateToken(EmptyToken);
+        var actualResult = twoFactorService.ValidateToken(EmptyToken);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
@@ -61,10 +61,10 @@ public class TwoFAServiceTests
         var twoFactorService = new TwoFAService();
 
         // Act
-        var result = twoFactorService.ValidateToken(WhitespaceToken);
+        var actualResult = twoFactorService.ValidateToken(WhitespaceToken);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
@@ -74,10 +74,10 @@ public class TwoFAServiceTests
         var twoFactorService = new TwoFAService();
 
         // Act
-        var result = twoFactorService.ValidateToken(ValidToken);
+        var actualResult = twoFactorService.ValidateToken(ValidToken);
 
         // Assert
-        result.Should().BeTrue();
+        actualResult.Should().BeTrue();
     }
 
     [Fact]
@@ -87,9 +87,9 @@ public class TwoFAServiceTests
         var twoFactorService = new TwoFAService();
 
         // Act
-        var result = twoFactorService.GenerateToken(DefaultUserId);
+        var actualResult = twoFactorService.GenerateToken(DefaultUserId);
 
         // Assert
-        result.Should().Be(ExpectedPlaceholderToken);
+        actualResult.Should().Be(ExpectedPlaceholderToken);
     }
 }

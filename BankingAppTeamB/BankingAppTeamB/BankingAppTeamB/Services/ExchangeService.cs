@@ -50,6 +50,7 @@ namespace BankingAppTeamB.Services
             this.accountService = accountService;
         }
 
+        /// <summary>Returns the built-in exchange rates for the 5 supported currency pairs.</summary>
         private static Dictionary<string, decimal> GetSeedExchangeRates() => new ()
         {
             { EurUsdPair, EurUsdSeedRate },
@@ -59,6 +60,7 @@ namespace BankingAppTeamB.Services
             { GbpRonPair, GbpRonSeedRate }
         };
 
+        /// <summary>Gets all exchange rates including the reverse ones, caches them for 30 seconds so it's not recalculating constantly.</summary>
         public Dictionary<string, decimal> GetLiveRates()
         {
             if (cachedRates != null && DateTime.Now - ratesLastFetched < CacheDuration)
@@ -81,6 +83,7 @@ namespace BankingAppTeamB.Services
             return cachedRates;
         }
 
+        /// <summary>Finds the exchange rate between two currencies, tries the reverse if the direct rate isn't there, throws if neither exists.</summary>
         public decimal GetRate(string sourceCurrency, string targetCurrency)
         {
             Dictionary<string, decimal> rates = GetLiveRates();
@@ -100,6 +103,7 @@ namespace BankingAppTeamB.Services
             throw new Exception($"Rate not found for pair {sourceCurrency}/{targetCurrency}");
         }
 
+        /// <summary>Locks in the current exchange rate for a user for 30 seconds so it can't change mid-transaction.</summary>
         public LockedRate LockRate(int userId, string sourceCurrency, string targetCurrency)
         {
             decimal rate = GetRate(sourceCurrency, targetCurrency);
@@ -115,6 +119,7 @@ namespace BankingAppTeamB.Services
             return lockedRate;
         }
 
+        /// <summary>Checks if the user has a rate lock that hasn't expired yet.</summary>
         public bool IsRateLockValid(int userId)
         {
             if (!lockedRates.ContainsKey(userId))
@@ -125,18 +130,21 @@ namespace BankingAppTeamB.Services
             return !lockedRates[userId].IsExpired();
         }
 
+        /// <summary>Calculates the exchange fee — 0.5% of the amount but at least 50 cents.</summary>
         public decimal CalculateCommission(decimal amount)
         {
             decimal percentage = amount * CommissionRate;
             return Math.Max(MinimumCommission, percentage);
         }
 
+        /// <summary>Calculates how much you'll actually receive in the target currency after fees are taken out.</summary>
         public decimal CalculateTargetAmount(decimal sourceAmount, decimal rate)
         {
             decimal commission = CalculateCommission(sourceAmount);
             return (sourceAmount * rate) - commission;
         }
 
+        /// <summary>Does the actual currency swap using the locked rate — takes money from one account, puts it in another, saves the record.</summary>
         public ExchangeTransaction ExecuteExchange(ExchangeDto exchangeDto)
         {
             if (!IsRateLockValid(exchangeDto.UserId))
@@ -188,16 +196,19 @@ namespace BankingAppTeamB.Services
             return exchangeTransaction;
         }
 
+        /// <summary>Gets rid of the user's rate lock, like when they hit cancel.</summary>
         public void ClearLocks(int userId)
         {
             lockedRates.Remove(userId);
         }
 
+        /// <summary>Gets all the rate alerts for a user that haven't fired yet.</summary>
         public List<RateAlert> GetUserAlerts(int userId)
         {
             return exchangeRepository.GetAlertsByUser(userId, isTriggered: false);
         }
 
+        /// <summary>Makes a new rate alert after checking the currencies are valid and the rate makes sense.</summary>
         public RateAlert CreateAlert(int userId, string sourceCurrency, string targetCurrency, decimal rate, bool isBuyAlert)
         {
             if (string.IsNullOrEmpty(sourceCurrency))
@@ -224,11 +235,13 @@ namespace BankingAppTeamB.Services
             return exchangeRepository.AddAlert(rateAlert);
         }
 
+        /// <summary>Permanently deletes a rate alert.</summary>
         public void DeleteAlert(int alertId)
         {
             exchangeRepository.DeleteAlert(alertId);
         }
 
+        /// <summary>Goes through all active alerts and marks the ones that have hit their target rate as triggered.</summary>
         public void CheckRateAlerts()
         {
             List<RateAlert> activeAlerts = exchangeRepository.GetAllAlerts(isTriggered: false);

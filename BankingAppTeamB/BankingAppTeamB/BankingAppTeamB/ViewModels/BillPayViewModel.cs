@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,6 +67,7 @@ namespace BankingAppTeamB.ViewModels
         private const int TwoFaTokenMinValue = 100000;
         private const int TwoFaTokenMaxValue = 999999;
 
+        /// <summary>Generates a random six-digit 2FA token string for display to the user.</summary>
         private string GenerateTwoFAToken()
         {
             var random = new Random();
@@ -260,6 +261,7 @@ namespace BankingAppTeamB.ViewModels
         public ICommand PayBillCommand { get; }
         public ICommand CancelCommand { get; }
 
+        /// <summary>Loads the biller directory, saved billers, and user accounts on a background thread, then resets the form state.</summary>
         public async Task LoadAsync()
         {
             try
@@ -281,6 +283,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Searches the biller directory using the current query and selected category and refreshes the Billers collection.</summary>
         private void ExecuteSearch()
         {
             try
@@ -299,6 +302,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Sets the selected biller from a clicked Biller or SavedBiller and advances to the payment details step.</summary>
         private void ExecuteSelectBiller(object? parameter)
         {
             ErrorMessage = string.Empty;
@@ -323,6 +327,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Validates the current step inputs and advances the payment wizard, computing fee and 2FA requirement when leaving the payment details step.</summary>
         private void ExecuteNextStep()
         {
             ErrorMessage = string.Empty;
@@ -388,6 +393,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Navigates the wizard back one step, skipping the 2FA step when it was not required.</summary>
         private void ExecuteBack()
         {
             ErrorMessage = string.Empty;
@@ -409,6 +415,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Submits the bill payment on a background thread; optionally saves the biller if the user opted in, then displays the receipt on success.</summary>
         private async Task ExecutePayBillAsync()
         {
             try
@@ -488,12 +495,14 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Clears the error message and resets all form state to allow a fresh payment entry.</summary>
         private void ResetForm()
         {
             ErrorMessage = string.Empty;
             ResetFormStateOnly();
         }
 
+        /// <summary>Resets all wizard state (step, biller, amounts, flags) back to their initial values without touching the error message.</summary>
         private void ResetFormStateOnly()
         {
             CurrentStep = SelectBillerStep;
@@ -512,6 +521,7 @@ namespace BankingAppTeamB.ViewModels
             TwoFAToken = string.Empty;
         }
 
+        /// <summary>Pre-fills BillerReference from the matching saved biller's default reference when the biller has been saved before and the reference field is currently empty.</summary>
         private void ApplySavedDefaultsForSelectedBiller()
         {
             if (SelectedBiller == null || SavedBillers == null || SavedBillers.Count == MinimumBillers)

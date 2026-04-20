@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -87,6 +87,7 @@ namespace BankingAppTeamB.ViewModels
             DeleteAlertCommand = new RelayCommand(commandParameter => DeleteAlert((RateAlert)commandParameter));
         }
 
+        /// <summary>Loads the user's active alerts and refreshes live rates on a background thread, then evaluates each alert against current rates.</summary>
         public async Task LoadAsync()
         {
             var alerts = await Task.Run(() => exchangeService.GetUserAlerts(userId));
@@ -95,6 +96,7 @@ namespace BankingAppTeamB.ViewModels
             await LoadRatesAsync();
         }
 
+        /// <summary>Fetches live rates on a background thread, rebuilds the AvailableCurrencies list, and re-evaluates trigger state for each existing alert.</summary>
         private async Task LoadRatesAsync()
         {
             var liveRates = await Task.Run(() => exchangeService.GetLiveRates());
@@ -131,6 +133,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Validates the currency pair and target rate inputs, creates the alert via the service on a background thread, and adds it to the observable collection.</summary>
         private async Task CreateAlertAsync()
         {
             if (string.IsNullOrWhiteSpace(BaseCurrency) ||
@@ -182,6 +185,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
+        /// <summary>Deletes the given alert via the service and removes it from the Alerts collection.</summary>
         private void DeleteAlert(object commandParameter)
         {
             var alert = (RateAlert)commandParameter;
@@ -189,6 +193,7 @@ namespace BankingAppTeamB.ViewModels
             Alerts.Remove(alert);
         }
 
+        /// <summary>Marks the matching alert in the Alerts collection as triggered when notified by an external source.</summary>
         private void OnAlertTriggered(RateAlert alert)
         {
             foreach (var existingAlert in Alerts)

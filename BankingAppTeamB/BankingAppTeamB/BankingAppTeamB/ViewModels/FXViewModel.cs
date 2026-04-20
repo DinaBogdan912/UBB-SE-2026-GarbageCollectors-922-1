@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -209,12 +209,14 @@ public class FXViewModel : ViewModelBase
         var commandParameter = LoadAccountsAsync();
     }
 
+    /// <summary>Stops the countdown timer and resets all exchange state (equivalent to abandoning the current exchange flow).</summary>
     private void Cancel(object? unusedParameter)
     {
         timer?.Stop();
         Reset(null);
     }
 
+    /// <summary>Clears all locked rates, resets all observable properties to their defaults, and returns the wizard to the first step.</summary>
     private void Reset(object? unusedParameter)
     {
         timer?.Stop();
@@ -244,6 +246,7 @@ public class FXViewModel : ViewModelBase
         AmountText = string.Empty;
     }
 
+    /// <summary>Executes the currency exchange using the locked rate; validates preconditions (non-expired lock, selected accounts) before calling the service.</summary>
     private Task ExecuteExchanges(object? unusedParameter)
     {
         try
@@ -294,6 +297,7 @@ public class FXViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
+    /// <summary>Populates the Accounts collection from the current user session.</summary>
     public Task LoadAccountsAsync()
     {
         Accounts.Clear();
@@ -306,6 +310,7 @@ public class FXViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
+    /// <summary>Fetches the live rate for the currently selected currency pair and updates LiveRate.</summary>
     private Task LoadRatesAsync(object? unusedParameter)
     {
         try
@@ -328,6 +333,7 @@ public class FXViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
+    /// <summary>Recomputes LiveRate, Commission, and TargetAmount whenever the source/target currencies or amount change.</summary>
     private void Recalculate()
     {
         try
@@ -359,6 +365,7 @@ public class FXViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Locks the current exchange rate for the user, advances the wizard to the locked-rate step, and starts the 30-second countdown timer.</summary>
     private void LockRate(object? commandParameter)
     {
         try
@@ -377,6 +384,7 @@ public class FXViewModel : ViewModelBase
         }
     }
 
+    /// <summary>Starts a UI-thread DispatcherTimer that ticks every second, updating SecondsRemaining and setting IsRateExpired when the lock window elapses.</summary>
     private void StartCountdownTimer()
     {
         if (lockedRate == null)

@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class TransactionRepository : ITransactionRepository
     {
+        /// <summary>Adds a transaction record and sets the generated ID on the transaction object.</summary>
         public void Add(Transaction transaction)
         {
             string insertSql = @"
@@ -49,6 +50,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Gets one transaction by ID or throws if it is missing.</summary>
         public Transaction GetById(int transactionId)
         {
             string sqlQuery = "SELECT * FROM Transactions WHERE Id = @Id";
@@ -72,6 +74,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Transaction with ID {transactionId} was not found.");
         }
 
+        /// <summary>Gets transactions for the given user's account ID.</summary>
         public List<Transaction> GetByUserId(int userId)
         {
             string sqlQuery = "SELECT * FROM Transactions WHERE AccountId = @UserId";
@@ -96,6 +99,7 @@ namespace BankingAppTeamB.Repositories
             return transactions;
         }
 
+        /// <summary>Builds a Transaction object from the current database row.</summary>
         private Transaction MapTransaction(SqlDataReader reader)
         {
             return new Transaction

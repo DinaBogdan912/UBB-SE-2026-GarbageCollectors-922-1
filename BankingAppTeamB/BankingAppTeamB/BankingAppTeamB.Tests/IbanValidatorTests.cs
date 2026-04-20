@@ -19,69 +19,69 @@ public class IbanValidatorTests
     public void Validate_WhenIbanIsValid_ReturnsTrue()
     {
         // Act
-        var result = IbanValidator.Validate(ValidIban);
+        var actualResult = IbanValidator.Validate(ValidIban);
 
         // Assert
-        result.Should().BeTrue();
+        actualResult.Should().BeTrue();
     }
 
     [Fact]
     public void Validate_WhenIbanIsEmpty_ReturnsFalse()
     {
         // Act
-        var result = IbanValidator.Validate(EmptyIban);
+        var actualResult = IbanValidator.Validate(EmptyIban);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
     public void Validate_WhenIbanIsWhitespace_ReturnsFalse()
     {
         // Act
-        var result = IbanValidator.Validate(WhitespaceIban);
+        var actualResult = IbanValidator.Validate(WhitespaceIban);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
     public void Validate_WhenIbanIsTooShort_ReturnsFalse()
     {
         // Act
-        var result = IbanValidator.Validate(TooShortIban);
+        var actualResult = IbanValidator.Validate(TooShortIban);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
     public void Validate_WhenIbanIsTooLong_ReturnsFalse()
     {
         // Act
-        var result = IbanValidator.Validate(TooLongIban);
+        var actualResult = IbanValidator.Validate(TooLongIban);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
     public void Validate_WhenCountryCodeIsInvalid_ReturnsFalse()
     {
         // Act
-        var result = IbanValidator.Validate(IbanWithInvalidCountryCode);
+        var actualResult = IbanValidator.Validate(IbanWithInvalidCountryCode);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 
     [Fact]
     public void Validate_WhenCheckDigitsAreInvalid_ReturnsFalse()
     {
         // Act
-        var result = IbanValidator.Validate(IbanWithInvalidCheckDigits);
+        var actualResult = IbanValidator.Validate(IbanWithInvalidCheckDigits);
 
         // Assert
-        result.Should().BeFalse();
+        actualResult.Should().BeFalse();
     }
 }

@@ -8,11 +8,13 @@ namespace BankingAppTeamB.Services
         private const int TwoFaAmountThreshold = 1000;
         private const string PlaceholderToken = "123456";
 
+        /// <summary>Returns true when amount meets or exceeds the â‚¬1 000 threshold that mandates two-factor authentication.</summary>
         public bool Requires2FA(decimal amount)
         {
             return amount >= TwoFaAmountThreshold;
         }
 
+        /// <summary>Returns true for any non-blank token (placeholder implementation does not verify against a real OTP).</summary>
         public bool ValidateToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -25,6 +27,7 @@ namespace BankingAppTeamB.Services
             return true;
         }
 
+        /// <summary>Returns the placeholder 2FA token "123456" for any user (stub - replace with a real OTP generator in production).</summary>
         public string GenerateToken(int userId)
         {
             string placeholder = PlaceholderToken;

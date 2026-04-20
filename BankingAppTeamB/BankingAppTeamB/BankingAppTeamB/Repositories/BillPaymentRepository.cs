@@ -8,6 +8,7 @@ namespace BankingAppTeamB.Repositories
 {
     public class BillPaymentRepository : IBillPaymentRepository
     {
+        /// <summary>Adds a bill payment record to the database, then sets and returns its new ID.</summary>
         public BillPayment Add(BillPayment billPayment)
         {
             string sqlQuery = @"
@@ -41,6 +42,7 @@ namespace BankingAppTeamB.Repositories
             return billPayment;
         }
 
+        /// <summary>Gets all bill payments for a user, newest first.</summary>
         public List<BillPayment> GetByUserId(int userId)
         {
             string sqlQuery = @"
@@ -68,6 +70,7 @@ namespace BankingAppTeamB.Repositories
             return billPayments;
         }
 
+        /// <summary>Gets all billers, with optional active filtering.</summary>
         public List<Biller> GetAllBillers(bool? isActive = null)
         {
             string sqlQuery = @"
@@ -95,6 +98,7 @@ namespace BankingAppTeamB.Repositories
             return billers;
         }
 
+        /// <summary>Searches billers by name, category, and optional active filter.</summary>
         public List<Biller> SearchBillers(string searchQuery, string? category, bool? isActive = null)
         {
             string sqlQuery = @"
@@ -126,6 +130,7 @@ namespace BankingAppTeamB.Repositories
             return billers;
         }
 
+        /// <summary>Gets one biller by ID or throws if it is missing.</summary>
         public Biller? GetBillerById(int billerId)
         {
             string sqlQuery = "SELECT * FROM Biller WHERE Id = @Id";
@@ -149,6 +154,7 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Biller with ID {billerId} was not found.");
         }
 
+        /// <summary>Gets the user's saved billers and includes each biller's details.</summary>
         public List<SavedBiller> GetSavedBillers(int userId)
         {
             string sqlQuery = @"
@@ -189,6 +195,7 @@ namespace BankingAppTeamB.Repositories
             return savedBillers;
         }
 
+        /// <summary>Adds a biller to the user's saved billers list.</summary>
         public void SaveBiller(SavedBiller savedBiller)
         {
             string sqlQuery = @"
@@ -213,6 +220,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Deletes a saved biller entry by ID.</summary>
         public void DeleteSavedBiller(int savedBillerId)
         {
             string sqlQuery = "DELETE FROM SavedBiller WHERE Id = @Id";
@@ -228,6 +236,7 @@ namespace BankingAppTeamB.Repositories
             }
         }
 
+        /// <summary>Builds a BillPayment object from the current database row.</summary>
         private BillPayment MapBillPayment(SqlDataReader reader)
         {
             return new BillPayment
@@ -246,6 +255,7 @@ namespace BankingAppTeamB.Repositories
             };
         }
 
+        /// <summary>Builds a Biller object from the current database row.</summary>
         private Biller MapBiller(SqlDataReader reader)
         {
             return new Biller
@@ -258,6 +268,7 @@ namespace BankingAppTeamB.Repositories
             };
         }
 
+        /// <summary>Builds a SavedBiller object from the current database row.</summary>
         private SavedBiller MapSavedBiller(SqlDataReader reader)
         {
             return new SavedBiller
