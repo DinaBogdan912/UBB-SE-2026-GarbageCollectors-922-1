@@ -17,28 +17,28 @@ public class UserSessionServiceTests
     public void Constructor_WhenCreated_SetsExpectedDefaults()
     {
         // Arrange & Act
-        var service = new UserSessionService();
+        var userSessionService = new UserSessionService();
 
         // Assert
-        service.CurrentUserId.Should().Be(ExpectedUserId);
-        service.CurrentUserName.Should().Be(ExpectedUserName);
+        userSessionService.CurrentUserId.Should().Be(ExpectedUserId);
+        userSessionService.CurrentUserName.Should().Be(ExpectedUserName);
     }
 
     [Fact]
     public void GetAccounts_WhenCalled_ReturnsHardcodedAccountList()
     {
         // Arrange
-        var service = new UserSessionService();
+        var userSessionService = new UserSessionService();
 
         // Act
-        var accounts = service.GetAccounts();
+        var accounts = userSessionService.GetAccounts();
 
         // Assert
         accounts.Should().NotBeNull();
         accounts.Count.Should().Be(ExpectedAccountCount);
-        accounts.Should().ContainSingle(a => a.Id == 1 && a.Currency == "EUR" && a.Balance == 5000.00m);
-        accounts.Should().ContainSingle(a => a.Id == 2 && a.Currency == "USD" && a.Balance == 1200.00m);
-        accounts.Should().ContainSingle(a => a.Id == 3 && a.Currency == "RON" && a.Balance == 8500.00m);
-        accounts.Should().ContainSingle(a => a.Id == 4 && a.Currency == "EUR" && a.Balance == 300.00m);
+        accounts.Should().ContainSingle(account => account.Id == 1 && account.Currency == "EUR" && account.Balance == 5000.00m);
+        accounts.Should().ContainSingle(account => account.Id == 2 && account.Currency == "USD" && account.Balance == 1200.00m);
+        accounts.Should().ContainSingle(account => account.Id == 3 && account.Currency == "RON" && account.Balance == 8500.00m);
+        accounts.Should().ContainSingle(account => account.Id == 4 && account.Currency == "EUR" && account.Balance == 300.00m);
     }
 }

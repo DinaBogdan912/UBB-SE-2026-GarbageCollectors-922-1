@@ -1,4 +1,4 @@
-﻿namespace BankingAppTeamB.Services
+namespace BankingAppTeamB.Services
 {
     public interface ITwoFAService
     {

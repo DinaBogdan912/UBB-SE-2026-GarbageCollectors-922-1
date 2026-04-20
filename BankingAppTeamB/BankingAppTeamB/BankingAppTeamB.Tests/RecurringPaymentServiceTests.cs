@@ -365,7 +365,7 @@ public class RecurringPaymentServiceTests
         recurringPaymentService.ProcessDuePayments();
 
         // Assert
-        mockBillPaymentService.Verify(service => service.PayBill(It.Is<BillPaymentDto>(billPaymentDataTransferObject =>
+        mockBillPaymentService.Verify(service => recurringPaymentService.PayBill(It.Is<BillPaymentDto>(billPaymentDataTransferObject =>
             billPaymentDataTransferObject.UserId == DefaultUserId &&
             billPaymentDataTransferObject.SourceAccountId == DefaultSourceAccountId &&
             billPaymentDataTransferObject.BillerId == DefaultBillerId &&
@@ -402,7 +402,7 @@ public class RecurringPaymentServiceTests
             .Returns(duePaymentsList);
 
         mockBillPaymentService
-            .Setup(service => service.PayBill(It.IsAny<BillPaymentDto>()))
+            .Setup(service => recurringPaymentService.PayBill(It.IsAny<BillPaymentDto>()))
             .Throws(new InvalidOperationException("Insufficient funds"));
 
         // Act

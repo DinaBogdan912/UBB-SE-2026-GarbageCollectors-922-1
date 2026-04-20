@@ -31,12 +31,12 @@ public class BillPaymentServiceTests
     public void CalculateFee_WhenAmountIsSmall_ReturnsSmallPaymentFee()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
 
         // Act
-        var result = service.CalculateFee(SmallPaymentAmount);
+        var result = billPaymentService.CalculateFee(SmallPaymentAmount);
 
         // Assert
         result.Should().Be(SmallPaymentFee);
@@ -46,12 +46,12 @@ public class BillPaymentServiceTests
     public void CalculateFee_WhenAmountIsLarge_ReturnsStandardPaymentFee()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
 
         // Act
-        var result = service.CalculateFee(LargePaymentAmount);
+        var result = billPaymentService.CalculateFee(LargePaymentAmount);
 
         // Assert
         result.Should().Be(StandardPaymentFee);
@@ -61,14 +61,14 @@ public class BillPaymentServiceTests
     public void GetBillerDirectory_WhenCategoryIsNull_ReturnsAllActiveBillers()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
         var expectedBillers = new List<Biller> { new Biller { Id = DefaultBillerId, Name = BillerName } };
-        mockRepository.Setup(r => r.GetAllBillers(true)).Returns(expectedBillers);
+        mockBillPaymentRepository.Setup(repository => repository.GetAllBillers(true)).Returns(expectedBillers);
 
         // Act
-        var result = service.GetBillerDirectory(null);
+        var result = billPaymentService.GetBillerDirectory(null);
 
         // Assert
         result.Should().BeEquivalentTo(expectedBillers);
@@ -78,14 +78,14 @@ public class BillPaymentServiceTests
     public void GetBillerDirectory_WhenCategoryIsProvided_ReturnsFilteredBillers()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
         var expectedBillers = new List<Biller> { new Biller { Id = DefaultBillerId, Name = BillerName, Category = BillerCategory } };
-        mockRepository.Setup(r => r.SearchBillers(string.Empty, BillerCategory, true)).Returns(expectedBillers);
+        mockBillPaymentRepository.Setup(repository => repository.SearchBillers(string.Empty, BillerCategory, true)).Returns(expectedBillers);
 
         // Act
-        var result = service.GetBillerDirectory(BillerCategory);
+        var result = billPaymentService.GetBillerDirectory(BillerCategory);
 
         // Assert
         result.Should().BeEquivalentTo(expectedBillers);
@@ -95,14 +95,14 @@ public class BillPaymentServiceTests
     public void SearchBillers_WithQueryOnly_ReturnsFilteredBillers()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
         var expectedBillers = new List<Biller> { new Biller { Id = DefaultBillerId, Name = BillerName } };
-        mockRepository.Setup(r => r.SearchBillers(SearchQuery, null, true)).Returns(expectedBillers);
+        mockBillPaymentRepository.Setup(repository => repository.SearchBillers(SearchQuery, null, true)).Returns(expectedBillers);
 
         // Act
-        var result = service.SearchBillers(SearchQuery);
+        var result = billPaymentService.SearchBillers(SearchQuery);
 
         // Assert
         result.Should().BeEquivalentTo(expectedBillers);
@@ -112,14 +112,14 @@ public class BillPaymentServiceTests
     public void SearchBillers_WithQueryAndCategory_ReturnsFilteredBillers()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
         var expectedBillers = new List<Biller> { new Biller { Id = DefaultBillerId, Name = BillerName, Category = BillerCategory } };
-        mockRepository.Setup(r => r.SearchBillers(SearchQuery, BillerCategory, true)).Returns(expectedBillers);
+        mockBillPaymentRepository.Setup(repository => repository.SearchBillers(SearchQuery, BillerCategory, true)).Returns(expectedBillers);
 
         // Act
-        var result = service.SearchBillers(SearchQuery, BillerCategory);
+        var result = billPaymentService.SearchBillers(SearchQuery, BillerCategory);
 
         // Assert
         result.Should().BeEquivalentTo(expectedBillers);
@@ -129,14 +129,14 @@ public class BillPaymentServiceTests
     public void SearchBillers_WithNullQueryAndCategory_UsesEmptyStringForQuery()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
         var expectedBillers = new List<Biller> { new Biller { Id = DefaultBillerId, Name = BillerName, Category = BillerCategory } };
-        mockRepository.Setup(r => r.SearchBillers(string.Empty, BillerCategory, true)).Returns(expectedBillers);
+        mockBillPaymentRepository.Setup(repository => repository.SearchBillers(string.Empty, BillerCategory, true)).Returns(expectedBillers);
 
         // Act
-        var result = service.SearchBillers(null, BillerCategory);
+        var result = billPaymentService.SearchBillers(null, BillerCategory);
 
         // Assert
         result.Should().BeEquivalentTo(expectedBillers);
@@ -146,14 +146,14 @@ public class BillPaymentServiceTests
     public void GetSavedBillers_WhenCalled_ReturnsUserSavedBillers()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
         var expectedSavedBillers = new List<SavedBiller> { new SavedBiller { Id = 1, UserId = DefaultUserId, BillerId = DefaultBillerId } };
-        mockRepository.Setup(r => r.GetSavedBillers(DefaultUserId)).Returns(expectedSavedBillers);
+        mockBillPaymentRepository.Setup(repository => repository.GetSavedBillers(DefaultUserId)).Returns(expectedSavedBillers);
 
         // Act
-        var result = service.GetSavedBillers(DefaultUserId);
+        var result = billPaymentService.GetSavedBillers(DefaultUserId);
 
         // Assert
         result.Should().BeEquivalentTo(expectedSavedBillers);
@@ -163,16 +163,16 @@ public class BillPaymentServiceTests
     public void SaveBiller_WhenCalled_SavesBillerToRepository()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
         var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
         // Act
-        service.SaveBiller(DefaultUserId, DefaultBillerId, BillerNickname, BillerReference);
+        billPaymentService.SaveBiller(DefaultUserId, DefaultBillerId, BillerNickname, BillerReference);
 
         // Assert
-        mockRepository.Verify(r => r.SaveBiller(It.Is<SavedBiller>(sb => sb.UserId == DefaultUserId &&
+        mockBillPaymentRepository.Verify(repository => repository.SaveBiller(It.Is<SavedBiller>(savedBiller => savedBiller.UserId == DefaultUserId &&
             sb.BillerId == DefaultBillerId &&
             sb.Nickname == BillerNickname &&
             sb.DefaultReference == BillerReference &&
@@ -183,27 +183,27 @@ public class BillPaymentServiceTests
     public void RemoveSavedBiller_WhenCalled_DeletesBillerFromRepository()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
 
         // Act
-        service.RemoveSavedBiller(DefaultBillerId);
+        billPaymentService.RemoveSavedBiller(DefaultBillerId);
 
         // Assert
-        mockRepository.Verify(r => r.DeleteSavedBiller(DefaultBillerId), Times.Once);
+        mockBillPaymentRepository.Verify(repository => repository.DeleteSavedBiller(DefaultBillerId), Times.Once);
     }
 
     [Fact]
     public void Requires2FA_WhenAmountIsBelowThreshold_ReturnsFalse()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
 
         // Act
-        var result = service.Requires2FA(LargePaymentAmount);
+        var result = billPaymentService.Requires2FA(LargePaymentAmount);
 
         // Assert
         result.Should().BeFalse();
@@ -213,12 +213,12 @@ public class BillPaymentServiceTests
     public void Requires2FA_WhenAmountIsAtOrAboveThreshold_ReturnsTrue()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
 
         // Act
-        var result = service.Requires2FA(TwoFaThresholdAmount);
+        var result = billPaymentService.Requires2FA(TwoFaThresholdAmount);
 
         // Assert
         result.Should().BeTrue();
@@ -228,28 +228,28 @@ public class BillPaymentServiceTests
     public void PayBill_WhenBillerDoesNotExist_ThrowsInvalidOperationException()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
-        var dto = new BillPaymentDto { BillerId = DefaultBillerId };
-        mockRepository.Setup(r => r.GetBillerById(DefaultBillerId)).Returns((Biller)null);
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
+        var dataTransferObject = new BillPaymentDto { BillerId = DefaultBillerId };
+        mockBillPaymentRepository.Setup(repository => repository.GetBillerById(DefaultBillerId)).Returns((Biller)null);
 
         // Act
-        Action payBillAction = () => service.PayBill(dto);
+        Action payBillAction = () => billPaymentService.PayBill(dataTransferObject);
 
         // Assert
         payBillAction.Should().Throw<InvalidOperationException>().WithMessage($"Biller with ID {DefaultBillerId} does not exist.");
-        mockPipelineService.Verify(s => s.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
+        mockTransactionPipelineService.Verify(service => billPaymentService.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
     public void PayBill_WhenValid_ExecutesPipelineAndSavesBillPayment()
     {
         // Arrange
-        var mockRepository = new Mock<IBillPaymentRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
-        var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
-        var dto = new BillPaymentDto
+        var mockBillPaymentRepository = new Mock<IBillPaymentRepository>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
+        var testedService = new BillPaymentService(mockBillPaymentRepository.Object, mockTransactionPipelineService.Object);
+        var dataTransferObject = new BillPaymentDto
         {
             UserId = DefaultUserId,
             SourceAccountId = DefaultSourceAccountId,
@@ -260,23 +260,22 @@ public class BillPaymentServiceTests
         };
         var biller = new Biller { Id = DefaultBillerId, Name = BillerName };
         var transaction = new Transaction { Id = 123 };
-        mockRepository.Setup(r => r.GetBillerById(DefaultBillerId)).Returns(biller);
-        mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), ValidTwoFaToken)).Returns(transaction);
+        mockBillPaymentRepository.Setup(repository => repository.GetBillerById(DefaultBillerId)).Returns(biller);
+        mockTransactionPipelineService.Setup(service => billPaymentService.RunPipeline(It.IsAny<PipelineContext>(), ValidTwoFaToken)).Returns(transaction);
         var expectedBillPayment = new BillPayment
         {
             Id = 456,
             BillerReference = BillerReference,
             ReceiptNumber = "some-receipt"
         };
-        mockRepository.Setup(r => r.Add(It.IsAny<BillPayment>())).Returns(expectedBillPayment);
+        mockBillPaymentRepository.Setup(repository => repository.Add(It.IsAny<BillPayment>())).Returns(expectedBillPayment);
 
         // Act
-        var result = service.PayBill(dto);
+        var result = billPaymentService.PayBill(dataTransferObject);
 
         // Assert
         result.Should().Be(expectedBillPayment);
-        mockRepository.Verify(r => r.Add(It.Is<BillPayment>(bp =>
-            bp.UserId == DefaultUserId &&
+        mockBillPaymentRepository.Verify(repository => repository.Add(It.Is<BillPayment>(billPayment => billPayment.UserId == DefaultUserId &&
             bp.SourceAccountId == DefaultSourceAccountId &&
             bp.BillerId == DefaultBillerId &&
             bp.TransactionId == transaction.Id &&

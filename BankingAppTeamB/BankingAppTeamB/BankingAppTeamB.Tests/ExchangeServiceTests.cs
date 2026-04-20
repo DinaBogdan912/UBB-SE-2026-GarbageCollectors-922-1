@@ -29,12 +29,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        var result = service.GetLiveRates();
+        var result = exchangeService.GetLiveRates();
 
         // Assert
         result.Should().NotBeNull();
@@ -47,12 +47,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        var result = service.GetRate(BaseCurrency, TargetCurrency);
+        var result = exchangeService.GetRate(BaseCurrency, TargetCurrency);
 
         // Assert
         result.Should().Be(SeedExchangeRate);
@@ -63,13 +63,13 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
         var expectedInverseRate = Math.Round(1 / SeedExchangeRate, 2);
 
         // Act
-        var result = service.GetRate(TargetCurrency, BaseCurrency);
+        var result = exchangeService.GetRate(TargetCurrency, BaseCurrency);
 
         // Assert
         result.Should().Be(expectedInverseRate);
@@ -80,12 +80,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        Action getRateAction = () => service.GetRate("JPY", "CAD");
+        Action getRateAction = () => exchangeService.GetRate("JPY", "CAD");
 
         // Assert
         getRateAction.Should().Throw<Exception>().WithMessage("Rate not found for pair JPY/CAD");
@@ -96,13 +96,13 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
         var expectedToleranceForLockTime = TimeSpan.FromSeconds(2);
 
         // Act
-        var result = service.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
+        var result = exchangeService.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
 
         // Assert
         result.Should().NotBeNull();
@@ -111,7 +111,7 @@ public class ExchangeServiceTests
         result.Rate.Should().Be(SeedExchangeRate);
         result.LockedAt.Should().BeCloseTo(DateTime.Now, expectedToleranceForLockTime);
 
-        service.IsRateLockValid(DefaultUserId).Should().BeTrue();
+        exchangeService.IsRateLockValid(DefaultUserId).Should().BeTrue();
     }
 
     [Fact]
@@ -119,12 +119,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        var result = service.IsRateLockValid(DefaultUserId);
+        var result = exchangeService.IsRateLockValid(DefaultUserId);
 
         // Assert
         result.Should().BeFalse();
@@ -135,12 +135,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        var result = service.CalculateCommission(SmallExchangeAmount);
+        var result = exchangeService.CalculateCommission(SmallExchangeAmount);
 
         // Assert
         result.Should().Be(MinimumCommissionAmount);
@@ -151,12 +151,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        var result = service.CalculateCommission(LargeExchangeAmount);
+        var result = exchangeService.CalculateCommission(LargeExchangeAmount);
 
         // Assert
         result.Should().Be(ExpectedLargeCommission);
@@ -167,13 +167,13 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
         var expectedTargetAmount = (LargeExchangeAmount * SeedExchangeRate) - ExpectedLargeCommission;
 
         // Act
-        var result = service.CalculateTargetAmount(LargeExchangeAmount, SeedExchangeRate);
+        var result = exchangeService.CalculateTargetAmount(LargeExchangeAmount, SeedExchangeRate);
 
         // Assert
         result.Should().Be(expectedTargetAmount);
@@ -184,10 +184,10 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
-        var dto = new ExchangeDto
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
+        var dataTransferObject = new ExchangeDto
         {
             UserId = DefaultUserId,
             SourceCurrency = BaseCurrency,
@@ -195,11 +195,11 @@ public class ExchangeServiceTests
         };
 
         // Act
-        Action executeAction = () => service.ExecuteExchange(dto);
+        Action executeAction = () => exchangeService.ExecuteExchange(dataTransferObject);
 
         // Assert
         executeAction.Should().Throw<Exception>().WithMessage("No valid rate lock found or the 3-second window has expired.");
-        mockPipelineService.Verify(s => s.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
+        mockTransactionPipelineService.Verify(service => exchangeService.RunPipeline(It.IsAny<PipelineContext>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -207,13 +207,13 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
-        service.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
+        exchangeService.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
 
-        var dto = new ExchangeDto
+        var dataTransferObject = new ExchangeDto
         {
             UserId = DefaultUserId,
             SourceAccountId = DefaultSourceAccountId,
@@ -224,12 +224,12 @@ public class ExchangeServiceTests
         };
 
         var transaction = new Transaction { Id = 123 };
-        mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), null)).Returns(transaction);
+        mockTransactionPipelineService.Setup(service => exchangeService.RunPipeline(It.IsAny<PipelineContext>(), null)).Returns(transaction);
 
         var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
         // Act
-        var result = service.ExecuteExchange(dto);
+        var result = exchangeService.ExecuteExchange(dataTransferObject);
 
         // Assert
         result.Should().NotBeNull();
@@ -245,12 +245,12 @@ public class ExchangeServiceTests
         result.Status.Should().Be(TransferStatus.Completed);
         result.CreatedAt.Should().BeCloseTo(DateTime.Now, expectedToleranceForCreationTime);
 
-        mockPipelineService.Verify(s => s.RunPipeline(It.IsAny<PipelineContext>(), null), Times.Once);
-        mockAccountService.Verify(s => s.CreditAccount(DefaultTargetAccountId, result.TargetAmount), Times.Once);
-        mockExchangeRepository.Verify(r => r.Add(It.IsAny<ExchangeTransaction>()), Times.Once);
+        mockTransactionPipelineService.Verify(service => exchangeService.RunPipeline(It.IsAny<PipelineContext>(), null), Times.Once);
+        mockAccountService.Verify(service => exchangeService.CreditAccount(DefaultTargetAccountId, result.TargetAmount), Times.Once);
+        mockExchangeRepository.Verify(repository => repository.Add(It.IsAny<ExchangeTransaction>()), Times.Once);
 
         // Lock should be cleared after execution
-        service.IsRateLockValid(DefaultUserId).Should().BeFalse();
+        exchangeService.IsRateLockValid(DefaultUserId).Should().BeFalse();
     }
 
     [Fact]
@@ -258,17 +258,17 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
-        service.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
+        exchangeService.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
 
         // Act
-        service.ClearLocks(DefaultUserId);
+        exchangeService.ClearLocks(DefaultUserId);
 
         // Assert
-        service.IsRateLockValid(DefaultUserId).Should().BeFalse();
+        exchangeService.IsRateLockValid(DefaultUserId).Should().BeFalse();
     }
 
     [Fact]
@@ -276,14 +276,14 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
         var expectedAlerts = new List<RateAlert> { new RateAlert(DefaultUserId, BaseCurrency, TargetCurrency, SeedExchangeRate, false) };
-        mockExchangeRepository.Setup(r => r.GetAlertsByUser(DefaultUserId, false)).Returns(expectedAlerts);
+        mockExchangeRepository.Setup(repository => repository.GetAlertsByUser(DefaultUserId, false)).Returns(expectedAlerts);
 
         // Act
-        var result = service.GetUserAlerts(DefaultUserId);
+        var result = exchangeService.GetUserAlerts(DefaultUserId);
 
         // Assert
         result.Should().BeEquivalentTo(expectedAlerts);
@@ -294,12 +294,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        Action createAction = () => service.CreateAlert(DefaultUserId, string.Empty, TargetCurrency, SeedExchangeRate, false);
+        Action createAction = () => exchangeService.CreateAlert(DefaultUserId, string.Empty, TargetCurrency, SeedExchangeRate, false);
 
         // Assert
         createAction.Should().Throw<ArgumentException>().WithMessage("Source currency cannot be null or empty.");
@@ -310,12 +310,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        Action createAction = () => service.CreateAlert(DefaultUserId, BaseCurrency, string.Empty, SeedExchangeRate, false);
+        Action createAction = () => exchangeService.CreateAlert(DefaultUserId, BaseCurrency, string.Empty, SeedExchangeRate, false);
 
         // Assert
         createAction.Should().Throw<ArgumentException>().WithMessage("Target currency cannot be null or empty.");
@@ -326,12 +326,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        Action createAction = () => service.CreateAlert(DefaultUserId, BaseCurrency, BaseCurrency, SeedExchangeRate, false);
+        Action createAction = () => exchangeService.CreateAlert(DefaultUserId, BaseCurrency, BaseCurrency, SeedExchangeRate, false);
 
         // Assert
         createAction.Should().Throw<ArgumentException>().WithMessage("Source currency cannot be the same as target currency.");
@@ -342,12 +342,12 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        Action createAction = () => service.CreateAlert(DefaultUserId, BaseCurrency, TargetCurrency, 0m, false);
+        Action createAction = () => exchangeService.CreateAlert(DefaultUserId, BaseCurrency, TargetCurrency, 0m, false);
 
         // Assert
         createAction.Should().Throw<ArgumentException>().WithMessage("Rate cannot be zero or negative.");
@@ -358,19 +358,18 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
         var expectedAlert = new RateAlert(DefaultUserId, BaseCurrency, TargetCurrency, SeedExchangeRate, false);
-        mockExchangeRepository.Setup(r => r.AddAlert(It.IsAny<RateAlert>())).Returns(expectedAlert);
+        mockExchangeRepository.Setup(repository => repository.AddAlert(It.IsAny<RateAlert>())).Returns(expectedAlert);
 
         // Act
-        var result = service.CreateAlert(DefaultUserId, BaseCurrency, TargetCurrency, SeedExchangeRate, false);
+        var result = exchangeService.CreateAlert(DefaultUserId, BaseCurrency, TargetCurrency, SeedExchangeRate, false);
 
         // Assert
         result.Should().Be(expectedAlert);
-        mockExchangeRepository.Verify(r => r.AddAlert(It.Is<RateAlert>(a =>
-            a.UserId == DefaultUserId &&
+        mockExchangeRepository.Verify(repository => repository.AddAlert(It.Is<RateAlert>(account => account.UserId == DefaultUserId &&
             a.BaseCurrency == BaseCurrency &&
             a.TargetCurrency == TargetCurrency &&
             a.TargetRate == SeedExchangeRate &&
@@ -382,14 +381,14 @@ public class ExchangeServiceTests
     {
         // Arrange
         var mockExchangeRepository = new Mock<IExchangeRepository>();
-        var mockPipelineService = new Mock<ITransactionPipelineService>();
+        var mockTransactionPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
+        var testedService = new ExchangeService(mockExchangeRepository.Object, mockTransactionPipelineService.Object, mockAccountService.Object);
 
         // Act
-        service.DeleteAlert(ValidAlertId);
+        exchangeService.DeleteAlert(ValidAlertId);
 
         // Assert
-        mockExchangeRepository.Verify(r => r.DeleteAlert(ValidAlertId), Times.Once);
+        mockExchangeRepository.Verify(repository => repository.DeleteAlert(ValidAlertId), Times.Once);
     }
 }

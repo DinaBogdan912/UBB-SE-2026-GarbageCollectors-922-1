@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Data;
 using Microsoft.UI.Xaml;

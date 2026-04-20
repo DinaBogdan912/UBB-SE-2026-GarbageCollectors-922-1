@@ -72,8 +72,7 @@ namespace BankingAppTeamB.Services
         {
             try
             {
-                return recurringPaymentRepository.GetById(id)
-                    ?? throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+                return recurringPaymentRepository.GetById(id);
             }
             catch (KeyNotFoundException ex)
             {

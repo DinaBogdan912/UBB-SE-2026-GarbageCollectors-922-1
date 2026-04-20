@@ -89,8 +89,7 @@ namespace BankingAppTeamB.Services
         {
             try
             {
-                return billPaymentRepository.GetBillerById(billerId)
-                    ?? throw new InvalidOperationException($"Biller with ID {billerId} does not exist.");
+                return billPaymentRepository.GetBillerById(billerId);
             }
             catch (KeyNotFoundException ex)
             {

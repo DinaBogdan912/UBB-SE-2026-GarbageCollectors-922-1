@@ -58,7 +58,7 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
         var emptyAccountsList = new List<Account>();
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(emptyAccountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(emptyAccountsList);
 
         // Act
         Action debitAccountAction = () => accountService.DebitAccount(InvalidAccountId, ValidDebitAmount);
@@ -81,7 +81,7 @@ public class AccountServiceTests
         };
         var accountsList = new List<Account> { accountWithInsufficientFunds };
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(accountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(accountsList);
 
         // Act
         Action debitAccountAction = () => accountService.DebitAccount(ValidAccountId, ValidDebitAmount);
@@ -105,7 +105,7 @@ public class AccountServiceTests
         var accountsList = new List<Account> { validAccount };
         var expectedBalanceAfterDebit = InitialBalance - ValidDebitAmount;
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(accountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(accountsList);
 
         // Act
         accountService.DebitAccount(ValidAccountId, ValidDebitAmount);
@@ -152,7 +152,7 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
         var emptyAccountsList = new List<Account>();
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(emptyAccountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(emptyAccountsList);
 
         // Act
         Action creditAccountAction = () => accountService.CreditAccount(InvalidAccountId, ValidCreditAmount);
@@ -176,7 +176,7 @@ public class AccountServiceTests
         var accountsList = new List<Account> { validAccount };
         var expectedBalanceAfterCredit = InitialBalance + ValidCreditAmount;
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(accountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(accountsList);
 
         // Act
         accountService.CreditAccount(ValidAccountId, ValidCreditAmount);
@@ -197,7 +197,7 @@ public class AccountServiceTests
         };
         var accountsList = new List<Account> { validAccount };
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(accountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(accountsList);
 
         // Act
         var isValid = accountService.IsAccountValid(ValidAccountId);
@@ -214,7 +214,7 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
         var emptyAccountsList = new List<Account>();
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(emptyAccountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(emptyAccountsList);
 
         // Act
         var isValid = accountService.IsAccountValid(InvalidAccountId);
@@ -236,7 +236,7 @@ public class AccountServiceTests
         };
         var accountsList = new List<Account> { validAccount };
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(accountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(accountsList);
 
         // Act
         var actualBalance = accountService.GetBalance(ValidAccountId);
@@ -253,7 +253,7 @@ public class AccountServiceTests
         var accountService = new AccountService(mockUserSessionService.Object);
         var emptyAccountsList = new List<Account>();
 
-        mockUserSessionService.Setup(service => service.GetAccounts()).Returns(emptyAccountsList);
+        mockUserSessionService.Setup(service => accountService.GetAccounts()).Returns(emptyAccountsList);
 
         // Act
         var actualBalance = accountService.GetBalance(InvalidAccountId);

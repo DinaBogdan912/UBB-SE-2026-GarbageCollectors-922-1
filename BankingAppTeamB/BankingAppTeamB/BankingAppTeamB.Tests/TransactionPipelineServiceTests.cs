@@ -31,11 +31,11 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ZeroAmount };
 
         // Act
-        var result = service.Validate(context);
+        var result = transactionPipelineService.Validate(context);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -48,11 +48,11 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = NegativeAmount };
 
         // Act
-        var result = service.Validate(context);
+        var result = transactionPipelineService.Validate(context);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -65,11 +65,11 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ValidAmount, Currency = InvalidCurrency };
 
         // Act
-        var result = service.Validate(context);
+        var result = transactionPipelineService.Validate(context);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -82,12 +82,12 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        mockAccountService.Setup(s => s.IsAccountValid(DefaultSourceAccountId)).Returns(false);
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        mockAccountService.Setup(service => transactionPipelineService.IsAccountValid(DefaultSourceAccountId)).Returns(false);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ValidAmount, Currency = ValidCurrency, SourceAccountId = DefaultSourceAccountId };
 
         // Act
-        var result = service.Validate(context);
+        var result = transactionPipelineService.Validate(context);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -100,12 +100,12 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        mockAccountService.Setup(s => s.IsAccountValid(DefaultSourceAccountId)).Returns(true);
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        mockAccountService.Setup(service => transactionPipelineService.IsAccountValid(DefaultSourceAccountId)).Returns(true);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ValidAmount, Currency = ValidCurrency, SourceAccountId = DefaultSourceAccountId };
 
         // Act
-        var result = service.Validate(context);
+        var result = transactionPipelineService.Validate(context);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -117,11 +117,11 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = AmountRequiringTwoFa };
 
         // Act
-        var result = service.Authorize(context, MissingTwoFaToken);
+        var result = transactionPipelineService.Authorize(context, MissingTwoFaToken);
 
         // Assert
         result.IsAuthorized.Should().BeFalse();
@@ -134,11 +134,11 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = AmountRequiringTwoFa };
 
         // Act
-        var result = service.Authorize(context, TwoFaRequiredToken);
+        var result = transactionPipelineService.Authorize(context, TwoFaRequiredToken);
 
         // Assert
         result.IsAuthorized.Should().BeTrue();
@@ -150,11 +150,11 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ValidAmount };
 
         // Act
-        var result = service.Authorize(context, MissingTwoFaToken);
+        var result = transactionPipelineService.Authorize(context, MissingTwoFaToken);
 
         // Assert
         result.IsAuthorized.Should().BeTrue();
@@ -166,15 +166,15 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ValidAmount, Fee = FeeAmount, SourceAccountId = DefaultSourceAccountId };
 
         // Act
-        var result = service.Execute(context);
+        var result = transactionPipelineService.Execute(context);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        mockAccountService.Verify(s => s.DebitAccount(DefaultSourceAccountId, ValidAmount + FeeAmount), Times.Once);
+        mockAccountService.Verify(service => transactionPipelineService.DebitAccount(DefaultSourceAccountId, ValidAmount + FeeAmount), Times.Once);
     }
 
     [Fact]
@@ -184,12 +184,12 @@ public class TransactionPipelineServiceTests
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
         var exceptionMessage = "Insufficient funds";
-        mockAccountService.Setup(s => s.DebitAccount(DefaultSourceAccountId, It.IsAny<decimal>())).Throws(new InvalidOperationException(exceptionMessage));
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        mockAccountService.Setup(service => transactionPipelineService.DebitAccount(DefaultSourceAccountId, It.IsAny<decimal>())).Throws(new InvalidOperationException(exceptionMessage));
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ValidAmount, Fee = FeeAmount, SourceAccountId = DefaultSourceAccountId };
 
         // Act
-        var result = service.Execute(context);
+        var result = transactionPipelineService.Execute(context);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -202,11 +202,11 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ZeroAmount };
 
         // Act
-        Action runAction = () => service.RunPipeline(context, MissingTwoFaToken);
+        Action runAction = () => transactionPipelineService.RunPipeline(context, MissingTwoFaToken);
 
         // Assert
         runAction.Should().Throw<InvalidOperationException>().WithMessage("Amount must be greater than zero.");
@@ -218,12 +218,12 @@ public class TransactionPipelineServiceTests
         // Arrange
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
-        mockAccountService.Setup(s => s.IsAccountValid(DefaultSourceAccountId)).Returns(true);
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        mockAccountService.Setup(service => transactionPipelineService.IsAccountValid(DefaultSourceAccountId)).Returns(true);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = AmountRequiringTwoFa, Currency = ValidCurrency, SourceAccountId = DefaultSourceAccountId };
 
         // Act
-        Action runAction = () => service.RunPipeline(context, MissingTwoFaToken);
+        Action runAction = () => transactionPipelineService.RunPipeline(context, MissingTwoFaToken);
 
         // Assert
         runAction.Should().Throw<InvalidOperationException>().WithMessage("A 2FA token is required for transfers of 1000 or more.");
@@ -236,13 +236,13 @@ public class TransactionPipelineServiceTests
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
         var exceptionMessage = "Insufficient funds";
-        mockAccountService.Setup(s => s.IsAccountValid(DefaultSourceAccountId)).Returns(true);
-        mockAccountService.Setup(s => s.DebitAccount(DefaultSourceAccountId, It.IsAny<decimal>())).Throws(new InvalidOperationException(exceptionMessage));
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        mockAccountService.Setup(service => transactionPipelineService.IsAccountValid(DefaultSourceAccountId)).Returns(true);
+        mockAccountService.Setup(service => transactionPipelineService.DebitAccount(DefaultSourceAccountId, It.IsAny<decimal>())).Throws(new InvalidOperationException(exceptionMessage));
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext { Amount = ValidAmount, Currency = ValidCurrency, SourceAccountId = DefaultSourceAccountId };
 
         // Act
-        Action runAction = () => service.RunPipeline(context, MissingTwoFaToken);
+        Action runAction = () => transactionPipelineService.RunPipeline(context, MissingTwoFaToken);
 
         // Assert
         runAction.Should().Throw<InvalidOperationException>().WithMessage($"Debit failed: {exceptionMessage}");
@@ -255,9 +255,9 @@ public class TransactionPipelineServiceTests
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
         var expectedBalance = 500m;
-        mockAccountService.Setup(s => s.IsAccountValid(DefaultSourceAccountId)).Returns(true);
-        mockAccountService.Setup(s => s.GetBalance(DefaultSourceAccountId)).Returns(expectedBalance);
-        var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
+        mockAccountService.Setup(service => transactionPipelineService.IsAccountValid(DefaultSourceAccountId)).Returns(true);
+        mockAccountService.Setup(service => transactionPipelineService.GetBalance(DefaultSourceAccountId)).Returns(expectedBalance);
+        var testedService = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
         var context = new PipelineContext
         {
             Amount = ValidAmount,
@@ -274,7 +274,7 @@ public class TransactionPipelineServiceTests
         // Basically the same as int 2
 
         // Act
-        var result = service.RunPipeline(context, MissingTwoFaToken);
+        var result = transactionPipelineService.RunPipeline(context, MissingTwoFaToken);
 
         // Assert
         result.Should().NotBeNull();
@@ -291,6 +291,6 @@ public class TransactionPipelineServiceTests
         result.RelatedEntityId.Should().Be(RelatedEntityId);
         result.CreatedAt.Should().BeCloseTo(DateTime.Now, expectedToleranceForCreationTime);
 
-        mockTransactionRepository.Verify(r => r.Add(It.IsAny<Transaction>()), Times.Once);
+        mockTransactionRepository.Verify(repository => repository.Add(It.IsAny<Transaction>()), Times.Once);
     }
 }
