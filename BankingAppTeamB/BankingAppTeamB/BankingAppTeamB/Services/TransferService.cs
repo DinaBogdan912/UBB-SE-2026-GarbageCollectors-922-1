@@ -8,9 +8,8 @@ namespace BankingAppTeamB.Services
 {
     public class TransferService : ITransferService
     {
-        private const int MinimumIbanLength = 15;
-        private const int MaximumIbanLength = 34;
-        private const int TwoFaAmountThreshold = 1000;
+        private const int IbanCountryCodeLength = 2;
+        private const decimal TwoFaAmountThreshold = 1000m;
 
         private readonly ITransferRepository transferRepository;
         private readonly IBeneficiaryRepository beneficiaryRepository;
@@ -29,93 +28,72 @@ namespace BankingAppTeamB.Services
             this.exchangeService = exchangeService;
         }
 
-        public Transfer ExecuteTransfer(TransferDto dto)
+        public Transfer ExecuteTransfer(TransferDto transferDto)
         {
-            if (!ValidateIBAN(dto.RecipientIBAN))
+            if (!ValidateIBAN(transferDto.RecipientIBAN))
             {
                 throw new InvalidOperationException("Recipient IBAN is invalid.");
             }
 
             var context = new PipelineContext
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                Amount = dto.Amount,
-                Currency = dto.Currency,
+                UserId = transferDto.UserId,
+                SourceAccountId = transferDto.SourceAccountId,
+                Amount = transferDto.Amount,
+                Currency = transferDto.Currency,
                 Type = "Transfer",
                 Fee = 0,
-                CounterpartyName = dto.RecipientName,
+                CounterpartyName = transferDto.RecipientName,
                 RelatedEntityType = "Transfer",
                 RelatedEntityId = 0
             };
 
-            var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
+            var transaction = transactionPipelineService.RunPipeline(context, transferDto.TwoFAToken);
 
             var transfer = new Transfer
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
+                UserId = transferDto.UserId,
+                SourceAccountId = transferDto.SourceAccountId,
                 TransactionId = transaction.Id,
-                RecipientName = dto.RecipientName,
-                RecipientIBAN = dto.RecipientIBAN,
-                RecipientBankName = GetBankNameFromIBAN(dto.RecipientIBAN),
-                Amount = dto.Amount,
-                Currency = dto.Currency,
+                RecipientName = transferDto.RecipientName,
+                RecipientIBAN = transferDto.RecipientIBAN,
+                RecipientBankName = GetBankNameFromIBAN(transferDto.RecipientIBAN),
+                Amount = transferDto.Amount,
+                Currency = transferDto.Currency,
                 Fee = 0,
-                Reference = dto.Reference,
+                Reference = transferDto.Reference,
                 Status = TransferStatus.Completed,
                 CreatedAt = DateTime.UtcNow
             };
 
             transferRepository.Add(transfer);
 
-            // newly added
-            var beneficiaries = beneficiaryRepository.GetByUserId(dto.UserId);
-            var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == dto.RecipientIBAN);
+            var beneficiaries = beneficiaryRepository.GetByUserId(transferDto.UserId);
+            var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == transferDto.RecipientIBAN);
             if (match != null)
             {
                 match.TransferCount++;
-                match.TotalAmountSent += dto.Amount;
+                match.TotalAmountSent += transferDto.Amount;
                 match.LastTransferDate = DateTime.UtcNow;
                 beneficiaryRepository.Update(match);
             }
-            // end of newly added
+
             return transfer;
         }
 
         public bool ValidateIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban))
-            {
-                return false;
-            }
-
-            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength)
-            {
-                return false;
-            }
-
-            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1]))
-            {
-                return false;
-            }
-
-            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3]))
-            {
-                return false;
-            }
-
-            return true;
+            return IbanValidator.Validate(iban);
         }
 
         public string GetBankNameFromIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban) || iban.Length < 2)
+            if (string.IsNullOrWhiteSpace(iban) || iban.Length < IbanCountryCodeLength)
             {
                 return "Unknown Bank";
             }
 
-            string countryCode = iban.Substring(0, 2).ToUpper();
+            string countryCode = iban.Substring(0, IbanCountryCodeLength).ToUpper();
             return countryCode switch
             {
                 "RO" => "Romanian Bank",

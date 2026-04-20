@@ -7,13 +7,13 @@ namespace BankingAppTeamB.Services
 {
     public interface IRecurringPaymentService
     {
-        void Cancel(int id);
+        void Cancel(int recurringPaymentId);
         DateTime ComputeNextRunDate(RecurringFrequency frequency, DateTime from);
-        RecurringPayment Create(RecurringPaymentDto dto);
+        RecurringPayment Create(RecurringPaymentDto recurringPaymentDto);
         List<RecurringPayment> GetByUser(int userId);
         List<RecurringPayment> GetDueSoon();
-        void Pause(int id);
+        void Pause(int recurringPaymentId);
         void ProcessDuePayments();
-        void Resume(int id);
+        void Resume(int recurringPaymentId);
     }
 }

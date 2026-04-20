@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BankingAppTeamB.Models;
@@ -9,9 +9,6 @@ namespace BankingAppTeamB.Services
 {
     public class BeneficiaryService : IBeneficiaryService
     {
-        private const int MinimumIbanLength = 15;
-        private const int MaximumIbanLength = 34;
-
         private readonly IBeneficiaryRepository beneficiaryRepository;
 
         public BeneficiaryService(IBeneficiaryRepository inputRepository)
@@ -23,43 +20,31 @@ namespace BankingAppTeamB.Services
         {
             return beneficiaryRepository.GetByUserId(userId);
         }
+
         public bool ValidateIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban))
-            {
-                return false;
-            }
-
-            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength)
-            {
-                return false;
-            }
-            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1]))
-            {
-                return false;
-            }
-            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3]))
-            {
-                return false;
-            }
-            return true;
+            return IbanValidator.Validate(iban);
         }
+
         public Beneficiary Add(string name, string iban, int userId)
         {
-            if (ValidateIBAN(iban) == false)
+            if (!ValidateIBAN(iban))
             {
                 throw new ArgumentException("Invalid IBAN format.");
             }
+
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("Name cannot be empty");
             }
+
             List<Beneficiary> existingBeneficiaries = beneficiaryRepository.GetByUserId(userId);
             if (existingBeneficiaries.Any(beneficiary => beneficiary.IBAN.Equals(iban, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new ArgumentException("A beneficiary with this IBAN already exists for this user.");
             }
-            Beneficiary beneficiary = new Beneficiary
+
+            Beneficiary newBeneficiary = new Beneficiary
             {
                 UserId = userId,
                 Name = name,
@@ -67,9 +52,10 @@ namespace BankingAppTeamB.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            beneficiaryRepository.Add(beneficiary);
-            return beneficiary;
+            beneficiaryRepository.Add(newBeneficiary);
+            return newBeneficiary;
         }
+
         public void Update(Beneficiary beneficiary)
         {
             if (string.IsNullOrWhiteSpace(beneficiary.Name))
@@ -79,10 +65,12 @@ namespace BankingAppTeamB.Services
 
             beneficiaryRepository.Update(beneficiary);
         }
-        public void Delete(int id)
+
+        public void Delete(int beneficiaryId)
         {
-            beneficiaryRepository.Delete(id);
+            beneficiaryRepository.Delete(beneficiaryId);
         }
+
         public TransferDto BuildTransferDtoFrom(Beneficiary beneficiary, int sourceAccountId, int userId)
         {
             return new TransferDto
@@ -94,32 +82,35 @@ namespace BankingAppTeamB.Services
             };
         }
 
-        internal object Add(string name, string iban, string newBankName, int userId)
+        internal object Add(string name, string iban, string bankName, int userId)
         {
-            if (ValidateIBAN(iban) == false)
+            if (!ValidateIBAN(iban))
             {
                 throw new ArgumentException("Invalid IBAN format.");
             }
+
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("Name cannot be empty");
             }
+
             List<Beneficiary> existingBeneficiaries = beneficiaryRepository.GetByUserId(userId);
             if (existingBeneficiaries.Any(beneficiary => beneficiary.IBAN.Equals(iban, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new ArgumentException("A beneficiary with this IBAN already exists for this user.");
             }
-            Beneficiary beneficiary = new Beneficiary
+
+            Beneficiary newBeneficiary = new Beneficiary
             {
                 UserId = userId,
                 Name = name,
                 IBAN = iban,
-                BankName = newBankName,
+                BankName = bankName,
                 CreatedAt = DateTime.UtcNow
             };
 
-            beneficiaryRepository.Add(beneficiary);
-            return beneficiary;
+            beneficiaryRepository.Add(newBeneficiary);
+            return newBeneficiary;
         }
     }
 }

@@ -9,43 +9,38 @@ namespace BankingAppTeamB.Services
         private const int ExpectedCurrencyCodeLength = 3;
         private const int TwoFaAmountThreshold = 1000;
 
-        private readonly ITransactionRepository transactionRepo;
+        private readonly ITransactionRepository transactionRepository;
         private readonly IAccountService accountService;
 
-        public TransactionPipelineService(ITransactionRepository transactionRepo, IAccountService accountService)
+        public TransactionPipelineService(ITransactionRepository transactionRepository, IAccountService accountService)
         {
-            this.transactionRepo = transactionRepo;
+            this.transactionRepository = transactionRepository;
             this.accountService = accountService;
         }
 
-        // public TransactionPipelineService(ITransactionRepository transactionRepo)
-        // {
-        //     this.transactionRepo = transactionRepo;
-        // }
-        public ValidationResult Validate(PipelineContext ctx)
+        public ValidationResult Validate(PipelineContext context)
         {
-            if (ctx.Amount <= 0)
+            if (context.Amount <= 0)
             {
                 return ValidationResult.Failure("Amount must be greater than zero.");
             }
 
-            if (ctx.Currency == null || ctx.Currency.Length != ExpectedCurrencyCodeLength)
+            if (context.Currency == null || context.Currency.Length != ExpectedCurrencyCodeLength)
             {
                 return ValidationResult.Failure("Currency code must be exactly 3 characters.");
             }
 
-            if (!accountService.IsAccountValid(ctx.SourceAccountId))
+            if (!accountService.IsAccountValid(context.SourceAccountId))
             {
-                // if (!AccountService.IsAccountValid(ctx.SourceAccountId))
                 return ValidationResult.Failure("Source account is invalid or does not exist.");
             }
 
             return ValidationResult.Success();
         }
 
-        public AuthResult Authorize(PipelineContext ctx, string? twoFAToken = null)
+        public AuthResult Authorize(PipelineContext context, string? twoFAToken = null)
         {
-            if (ctx.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
+            if (context.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
             {
                 return AuthResult.Failure("A 2FA token is required for transfers of 1000 or more.");
             }
@@ -57,66 +52,64 @@ namespace BankingAppTeamB.Services
             return accountService;
         }
 
-        public ExecutionResult Execute(PipelineContext ctx)
+        public ExecutionResult Execute(PipelineContext context)
         {
             try
             {
-                decimal totalDebit = ctx.Amount + ctx.Fee;
-                accountService.DebitAccount(ctx.SourceAccountId, totalDebit);
-                // AccountService.DebitAccount(ctx.SourceAccountId, totalDebit);
+                decimal totalDebit = context.Amount + context.Fee;
+                accountService.DebitAccount(context.SourceAccountId, totalDebit);
                 return ExecutionResult.Success();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                return ExecutionResult.Failure($"Debit failed: {ex.Message}");
+                return ExecutionResult.Failure($"Debit failed: {exception.Message}");
             }
         }
 
-        public Transaction LogTransaction(Transaction tx)
+        public Transaction LogTransaction(Transaction transaction)
         {
-            transactionRepo.Add(tx);
-            return tx;
+            transactionRepository.Add(transaction);
+            return transaction;
         }
 
-        public Transaction RunPipeline(PipelineContext ctx, string? twoFAToken = null)
+        public Transaction RunPipeline(PipelineContext context, string? twoFAToken = null)
         {
-            var validation = Validate(ctx);
+            var validation = Validate(context);
             if (!validation.IsValid)
             {
                 throw new InvalidOperationException(validation.Message);
             }
 
-            var auth = Authorize(ctx, twoFAToken);
+            var auth = Authorize(context, twoFAToken);
             if (!auth.IsAuthorized)
             {
                 throw new InvalidOperationException(auth.Message);
             }
 
-            var execution = Execute(ctx);
+            var execution = Execute(context);
             if (!execution.IsSuccess)
             {
                 throw new InvalidOperationException(execution.Message);
             }
 
-            return LogTransaction(BuildTransaction(ctx));
+            return LogTransaction(BuildTransaction(context));
         }
 
-        private Transaction BuildTransaction(PipelineContext ctx)
+        private Transaction BuildTransaction(PipelineContext context)
         {
             return new Transaction
             {
-                AccountId = ctx.SourceAccountId,
-                Type = ctx.Type,
+                AccountId = context.SourceAccountId,
+                Type = context.Type,
                 Direction = "Debit",
-                Amount = ctx.Amount,
-                Currency = ctx.Currency,
-                BalanceAfter = accountService.GetBalance(ctx.SourceAccountId),
-                // BalanceAfter = AccountService.GetBalance(ctx.SourceAccountId),
-                CounterpartyName = ctx.CounterpartyName,
-                Fee = ctx.Fee,
+                Amount = context.Amount,
+                Currency = context.Currency,
+                BalanceAfter = accountService.GetBalance(context.SourceAccountId),
+                CounterpartyName = context.CounterpartyName,
+                Fee = context.Fee,
                 Status = "Completed",
-                RelatedEntityType = ctx.RelatedEntityType,
-                RelatedEntityId = ctx.RelatedEntityId,
+                RelatedEntityType = context.RelatedEntityType,
+                RelatedEntityId = context.RelatedEntityId,
                 CreatedAt = DateTime.Now
             };
         }

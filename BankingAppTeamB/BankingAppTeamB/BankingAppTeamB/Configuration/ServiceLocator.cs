@@ -17,8 +17,7 @@ public static class ServiceLocator
     private static IExchangeRepository exchangeRepository = new ExchangeRepository();
     private static IUserSessionService userSessionService = new UserSessionService();
 
-    // mock
-    private static IAccountService accountService = new AccountService();
+    private static IAccountService accountService = new AccountService(userSessionService);
     private static ITransactionPipelineService pipelineService = new TransactionPipelineService(transactionRepository, accountService);
     private static IExchangeService exchangeService = new ExchangeService(exchangeRepository, pipelineService, accountService);
     private static ITransferService transferService = new TransferService(transferRepository, beneficiaryRepository, pipelineService, exchangeService);

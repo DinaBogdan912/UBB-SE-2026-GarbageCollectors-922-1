@@ -228,6 +228,9 @@ public class TransferViewModel : ViewModelBase
         }
     }
 
+    private const int TwoFaTokenMinValue = 100000;
+    private const int TwoFaTokenMaxValue = 999999;
+
     private string GenerateTwoFAToken()
     {
         var random = new Random();

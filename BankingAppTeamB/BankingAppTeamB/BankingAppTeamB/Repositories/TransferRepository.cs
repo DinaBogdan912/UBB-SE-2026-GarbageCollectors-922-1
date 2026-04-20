@@ -100,7 +100,11 @@ namespace BankingAppTeamB.Repositories
             return transfers;
         }
 
+<<<<<<< FilipB-refactor-tests-repo-model
         public void UpdateStatus(int transferId, string transferStatus)
+=======
+        public void UpdateStatus(int id, string newStatus)
+>>>>>>> main
         {
             string sqlQuery = "UPDATE Transfers SET Status = @Status WHERE Id = @Id";
 
@@ -109,8 +113,13 @@ namespace BankingAppTeamB.Repositories
                 connection.Open();
                 using (var command = new SqlCommand(sqlQuery, connection))
                 {
+<<<<<<< FilipB-refactor-tests-repo-model
                     command.Parameters.Add(new SqlParameter("@Status", transferStatus));
                     command.Parameters.Add(new SqlParameter("@Id", transferId));
+=======
+                    command.Parameters.Add(new SqlParameter("@Status", newStatus));
+                    command.Parameters.Add(new SqlParameter("@Id", id));
+>>>>>>> main
                     command.ExecuteNonQuery();
                 }
             }

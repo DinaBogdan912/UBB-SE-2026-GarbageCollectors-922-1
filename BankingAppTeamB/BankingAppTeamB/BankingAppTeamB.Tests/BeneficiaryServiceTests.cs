@@ -224,20 +224,32 @@ namespace BankingAppTeamB.Tests.Services
         }
 
         [Fact]
-        public void InternalAdd_ReturnsBeneficiaryWithBankName_AndCallsRepoAdd_WhenInputValid()
+        public void InternalAdd_ReturnsBeneficiary_WhenInputValid()
         {
+<<<<<<< FilipB-refactor-tests-repo-model
             repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
-
-            Beneficiary? captured = null;
-            repo.Setup(r => r.Add(It.IsAny<Beneficiary>()))
-                .Callback<Beneficiary>(beneficiary => captured = beneficiary);
-
+=======
+            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
+            _repo.Setup(r => r.Add(It.IsAny<Beneficiary>()));
             var sut = CreateSut();
 
             var result = InvokeInternalAdd(sut, "Ana", "RO49AAAA1B31007593840000", "Test Bank", 1);
 
             result.Should().BeOfType<Beneficiary>();
-            captured.Should().NotBeNull();
+        }
+>>>>>>> main
+
+        [Fact]
+        public void InternalAdd_CapturedBeneficiaryHasCorrectFields_WhenInputValid()
+        {
+            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
+            Beneficiary? captured = null;
+            repo.Setup(r => r.Add(It.IsAny<Beneficiary>()))
+                .Callback<Beneficiary>(beneficiary => captured = beneficiary);
+            var sut = CreateSut();
+
+            InvokeInternalAdd(sut, "Ana", "RO49AAAA1B31007593840000", "Test Bank", 1);
+
             captured.Should().BeEquivalentTo(new
             {
                 UserId = 1,
@@ -245,7 +257,22 @@ namespace BankingAppTeamB.Tests.Services
                 IBAN = "RO49AAAA1B31007593840000",
                 BankName = "Test Bank"
             });
+<<<<<<< FilipB-refactor-tests-repo-model
             repo.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Once);
+=======
+        }
+
+        [Fact]
+        public void InternalAdd_CallsRepoAddOnce_WhenInputValid()
+        {
+            _repo.Setup(r => r.GetByUserId(1)).Returns(new List<Beneficiary>());
+            _repo.Setup(r => r.Add(It.IsAny<Beneficiary>()));
+            var sut = CreateSut();
+
+            InvokeInternalAdd(sut, "Ana", "RO49AAAA1B31007593840000", "Test Bank", 1);
+
+            _repo.Verify(r => r.Add(It.IsAny<Beneficiary>()), Times.Once);
+>>>>>>> main
         }
     }
 }

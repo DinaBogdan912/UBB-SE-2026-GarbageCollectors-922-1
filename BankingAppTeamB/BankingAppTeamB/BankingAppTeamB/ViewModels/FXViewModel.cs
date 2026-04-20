@@ -358,7 +358,11 @@ public class FXViewModel : ViewModelBase
         }
     }
 
+<<<<<<< FilipB-refactor-tests-repo-model
     private void LockRate(object? commandParameter)
+=======
+    private void LockRate(object? unusedParameter)
+>>>>>>> main
     {
         try
         {
