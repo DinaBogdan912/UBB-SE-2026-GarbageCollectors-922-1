@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.UI.Xaml.Data;
 
 namespace BankingAppTeamB.Converters
@@ -8,7 +8,7 @@ namespace BankingAppTeamB.Converters
         private const string DefaultDecimalFormatPattern = "F2";
         private const string DefaultFormattedZeroValue = "0.00";
 
-        /// <summary>Formats a <see cref="decimal"/> to two decimal places; prepends the currency symbol from <paramref name="parameter"/> when provided.</summary>
+        /// <summary>Formats a decimal to two decimal places; prepends the currency symbol from parameter when provided.</summary>
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             if (value is decimal decimalValue)

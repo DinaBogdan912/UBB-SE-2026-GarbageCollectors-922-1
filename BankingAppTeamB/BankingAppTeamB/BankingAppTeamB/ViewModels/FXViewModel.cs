@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -297,7 +297,7 @@ public class FXViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
-    /// <summary>Populates the <see cref="Accounts"/> collection from the current user session.</summary>
+    /// <summary>Populates the Accounts collection from the current user session.</summary>
     public Task LoadAccountsAsync()
     {
         Accounts.Clear();
@@ -310,7 +310,7 @@ public class FXViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
-    /// <summary>Fetches the live rate for the currently selected currency pair and updates <see cref="LiveRate"/>.</summary>
+    /// <summary>Fetches the live rate for the currently selected currency pair and updates LiveRate.</summary>
     private Task LoadRatesAsync(object? unusedParameter)
     {
         try
@@ -333,7 +333,7 @@ public class FXViewModel : ViewModelBase
         return Task.CompletedTask;
     }
 
-    /// <summary>Recomputes <see cref="LiveRate"/>, <see cref="Commission"/>, and <see cref="TargetAmount"/> whenever the source/target currencies or amount change.</summary>
+    /// <summary>Recomputes LiveRate, Commission, and TargetAmount whenever the source/target currencies or amount change.</summary>
     private void Recalculate()
     {
         try
@@ -384,7 +384,7 @@ public class FXViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Starts a UI-thread <see cref="DispatcherTimer"/> that ticks every second, updating <see cref="SecondsRemaining"/> and setting <see cref="IsRateExpired"/> when the lock window elapses.</summary>
+    /// <summary>Starts a UI-thread DispatcherTimer that ticks every second, updating SecondsRemaining and setting IsRateExpired when the lock window elapses.</summary>
     private void StartCountdownTimer()
     {
         if (lockedRate == null)

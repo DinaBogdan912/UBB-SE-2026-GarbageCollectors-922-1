@@ -86,13 +86,13 @@ namespace BankingAppTeamB.Services
             return transfer;
         }
 
-        /// <summary>Returns <see langword="true"/> when <paramref name="iban"/> passes the structural IBAN validation rules.</summary>
+        /// <summary>Returns true when iban passes the structural IBAN validation rules.</summary>
         public bool ValidateIBAN(string iban)
         {
             return IbanValidator.Validate(iban);
         }
 
-        /// <summary>Infers a human-readable bank name from the two-letter country code at the start of <paramref name="iban"/>.</summary>
+        /// <summary>Infers a human-readable bank name from the two-letter country code at the start of iban.</summary>
         public string GetBankNameFromIBAN(string iban)
         {
             if (string.IsNullOrWhiteSpace(iban) || iban.Length < IbanCountryCodeLength)
@@ -141,13 +141,13 @@ namespace BankingAppTeamB.Services
             };
         }
 
-        /// <summary>Returns all transfer records for <paramref name="userId"/>, ordered by creation date descending.</summary>
+        /// <summary>Returns all transfer records for userId, ordered by creation date descending.</summary>
         public List<Transfer> GetHistory(int userId)
         {
             return transferRepository.GetByUserId(userId);
         }
 
-        /// <summary>Returns <see langword="true"/> when <paramref name="amount"/> meets or exceeds the €1 000 threshold that mandates two-factor authentication.</summary>
+        /// <summary>Returns true when amount meets or exceeds the 1 000 threshold that mandates two-factor authentication.</summary>
         public bool Requires2FA(decimal amount)
         {
             return amount >= TwoFaAmountThreshold;

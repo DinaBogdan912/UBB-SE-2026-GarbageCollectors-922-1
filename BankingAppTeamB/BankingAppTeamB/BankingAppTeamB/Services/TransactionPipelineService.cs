@@ -40,7 +40,7 @@ namespace BankingAppTeamB.Services
             return ValidationResult.Success();
         }
 
-        /// <summary>Checks that a 2FA token is present when the transfer amount is ≥ €1 000.</summary>
+        /// <summary>Checks that a 2FA token is present when the transfer amount is >= 1 000.</summary>
         public AuthResult Authorize(PipelineContext pipelineContext, string? twoFAToken = null)
         {
             if (pipelineContext.Amount >= TwoFaAmountThreshold && string.IsNullOrWhiteSpace(twoFAToken))
@@ -50,7 +50,7 @@ namespace BankingAppTeamB.Services
 
             return AuthResult.Success();
         }
-        /// <summary>Returns the underlying <see cref="IAccountService"/> for callers that need direct balance operations outside the pipeline.</summary>
+        /// <summary>Returns the underlying IAccountService for callers that need direct balance operations outside the pipeline.</summary>
         public IAccountService GetAccountService()
         {
             return accountService;
@@ -71,14 +71,14 @@ namespace BankingAppTeamB.Services
             }
         }
 
-        /// <summary>Persists <paramref name="transaction"/> to the database and returns the same object (with its new Id populated).</summary>
+        /// <summary>Persists transaction to the database and returns the same object (with its new Id populated).</summary>
         public Transaction LogTransaction(Transaction transaction)
         {
             transactionRepository.Add(transaction);
             return transaction;
         }
 
-        /// <summary>Runs validate → authorise → execute → log in sequence; throws <see cref="InvalidOperationException"/> at the first failed step.</summary>
+        /// <summary>Runs validate -> authorise -> execute -> log in sequence; throws InvalidOperationException at the first failed step.</summary>
         public Transaction RunPipeline(PipelineContext pipelineContext, string? twoFAToken = null)
         {
             var validationResult = Validate(pipelineContext);
@@ -102,7 +102,7 @@ namespace BankingAppTeamB.Services
             return LogTransaction(BuildTransaction(pipelineContext));
         }
 
-        /// <summary>Constructs a completed debit <see cref="Transaction"/> from the pipeline context, capturing the post-debit balance.</summary>
+        /// <summary>Constructs a completed debit Transaction from the pipeline context, capturing the post-debit balance.</summary>
         private Transaction BuildTransaction(PipelineContext pipelineContext)
         {
             return new Transaction

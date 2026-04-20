@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -96,7 +96,7 @@ namespace BankingAppTeamB.ViewModels
             await LoadRatesAsync();
         }
 
-        /// <summary>Fetches live rates on a background thread, rebuilds the <see cref="AvailableCurrencies"/> list, and re-evaluates trigger state for each existing alert.</summary>
+        /// <summary>Fetches live rates on a background thread, rebuilds the AvailableCurrencies list, and re-evaluates trigger state for each existing alert.</summary>
         private async Task LoadRatesAsync()
         {
             var liveRates = await Task.Run(() => exchangeService.GetLiveRates());
@@ -185,7 +185,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Deletes the given alert via the service and removes it from the <see cref="Alerts"/> collection.</summary>
+        /// <summary>Deletes the given alert via the service and removes it from the Alerts collection.</summary>
         private void DeleteAlert(object commandParameter)
         {
             var alert = (RateAlert)commandParameter;
@@ -193,7 +193,7 @@ namespace BankingAppTeamB.ViewModels
             Alerts.Remove(alert);
         }
 
-        /// <summary>Marks the matching alert in the <see cref="Alerts"/> collection as triggered when notified by an external source.</summary>
+        /// <summary>Marks the matching alert in the Alerts collection as triggered when notified by an external source.</summary>
         private void OnAlertTriggered(RateAlert alert)
         {
             foreach (var existingAlert in Alerts)

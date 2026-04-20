@@ -203,7 +203,7 @@ public class TransferViewModel : ViewModelBase
     public RelayCommand CancelCommand { get; }
     public RelayCommand SendAgainCommand { get; }
 
-    /// <summary>Populates <see cref="Accounts"/> from the current user session and pre-selects the first account.</summary>
+    /// <summary>Populates Accounts from the current user session and pre-selects the first account.</summary>
     public void LoadAccounts()
     {
         try
@@ -350,7 +350,7 @@ public class TransferViewModel : ViewModelBase
         CurrentStep = AccountSelectionStep;
     }
 
-    /// <summary>Validates <paramref name="iban"/> and updates <see cref="IsIBANValid"/> and <see cref="BankName"/> accordingly.</summary>
+    /// <summary>Validates iban and updates IsIBANValid and BankName accordingly.</summary>
     private void UpdateIBANValidation(string iban)
     {
         try
@@ -373,7 +373,7 @@ public class TransferViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Recalculates and updates <see cref="FxPreviewText"/> to show the converted amount and rate whenever the account, amount, or currency changes.</summary>
+    /// <summary>Recalculates and updates FxPreviewText to show the converted amount and rate whenever the account, amount, or currency changes.</summary>
     private void UpdateFxPreview()
     {
         try
@@ -396,7 +396,7 @@ public class TransferViewModel : ViewModelBase
             else
             {
                 FxPreviewText =
-                    $"{Amount:F2} {SelectedAccount.Currency} → {preview.ConvertedAmount:F2} {Currency} (rate: {preview.ExchangeRate:F4})";
+                    $"{Amount:F2} {SelectedAccount.Currency} â†’ {preview.ConvertedAmount:F2} {Currency} (rate: {preview.ExchangeRate:F4})";
             }
         }
         catch
@@ -405,7 +405,7 @@ public class TransferViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Updates <see cref="Requires2FA"/> based on whether the current amount meets the 2FA threshold.</summary>
+    /// <summary>Updates Requires2FA based on whether the current amount meets the 2FA threshold.</summary>
     private void UpdateRequires2FA()
     {
         try

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -283,7 +283,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Searches the biller directory using the current query and selected category and refreshes the <see cref="Billers"/> collection.</summary>
+        /// <summary>Searches the biller directory using the current query and selected category and refreshes the Billers collection.</summary>
         private void ExecuteSearch()
         {
             try
@@ -302,7 +302,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Sets the selected biller from a clicked <see cref="Biller"/> or <see cref="SavedBiller"/> and advances to the payment details step.</summary>
+        /// <summary>Sets the selected biller from a clicked Biller or SavedBiller and advances to the payment details step.</summary>
         private void ExecuteSelectBiller(object? parameter)
         {
             ErrorMessage = string.Empty;
@@ -521,7 +521,7 @@ namespace BankingAppTeamB.ViewModels
             TwoFAToken = string.Empty;
         }
 
-        /// <summary>Pre-fills <see cref="BillerReference"/> from the matching saved biller's default reference when the biller has been saved before and the reference field is currently empty.</summary>
+        /// <summary>Pre-fills BillerReference from the matching saved biller's default reference when the biller has been saved before and the reference field is currently empty.</summary>
         private void ApplySavedDefaultsForSelectedBiller()
         {
             if (SelectedBiller == null || SavedBillers == null || SavedBillers.Count == MinimumBillers)

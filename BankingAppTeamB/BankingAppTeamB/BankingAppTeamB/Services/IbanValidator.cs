@@ -11,7 +11,7 @@ namespace BankingAppTeamB.Services
         private const int CheckDigitFirstIndex = 2;
         private const int CheckDigitSecondIndex = 3;
 
-        /// <summary>Returns <see langword="true"/> when <paramref name="iban"/> is non-empty, between 15–34 characters, starts with two letters, and has two digits in positions 3–4. Does not verify the checksum.</summary>
+        /// <summary>Returns true when iban is non-empty, between 15 - 34 characters, starts with two letters, and has two digits in positions 3-4. Does not verify the checksum.</summary>
         public static bool Validate(string iban)
         {
             if (string.IsNullOrWhiteSpace(iban))

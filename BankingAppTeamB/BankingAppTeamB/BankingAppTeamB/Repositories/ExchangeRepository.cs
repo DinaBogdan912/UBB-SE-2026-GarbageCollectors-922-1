@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using BankingAppTeamB.Configuration;
 using BankingAppTeamB.Models;
@@ -44,7 +44,7 @@ public class ExchangeRepository : IExchangeRepository
         return exchangeTransaction;
     }
 
-    /// <summary>Returns all exchange transactions for <paramref name="userId"/>, ordered by creation date descending.</summary>
+    /// <summary>Returns all exchange transactions for userId, ordered by creation date descending.</summary>
     public List<ExchangeTransaction> GetByUserId(int userId)
     {
         var exchangeTransactions = new List<ExchangeTransaction>();
@@ -82,7 +82,7 @@ public class ExchangeRepository : IExchangeRepository
         return exchangeTransactions;
     }
 
-    /// <summary>Returns rate alerts for <paramref name="userId"/>, optionally filtered by triggered state.</summary>
+    /// <summary>Returns rate alerts for userId, optionally filtered by triggered state.</summary>
     public List<RateAlert> GetAlertsByUser(int userId, bool? isTriggered = null)
     {
         var rateAlerts = new List<RateAlert>();
@@ -108,7 +108,7 @@ public class ExchangeRepository : IExchangeRepository
         return rateAlerts;
     }
 
-    /// <summary>Hydrates a <see cref="RateAlert"/> from the current row of <paramref name="reader"/>.</summary>
+    /// <summary>Hydrates a RateAlert from the current row of reader.</summary>
     private RateAlert MapRateAlert(SqlDataReader reader)
     {
         return new RateAlert
@@ -172,7 +172,7 @@ public class ExchangeRepository : IExchangeRepository
         return rateAlert;
     }
 
-    /// <summary>Permanently removes the rate alert row with the given <paramref name="rateAlertId"/>.</summary>
+    /// <summary>Permanently removes the rate alert row with the given rateAlertId.</summary>
     public void DeleteAlert(int rateAlertId)
     {
         using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
@@ -184,7 +184,7 @@ public class ExchangeRepository : IExchangeRepository
         command.ExecuteNonQuery();
     }
 
-    /// <summary>Sets <c>IsTriggered = true</c> for the rate alert identified by <paramref name="rateAlertId"/>.</summary>
+    /// <summary>Sets IsTriggered = true for the rate alert identified by rateAlertId.</summary>
     public void MarkAlertTriggered(int rateAlertId)
     {
         using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());

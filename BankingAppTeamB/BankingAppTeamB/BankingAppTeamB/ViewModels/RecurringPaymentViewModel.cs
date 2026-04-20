@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -192,31 +192,31 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Public facade that delegates to <see cref="ExecuteCreateAsync"/> for use in non-command contexts such as tests or code-behind.</summary>
+        /// <summary>Public facade that delegates to ExecuteCreateAsync for use in non-command contexts such as tests or code-behind.</summary>
         public Task CreateAsync()
         {
             return ExecuteCreateAsync();
         }
 
-        /// <summary>Public facade that delegates to <see cref="ExecutePause"/> for use in non-command contexts.</summary>
+        /// <summary>Public facade that delegates to ExecutePause for use in non-command contexts.</summary>
         public void Pause(RecurringPayment? payment)
         {
             ExecutePause(payment);
         }
 
-        /// <summary>Public facade that delegates to <see cref="ExecuteResume"/> for use in non-command contexts.</summary>
+        /// <summary>Public facade that delegates to ExecuteResume for use in non-command contexts.</summary>
         public void Resume(RecurringPayment? payment)
         {
             ExecuteResume(payment);
         }
 
-        /// <summary>Public facade that delegates to <see cref="ExecuteCancel"/> for use in non-command contexts.</summary>
+        /// <summary>Public facade that delegates to ExecuteCancel for use in non-command contexts.</summary>
         public void Cancel(RecurringPayment? payment)
         {
             ExecuteCancel(payment);
         }
 
-        /// <summary>Validates form inputs, creates the recurring payment via the service on a background thread, and adds the result to the <see cref="Payments"/> collection.</summary>
+        /// <summary>Validates form inputs, creates the recurring payment via the service on a background thread, and adds the result to the Payments collection.</summary>
         private async Task ExecuteCreateAsync()
         {
             try
@@ -271,7 +271,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Pauses the recurring payment supplied as <paramref name="parameter"/> and updates its status in the observable collection.</summary>
+        /// <summary>Pauses the recurring payment supplied as parameter and updates its status in the observable collection.</summary>
         private void ExecutePause(object? parameter)
         {
             try
@@ -300,7 +300,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Resumes the recurring payment supplied as <paramref name="parameter"/> and updates its status in the observable collection.</summary>
+        /// <summary>Resumes the recurring payment supplied as parameter and updates its status in the observable collection.</summary>
         private void ExecuteResume(object? parameter)
         {
             try
@@ -329,7 +329,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Cancels the recurring payment supplied as <paramref name="parameter"/> and updates its status in the observable collection.</summary>
+        /// <summary>Cancels the recurring payment supplied as parameter and updates its status in the observable collection.</summary>
         private void ExecuteCancel(object? parameter)
         {
             try

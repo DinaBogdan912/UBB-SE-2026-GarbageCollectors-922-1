@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -82,7 +82,7 @@ namespace BankingAppTeamB.ViewModels
             UseForTransferCommand = new RelayCommand(commandParameter => UseForTransfer(commandParameter as Beneficiary));
         }
 
-        /// <summary>Loads the current user's beneficiaries from the service and refreshes the <see cref="Beneficiaries"/> collection.</summary>
+        /// <summary>Loads the current user's beneficiaries from the service and refreshes the Beneficiaries collection.</summary>
         public async Task LoadAsync()
         {
             List<Beneficiary> beneficiaries = beneficiaryService.GetByUser(currentUserId);
@@ -122,7 +122,7 @@ namespace BankingAppTeamB.ViewModels
             }
         }
 
-        /// <summary>Deletes <paramref name="beneficiary"/> via the service and removes it from the observable collection; no-ops if <paramref name="beneficiary"/> is null.</summary>
+        /// <summary>Deletes beneficiary via the service and removes it from the observable collection; no-ops if beneficiary is null.</summary>
         private void DeleteBeneficiary(Beneficiary beneficiary)
         {
             if (beneficiary == null)
@@ -144,7 +144,7 @@ namespace BankingAppTeamB.ViewModels
             IsAddFormVisible = true;
         }
 
-        /// <summary>Builds a pre-populated <see cref="TransferDto"/> from <paramref name="beneficiary"/> and navigates to the transfer page; no-ops if <paramref name="beneficiary"/> is null.</summary>
+        /// <summary>Builds a pre-populated TransferDto from beneficiary and navigates to the transfer page; no-ops if beneficiary is null.</summary>
         private void UseForTransfer(Beneficiary beneficiary)
         {
             if (beneficiary == null)
