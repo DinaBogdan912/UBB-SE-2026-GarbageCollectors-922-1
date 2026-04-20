@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using BankingAppTeamB.Commands;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Models.DTOs;
-using BankingAppTeamB.Repositories;
 using BankingAppTeamB.Services;
 using BankingAppTeamB.Views;
 
@@ -15,6 +12,8 @@ namespace BankingAppTeamB.ViewModels
 {
     public class BeneficiariesViewModel : ViewModelBase
     {
+        private const int PlaceholderSourceAccountId = 0;
+
         private readonly IBeneficiaryService beneficiaryService;
 
         // Hardcoded for this example.
@@ -84,9 +83,9 @@ namespace BankingAppTeamB.ViewModels
             this.beneficiaryService = beneficiaryService;
 
             // Initialize Commands
-            AddCommand = new AsyncRelayCommand(unusedParameter => AddBeneficiaryAsync());
+            AddCommand = new AsyncRelayCommand(_ => AddBeneficiaryAsync());
             DeleteCommand = new RelayCommand(commandParameter => DeleteBeneficiary(commandParameter as Beneficiary));
-            ShowAddFormCommand = new RelayCommand(unusedParameter => ShowAddForm());
+            ShowAddFormCommand = new RelayCommand(_ => ShowAddForm());
             UseForTransferCommand = new RelayCommand(commandParameter => UseForTransfer(commandParameter as Beneficiary));
         }
         // Methods
@@ -106,11 +105,10 @@ namespace BankingAppTeamB.ViewModels
         private async Task AddBeneficiaryAsync()
         {
             ErrorMessage = string.Empty;
-            // TODO: figure out whatever this shi is
-            // Disclaimer: we got the code like this
+
             try
             {
-                var newBeneficiary = beneficiaryService.Add(NewName, NewIBAN, currentUserId);
+                beneficiaryService.Add(NewName, NewIBAN, currentUserId);
 
                 NewName = string.Empty;
                 NewIBAN = string.Empty;
@@ -156,8 +154,10 @@ namespace BankingAppTeamB.ViewModels
                 return;
             }
 
-            // (0 is the placeholder for SourceAccountId)
-            TransferDto transferDto = beneficiaryService.BuildTransferDtoFrom(beneficiary, 0, currentUserId);
+            TransferDto transferDto = beneficiaryService.BuildTransferDtoFrom(
+                beneficiary,
+                PlaceholderSourceAccountId,
+                currentUserId);
 
             NavigationService.NavigateTo<TransferPage>(transferDto);
         }

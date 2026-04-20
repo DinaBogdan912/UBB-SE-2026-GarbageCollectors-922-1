@@ -21,29 +21,29 @@ namespace BankingAppTeamB.Models
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private bool isTriggered;
+        private bool isAlertTriggered;
 
         public bool IsTriggered
         {
-            get => this.isTriggered;
+            get => this.isAlertTriggered;
             set
             {
-                if (this.isTriggered == value)
+                if (this.isAlertTriggered == value)
                 {
                     return;
                 }
 
-                this.isTriggered = value;
+                this.isAlertTriggered = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTriggered)));
             }
         }
 
-        public RateAlert(int userId, string baseCurrency, string targetCurrency, decimal rate, bool isBuyAlert)
+        public RateAlert(int userId, string baseCurrency, string targetCurrency, decimal targetRate, bool isBuyAlert)
         {
             UserId = userId;
             BaseCurrency = baseCurrency;
             TargetCurrency = targetCurrency;
-            TargetRate = rate;
+            TargetRate = targetRate;
             IsTriggered = false;
             CreatedAt = DateTime.Now;
             IsBuyAlert = isBuyAlert;
@@ -53,34 +53,46 @@ namespace BankingAppTeamB.Models
         {
         }
 
-        public void SetBuyAlert(bool v)
+        public void SetBuyAlertState(bool isBuyAlert)
         {
-            IsBuyAlert = v;
+            IsBuyAlert = isBuyAlert;
         }
 
-        public int GetId()
+        public int GetAlertId()
         {
             return Id;
         }
 
-        public void SetTriggered(bool v)
+        public void SetTriggeredState(bool isTriggered)
         {
-            IsTriggered = v;
+            IsTriggered = isTriggered;
         }
 
-        public decimal GetTargetRate()
+        public decimal GetAlertTargetRate()
         {
             return TargetRate;
         }
 
-        public string GetBaseCurrency()
+        public string GetAlertBaseCurrency()
         {
             return BaseCurrency;
         }
 
-        public string GetTargetCurrency()
+        public string GetAlertTargetCurrency()
         {
             return TargetCurrency;
         }
+
+        public void SetBuyAlert(bool isBuyAlert) => SetBuyAlertState(isBuyAlert);
+
+        public int GetId() => GetAlertId();
+
+        public void SetTriggered(bool isTriggered) => SetTriggeredState(isTriggered);
+
+        public decimal GetTargetRate() => GetAlertTargetRate();
+
+        public string GetBaseCurrency() => GetAlertBaseCurrency();
+
+        public string GetTargetCurrency() => GetAlertTargetCurrency();
     }
 }

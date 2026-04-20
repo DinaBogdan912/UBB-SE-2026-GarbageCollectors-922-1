@@ -19,7 +19,8 @@ namespace BankingAppTeamB.Tests.Services
 
             var rates = service.GetLiveRates();
 
-            Assert.Equal(10, rates.Count);    }
+            Assert.Equal(10, rates.Count);
+        }
 
         [Fact]
         public void GetLiveRates_SecondCallWithinCacheDuration_ReturnsSameReference()
@@ -392,7 +393,7 @@ namespace BankingAppTeamB.Tests.Services
         private static T GetPrivateField<T>(object instance, string fieldName)
         {
             var field = instance.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-            return (T)field!.GetValue(instance)!;
+            return (T)field!.GetValue(instance) !;
         }
     }
 }

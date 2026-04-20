@@ -14,7 +14,7 @@ namespace BankingAppTeamB
             InitializeComponent();
         }
 
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs launchActivatedEventArgs)
         {
             try
             {

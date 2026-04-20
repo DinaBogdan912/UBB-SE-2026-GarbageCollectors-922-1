@@ -7,6 +7,8 @@ namespace BankingAppTeamB.Configuration;
 
 public static class ServiceLocator
 {
+    private const int RecurringSchedulerIntervalMilliseconds = 30000;
+
     private static ITransactionRepository transactionRepository = new TransactionRepository();
     private static ITransferRepository transferRepository = new TransferRepository();
     private static IBeneficiaryRepository beneficiaryRepository = new BeneficiaryRepository();
@@ -24,11 +26,11 @@ public static class ServiceLocator
     private static IBeneficiaryService beneficiaryService = new BeneficiaryService(beneficiaryRepository);
 
     // mock
-    private static readonly Timer Timer = new Timer(30000) // 30secs
+    private static readonly Timer RecurringSchedulerTimer = new Timer(RecurringSchedulerIntervalMilliseconds)
     {
         AutoReset = true
     };
-    private static RecurringScheduler recurringScheduler = new RecurringScheduler(recurringPaymentService, exchangeService, Timer);
+    private static RecurringScheduler recurringScheduler = new RecurringScheduler(recurringPaymentService, exchangeService, RecurringSchedulerTimer);
     public static ITransferService TransferService => transferService;
     public static IExchangeService ExchangeService => exchangeService;
     public static IBillPaymentService BillPaymentService => billPaymentService;

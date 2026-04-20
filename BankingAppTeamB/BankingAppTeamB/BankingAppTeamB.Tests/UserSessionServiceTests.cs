@@ -6,7 +6,7 @@ namespace BankingAppTeamB.Tests.Services
 {
     public class UserSessionServiceTests
     {
-        private static UserSessionService CreateSut() => new();
+        private static UserSessionService CreateSut() => new ();
 
         [Fact]
         public void CurrentUserId_ShouldBeDefaultValue()

@@ -6,7 +6,7 @@ namespace BankingAppTeamB.Tests.Services
 {
     public class TwoFAServiceTests
     {
-        private static TwoFAService CreateSut() => new();
+        private static TwoFAService CreateSut() => new ();
 
         [Theory]
         [InlineData(999.99, false)]

@@ -8,10 +8,10 @@ namespace BankingAppTeamB.Repositories
         BillPayment Add(BillPayment billPayment);
         List<BillPayment> GetByUserId(int userId);
         List<Biller> GetAllBillers(bool? isActive = null);
-        List<Biller> SearchBillers(string query, string? category, bool? isActive = null);
-        Biller? GetBillerById(int id);
+        List<Biller> SearchBillers(string searchQuery, string? category, bool? isActive = null);
+        Biller? GetBillerById(int billerId);
         List<SavedBiller> GetSavedBillers(int userId);
         void SaveBiller(SavedBiller savedBiller);
-        void DeleteSavedBiller(int id);
+        void DeleteSavedBiller(int savedBillerId);
     }
 }

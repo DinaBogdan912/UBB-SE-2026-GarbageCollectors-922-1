@@ -1,15 +1,15 @@
+using System;
+using System.Collections.Generic;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Services;
 using FluentAssertions;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace BankingAppTeamB.Tests.Services
 {
     public class NotificationServiceTests
     {
-        private static NotificationService CreateSut() => new();
+        private static NotificationService CreateSut() => new ();
 
         [Fact]
         public void NotifyTransferCompleted_DoesNotThrow()
@@ -154,9 +154,9 @@ namespace BankingAppTeamB.Tests.Services
             var sut = CreateSut();
             var payments = new List<RecurringPayment>
             {
-                new() { Id = 1, Amount = 50m,  NextExecutionDate = DateTime.Now.AddHours(6) },
-                new() { Id = 2, Amount = 75m,  NextExecutionDate = DateTime.Now.AddDays(5) },
-                new() { Id = 3, Amount = 100m, NextExecutionDate = DateTime.Now.AddDays(-1) }
+                new () { Id = 1, Amount = 50m,  NextExecutionDate = DateTime.Now.AddHours(6) },
+                new () { Id = 2, Amount = 75m,  NextExecutionDate = DateTime.Now.AddDays(5) },
+                new () { Id = 3, Amount = 100m, NextExecutionDate = DateTime.Now.AddDays(-1) }
             };
 
             Action act = () => sut.CheckAndNotifyDuePayments(payments, TimeSpan.FromDays(1));
@@ -247,9 +247,9 @@ namespace BankingAppTeamB.Tests.Services
             var sut = CreateSut();
             var alerts = new List<RateAlert>
             {
-                new() { BaseCurrency = "USD", TargetCurrency = "RON", TargetRate = 4.5m, IsTriggered = false },
-                new() { BaseCurrency = "EUR", TargetCurrency = "RON", TargetRate = 5.0m, IsTriggered = true },
-                new() { BaseCurrency = "GBP", TargetCurrency = "RON", TargetRate = 6.0m, IsTriggered = false }
+                new () { BaseCurrency = "USD", TargetCurrency = "RON", TargetRate = 4.5m, IsTriggered = false },
+                new () { BaseCurrency = "EUR", TargetCurrency = "RON", TargetRate = 5.0m, IsTriggered = true },
+                new () { BaseCurrency = "GBP", TargetCurrency = "RON", TargetRate = 6.0m, IsTriggered = false }
             };
             var rates = new Dictionary<string, decimal>
             {
