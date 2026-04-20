@@ -270,7 +270,8 @@ public class TransactionPipelineServiceTests
             RelatedEntityId = RelatedEntityId
         };
 
-        var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
+        var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2); // is not magic number
+        // Basically the same as int 2
 
         // Act
         var result = service.RunPipeline(context, MissingTwoFaToken);
@@ -288,7 +289,7 @@ public class TransactionPipelineServiceTests
         result.Status.Should().Be("Completed");
         result.RelatedEntityType.Should().Be(RelatedEntityType);
         result.RelatedEntityId.Should().Be(RelatedEntityId);
-        result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, expectedToleranceForCreationTime);
+        result.CreatedAt.Should().BeCloseTo(DateTime.Now, expectedToleranceForCreationTime);
 
         mockTransactionRepository.Verify(r => r.Add(It.IsAny<Transaction>()), Times.Once);
     }
