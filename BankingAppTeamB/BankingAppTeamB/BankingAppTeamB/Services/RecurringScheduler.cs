@@ -20,10 +20,6 @@ namespace BankingAppTeamB.Services
             this.timer.Elapsed += OnTick;
         }
 
-        public void SetExchangeService(ExchangeService exchangeService)
-        {
-        }
-
         public void Start()
         {
             timer.Start();
@@ -44,18 +40,18 @@ namespace BankingAppTeamB.Services
             {
                 recurringPaymentService.ProcessDuePayments();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Debug.WriteLine($"[RecurringScheduler] ProcessDuePayments failed: {ex.Message}");
+                Debug.WriteLine($"[RecurringScheduler] ProcessDuePayments failed: {exception.Message}");
             }
 
             try
             {
                 exchangeService.CheckRateAlerts();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Debug.WriteLine($"[RecurringScheduler] CheckRateAlerts failed: {ex.Message}");
+                Debug.WriteLine($"[RecurringScheduler] CheckRateAlerts failed: {exception.Message}");
             }
         }
     }

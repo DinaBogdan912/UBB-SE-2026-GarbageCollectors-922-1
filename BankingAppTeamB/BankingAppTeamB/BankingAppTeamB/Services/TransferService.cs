@@ -28,52 +28,52 @@ namespace BankingAppTeamB.Services
             this.exchangeService = exchangeService;
         }
 
-        public Transfer ExecuteTransfer(TransferDto dto)
+        public Transfer ExecuteTransfer(TransferDto transferDto)
         {
-            if (!ValidateIBAN(dto.RecipientIBAN))
+            if (!ValidateIBAN(transferDto.RecipientIBAN))
             {
                 throw new InvalidOperationException("Recipient IBAN is invalid.");
             }
 
             var context = new PipelineContext
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                Amount = dto.Amount,
-                Currency = dto.Currency,
+                UserId = transferDto.UserId,
+                SourceAccountId = transferDto.SourceAccountId,
+                Amount = transferDto.Amount,
+                Currency = transferDto.Currency,
                 Type = "Transfer",
                 Fee = 0,
-                CounterpartyName = dto.RecipientName,
+                CounterpartyName = transferDto.RecipientName,
                 RelatedEntityType = "Transfer",
                 RelatedEntityId = 0
             };
 
-            var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
+            var transaction = transactionPipelineService.RunPipeline(context, transferDto.TwoFAToken);
 
             var transfer = new Transfer
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
+                UserId = transferDto.UserId,
+                SourceAccountId = transferDto.SourceAccountId,
                 TransactionId = transaction.Id,
-                RecipientName = dto.RecipientName,
-                RecipientIBAN = dto.RecipientIBAN,
-                RecipientBankName = GetBankNameFromIBAN(dto.RecipientIBAN),
-                Amount = dto.Amount,
-                Currency = dto.Currency,
+                RecipientName = transferDto.RecipientName,
+                RecipientIBAN = transferDto.RecipientIBAN,
+                RecipientBankName = GetBankNameFromIBAN(transferDto.RecipientIBAN),
+                Amount = transferDto.Amount,
+                Currency = transferDto.Currency,
                 Fee = 0,
-                Reference = dto.Reference,
+                Reference = transferDto.Reference,
                 Status = TransferStatus.Completed,
                 CreatedAt = DateTime.UtcNow
             };
 
             transferRepository.Add(transfer);
 
-            var beneficiaries = beneficiaryRepository.GetByUserId(dto.UserId);
-            var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == dto.RecipientIBAN);
+            var beneficiaries = beneficiaryRepository.GetByUserId(transferDto.UserId);
+            var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == transferDto.RecipientIBAN);
             if (match != null)
             {
                 match.TransferCount++;
-                match.TotalAmountSent += dto.Amount;
+                match.TotalAmountSent += transferDto.Amount;
                 match.LastTransferDate = DateTime.UtcNow;
                 beneficiaryRepository.Update(match);
             }
