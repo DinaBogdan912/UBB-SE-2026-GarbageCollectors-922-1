@@ -358,6 +358,7 @@ public class FXViewModel : ViewModelBase
             ErrorMessage = recalculateException.Message;
         }
     }
+
     private void LockRate(object? commandParameter)
     {
         try

@@ -68,13 +68,22 @@ namespace BankingAppTeamB.Services
             return recurringPaymentRepository.GetByUserId(userId);
         }
 
-        public void Pause(int recurringPaymentId)
+        private RecurringPayment GetRequiredRecurringPayment(int id)
         {
-            var payment = recurringPaymentRepository.GetById(recurringPaymentId);
-            if (payment == null)
+            try
             {
-                throw new InvalidOperationException($"Recurring payment with ID {recurringPaymentId} does not exist.");
+                return recurringPaymentRepository.GetById(id)
+                    ?? throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
             }
+            catch (KeyNotFoundException ex)
+            {
+                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.", ex);
+            }
+        }
+
+        public void Pause(int id)
+        {
+            var payment = GetRequiredRecurringPayment(id);
 
             payment.Status = PaymentStatus.Paused;
             recurringPaymentRepository.Update(payment);
@@ -82,11 +91,7 @@ namespace BankingAppTeamB.Services
 
         public void Resume(int recurringPaymentId)
         {
-            var payment = recurringPaymentRepository.GetById(recurringPaymentId);
-            if (payment == null)
-            {
-                throw new InvalidOperationException($"Recurring payment with ID {recurringPaymentId} does not exist.");
-            }
+            var payment = GetRequiredRecurringPayment(recurringPaymentId);
 
             payment.Status = PaymentStatus.Active;
             recurringPaymentRepository.Update(payment);
@@ -94,11 +99,7 @@ namespace BankingAppTeamB.Services
 
         public void Cancel(int recurringPaymentId)
         {
-            var payment = recurringPaymentRepository.GetById(recurringPaymentId);
-            if (payment == null)
-            {
-                throw new InvalidOperationException($"Recurring payment with ID {recurringPaymentId} does not exist.");
-            }
+            var payment = GetRequiredRecurringPayment(recurringPaymentId);
 
             payment.Status = PaymentStatus.Cancelled;
             recurringPaymentRepository.Update(payment);

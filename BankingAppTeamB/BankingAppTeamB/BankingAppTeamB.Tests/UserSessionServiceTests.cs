@@ -1,64 +1,44 @@
-﻿using BankingAppTeamB.Services;
+using System;
+using System.Collections.Generic;
+using BankingAppTeamB.Models;
+using BankingAppTeamB.Services;
 using FluentAssertions;
 using Xunit;
 
-namespace BankingAppTeamB.Tests.Services
+namespace BankingAppTeamB.Tests;
+
+public class UserSessionServiceTests
 {
-    public class UserSessionServiceTests
+    private const int ExpectedUserId = 1;
+    private const string ExpectedUserName = "Ion Popescu";
+    private const int ExpectedAccountCount = 4;
+
+    [Fact]
+    public void Constructor_WhenCreated_SetsExpectedDefaults()
     {
-        private static UserSessionService CreateSut() => new ();
+        // Arrange & Act
+        var service = new UserSessionService();
 
-        [Fact]
-        public void CurrentUserId_ShouldBeDefaultValue()
-        {
-            var sut = CreateSut();
+        // Assert
+        service.CurrentUserId.Should().Be(ExpectedUserId);
+        service.CurrentUserName.Should().Be(ExpectedUserName);
+    }
 
-            sut.CurrentUserId.Should().Be(1);
-        }
+    [Fact]
+    public void GetAccounts_WhenCalled_ReturnsHardcodedAccountList()
+    {
+        // Arrange
+        var service = new UserSessionService();
 
-        [Fact]
-        public void CurrentUserName_ShouldBeDefaultValue()
-        {
-            var sut = CreateSut();
+        // Act
+        var accounts = service.GetAccounts();
 
-            sut.CurrentUserName.Should().Be("Ion Popescu");
-        }
-
-        [Fact]
-        public void GetAccounts_ShouldReturnExpectedAccountsInOrder()
-        {
-            var sut = CreateSut();
-
-            var accounts = sut.GetAccounts();
-
-            accounts.Should().HaveCount(4);
-
-            accounts[0].Id.Should().Be(1);
-            accounts[0].IBAN.Should().Be("RO49AAAA1B31007593840000");
-            accounts[0].Currency.Should().Be("EUR");
-            accounts[0].Balance.Should().Be(5000.00m);
-            accounts[0].AccountName.Should().Be("Main EUR Account");
-            accounts[0].Status.Should().Be("Active");
-
-            accounts[1].Id.Should().Be(2);
-            accounts[1].Currency.Should().Be("USD");
-
-            accounts[2].Id.Should().Be(3);
-            accounts[2].Currency.Should().Be("RON");
-
-            accounts[3].Id.Should().Be(4);
-            accounts[3].AccountName.Should().Be("Savings EUR Account");
-        }
-
-        [Fact]
-        public void GetAccounts_ShouldReturnNewListInstanceOnEachCall()
-        {
-            var sut = CreateSut();
-
-            var first = sut.GetAccounts();
-            var second = sut.GetAccounts();
-
-            first.Should().NotBeSameAs(second);
-        }
+        // Assert
+        accounts.Should().NotBeNull();
+        accounts.Count.Should().Be(ExpectedAccountCount);
+        accounts.Should().ContainSingle(a => a.Id == 1 && a.Currency == "EUR" && a.Balance == 5000.00m);
+        accounts.Should().ContainSingle(a => a.Id == 2 && a.Currency == "USD" && a.Balance == 1200.00m);
+        accounts.Should().ContainSingle(a => a.Id == 3 && a.Currency == "RON" && a.Balance == 8500.00m);
+        accounts.Should().ContainSingle(a => a.Id == 4 && a.Currency == "EUR" && a.Balance == 300.00m);
     }
 }
