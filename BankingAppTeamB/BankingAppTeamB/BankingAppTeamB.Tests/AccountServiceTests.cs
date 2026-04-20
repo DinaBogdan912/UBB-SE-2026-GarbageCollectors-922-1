@@ -1,13 +1,13 @@
+using System;
 using BankingAppTeamB.Services;
 using FluentAssertions;
-using System;
 using Xunit;
 
 namespace BankingAppTeamB.Tests.Services
 {
     public class AccountServiceTests
     {
-        private AccountService CreateSut() => new();
+        private AccountService CreateSut() => new ();
 
         [Theory]
         [InlineData(0)]
