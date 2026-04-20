@@ -5,11 +5,11 @@ namespace BankingAppTeamB.Repositories
 {
     public interface IBeneficiaryRepository
     {
-        void Add(Beneficiary b);
-        Beneficiary GetById(int id);
-        List<Beneficiary> GetByUserId(int uid);
-        void Update(Beneficiary b);
-        void Delete(int id);
-        bool ExistsByIBAN(int uid, string iban);
+        void Add(Beneficiary beneficiary);
+        Beneficiary GetById(int beneficiaryId);
+        List<Beneficiary> GetByUserId(int userId);
+        void Update(Beneficiary beneficiary);
+        void Delete(int beneficiaryId);
+        bool ExistsByIBAN(int userId, string iban);
     }
 }

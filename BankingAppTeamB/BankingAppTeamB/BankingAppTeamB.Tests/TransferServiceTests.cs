@@ -89,7 +89,7 @@ namespace BankingAppTeamB.Tests.Services
             var sut = CreateSut();
             var fx = sut.GetFxPreview("USD", "usd", 123.45m);
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 123.45m });
+            fx.Should().BeEquivalentTo(new FxPreview { ExchangeRate = 1m, ConvertedAmount = 123.45m });
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace BankingAppTeamB.Tests.Services
             var sut = CreateSut(withExchange: false);
             var fx = sut.GetFxPreview("USD", "EUR", 100m);
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 100m });
+            fx.Should().BeEquivalentTo(new FxPreview { ExchangeRate = 1m, ConvertedAmount = 100m });
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace BankingAppTeamB.Tests.Services
 
             var fx = sut.GetFxPreview("USD", "EUR", 100m);
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 1m, ConvertedAmount = 100m });
+            fx.Should().BeEquivalentTo(new FxPreview { ExchangeRate = 1m, ConvertedAmount = 100m });
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace BankingAppTeamB.Tests.Services
 
             var fx = sut.GetFxPreview("usd", "eur", 10m);
 
-            fx.Should().BeEquivalentTo(new FxPreview { Rate = 0.91337m, ConvertedAmount = 9.13m });
+            fx.Should().BeEquivalentTo(new FxPreview { ExchangeRate = 0.91337m, ConvertedAmount = 9.13m });
         }
 
         [Fact]

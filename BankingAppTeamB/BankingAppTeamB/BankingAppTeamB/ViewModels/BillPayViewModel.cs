@@ -16,6 +16,14 @@ namespace BankingAppTeamB.ViewModels
 {
     public class BillPayViewModel : ViewModelBase
     {
+        private const int SelectBillerStep = 1;
+        private const int PaymentDetailsStep = 2;
+        private const int TwoFactorAuthenticationStep = 3;
+        private const int ReviewAndConfirmStep = 4;
+        private const int PaymentResultStep = 5;
+        private const int MinimumTwoFactorToken = 100000;
+        private const int MaximumTwoFactorTokenExclusive = 1000000;
+
         private readonly IBillPaymentService billPaymentService;
 
         private int currentStep;
@@ -56,8 +64,8 @@ namespace BankingAppTeamB.ViewModels
 
         private string GenerateTwoFAToken()
         {
-            var rnd = new Random();
-            return rnd.Next(100000, 999999).ToString();
+            var random = new Random();
+            return random.Next(MinimumTwoFactorToken, MaximumTwoFactorTokenExclusive).ToString();
         }
 
         private bool shouldSaveBiller;
@@ -69,7 +77,7 @@ namespace BankingAppTeamB.ViewModels
             billers = new ObservableCollection<Biller>();
             savedBillers = new ObservableCollection<SavedBiller>();
             accounts = new ObservableCollection<Account>();
-            currentStep = 1;
+            currentStep = SelectBillerStep;
 
             SearchCommand = new RelayCommand(unusedParameter => ExecuteSearch());
             SelectBillerCommand = new RelayCommand(ExecuteSelectBiller);
@@ -293,7 +301,7 @@ namespace BankingAppTeamB.ViewModels
             if (parameter is Biller biller)
             {
                 SelectedBiller = biller;
-                CurrentStep = 2;
+                CurrentStep = PaymentDetailsStep;
                 return;
             }
 
@@ -306,7 +314,7 @@ namespace BankingAppTeamB.ViewModels
                     BillerReference = savedBiller.DefaultReference!;
                 }
 
-                CurrentStep = 2;
+                CurrentStep = PaymentDetailsStep;
             }
         }
 
@@ -314,7 +322,7 @@ namespace BankingAppTeamB.ViewModels
         {
             ErrorMessage = string.Empty;
 
-            if (CurrentStep == 1)
+            if (CurrentStep == SelectBillerStep)
             {
                 if (SelectedBiller == null)
                 {
@@ -322,11 +330,11 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                CurrentStep = 2;
+                CurrentStep = PaymentDetailsStep;
                 return;
             }
 
-            if (CurrentStep == 2)
+            if (CurrentStep == PaymentDetailsStep)
             {
                 if (SelectedBiller == null)
                 {
@@ -354,11 +362,11 @@ namespace BankingAppTeamB.ViewModels
 
                 Fee = billPaymentService.CalculateFee(Amount);
                 Requires2FA = billPaymentService.Requires2FA(Amount);
-                CurrentStep = Requires2FA ? 3 : 4;
+                CurrentStep = Requires2FA ? TwoFactorAuthenticationStep : ReviewAndConfirmStep;
                 return;
             }
 
-            if (CurrentStep == 3)
+            if (CurrentStep == TwoFactorAuthenticationStep)
             {
                 if (!Is2FAConfirmed)
                 {
@@ -371,7 +379,7 @@ namespace BankingAppTeamB.ViewModels
                     TwoFAToken = GenerateTwoFAToken();
                 }
 
-                CurrentStep = 4;
+                CurrentStep = ReviewAndConfirmStep;
             }
         }
 
@@ -379,15 +387,15 @@ namespace BankingAppTeamB.ViewModels
         {
             ErrorMessage = string.Empty;
 
-            if (CurrentStep > 1)
+            if (CurrentStep > SelectBillerStep)
             {
-                if (CurrentStep == 4 && Requires2FA)
+                if (CurrentStep == ReviewAndConfirmStep && Requires2FA)
                 {
-                    CurrentStep = 3;
+                    CurrentStep = TwoFactorAuthenticationStep;
                 }
-                else if (CurrentStep == 4 && !Requires2FA)
+                else if (CurrentStep == ReviewAndConfirmStep && !Requires2FA)
                 {
-                    CurrentStep = 2;
+                    CurrentStep = PaymentDetailsStep;
                 }
                 else
                 {
@@ -467,7 +475,7 @@ namespace BankingAppTeamB.ViewModels
 
                 ReceiptNumber = result.ReceiptNumber;
                 Fee = result.Fee;
-                CurrentStep = 5;
+                CurrentStep = PaymentResultStep;
             }
             catch (Exception ex)
             {
@@ -483,7 +491,7 @@ namespace BankingAppTeamB.ViewModels
 
         private void ResetFormStateOnly()
         {
-            CurrentStep = 1;
+            CurrentStep = SelectBillerStep;
             SelectedBiller = null;
             SearchQuery = string.Empty;
             SelectedCategory = null;

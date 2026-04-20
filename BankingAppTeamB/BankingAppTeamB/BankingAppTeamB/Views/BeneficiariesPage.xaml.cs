@@ -18,16 +18,16 @@ namespace BankingAppTeamB.Views
             DataContext = new BeneficiariesViewModel(ServiceLocator.BeneficiaryService);
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs navigationEventArgs)
         {
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(navigationEventArgs);
             if (DataContext is BeneficiariesViewModel viewModel)
             {
                 await viewModel.LoadAsync();
             }
         }
 
-        private void CancelAdd_Click(object sender, RoutedEventArgs e)
+        private void CancelAdd_Click(object sender, RoutedEventArgs routedEventArgs)
         {
             if (DataContext is BeneficiariesViewModel viewModel)
             {

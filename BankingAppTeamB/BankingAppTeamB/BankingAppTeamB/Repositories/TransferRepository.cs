@@ -8,9 +8,9 @@ namespace BankingAppTeamB.Repositories
 {
     public class TransferRepository : ITransferRepository
     {
-        public void Add(Transfer t)
+        public void Add(Transfer transfer)
         {
-            string sql = @"
+            string sqlQuery = @"
                 INSERT INTO Transfers
                     (UserId, SourceAccountId, TransactionId, RecipientName, RecipientIBAN,
                      RecipientBankName, Amount, Currency, ConvertedAmount, ExchangeRate,
@@ -24,43 +24,43 @@ namespace BankingAppTeamB.Repositories
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@UserId", t.UserId));
-                    command.Parameters.Add(new SqlParameter("@SourceAccountId", t.SourceAccountId));
+                    command.Parameters.Add(new SqlParameter("@UserId", transfer.UserId));
+                    command.Parameters.Add(new SqlParameter("@SourceAccountId", transfer.SourceAccountId));
                     command.Parameters.Add(new SqlParameter("@TransactionId",
-                        (object?)t.TransactionId ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@RecipientName", t.RecipientName));
-                    command.Parameters.Add(new SqlParameter("@RecipientIBAN", t.RecipientIBAN));
+                        (object?)transfer.TransactionId ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@RecipientName", transfer.RecipientName));
+                    command.Parameters.Add(new SqlParameter("@RecipientIBAN", transfer.RecipientIBAN));
                     command.Parameters.Add(new SqlParameter("@RecipientBankName",
-                        (object?)t.RecipientBankName ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@Amount", t.Amount));
-                    command.Parameters.Add(new SqlParameter("@Currency", t.Currency));
+                        (object?)transfer.RecipientBankName ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@Amount", transfer.Amount));
+                    command.Parameters.Add(new SqlParameter("@Currency", transfer.Currency));
                     command.Parameters.Add(new SqlParameter("@ConvertedAmount",
-                        (object?)t.ConvertedAmount ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@ExchangeRate", (object?)t.ExchangeRate ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@Fee", t.Fee));
-                    command.Parameters.Add(new SqlParameter("@Reference", (object?)t.Reference ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@Status", t.Status));
+                        (object?)transfer.ConvertedAmount ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@ExchangeRate", (object?)transfer.ExchangeRate ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@Fee", transfer.Fee));
+                    command.Parameters.Add(new SqlParameter("@Reference", (object?)transfer.Reference ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@Status", transfer.Status));
                     command.Parameters.Add(new SqlParameter("@EstimatedArrival",
-                        (object?)t.EstimatedArrival ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@CreatedAt", t.CreatedAt));
+                        (object?)transfer.EstimatedArrival ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@CreatedAt", transfer.CreatedAt));
 
-                    t.Id = (int)command.ExecuteScalar();
+                    transfer.Id = (int)command.ExecuteScalar();
                 }
             }
         }
 
-        public Transfer GetById(int id)
+        public Transfer GetById(int transferId)
         {
-            string sql = "SELECT * FROM Transfers WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM Transfers WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", transferId));
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -77,13 +77,13 @@ namespace BankingAppTeamB.Repositories
 
         public List<Transfer> GetByUserId(int userId)
         {
-            string sql = "SELECT * FROM Transfers WHERE UserId = @UserId ORDER BY CreatedAt DESC";
-            var results = new List<Transfer>();
+            string sqlQuery = "SELECT * FROM Transfers WHERE UserId = @UserId ORDER BY CreatedAt DESC";
+            var transfers = new List<Transfer>();
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
                     command.Parameters.Add(new SqlParameter("@UserId", userId));
 
@@ -91,26 +91,26 @@ namespace BankingAppTeamB.Repositories
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapTransfer(reader));
+                            transfers.Add(MapTransfer(reader));
                         }
                     }
                 }
             }
 
-            return results;
+            return transfers;
         }
 
-        public void UpdateStatus(int id, string s)
+        public void UpdateStatus(int transferId, string transferStatus)
         {
-            string sql = "UPDATE Transfers SET Status = @Status WHERE Id = @Id";
+            string sqlQuery = "UPDATE Transfers SET Status = @Status WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Status", s));
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Status", transferStatus));
+                    command.Parameters.Add(new SqlParameter("@Id", transferId));
                     command.ExecuteNonQuery();
                 }
             }

@@ -10,6 +10,8 @@ namespace BankingAppTeamB.Views
 {
     public sealed partial class RecurringPaymentsPage : Page
     {
+        private const decimal ZeroAmount = 0m;
+
         private readonly RecurringPaymentViewModel viewModel;
 
         public RecurringPaymentsPage()
@@ -23,15 +25,15 @@ namespace BankingAppTeamB.Views
             EndDatePicker.Date = DateTimeOffset.Now;
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs navigationEventArgs)
         {
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(navigationEventArgs);
             await viewModel.LoadAsync();
         }
 
         private void AmountNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
-            viewModel.Amount = double.IsNaN(sender.Value) ? 0 : (decimal)sender.Value;
+            viewModel.Amount = double.IsNaN(sender.Value) ? ZeroAmount : (decimal)sender.Value;
         }
 
         private void StartDatePicker_DateChanged(object sender, DatePickerValueChangedEventArgs args)

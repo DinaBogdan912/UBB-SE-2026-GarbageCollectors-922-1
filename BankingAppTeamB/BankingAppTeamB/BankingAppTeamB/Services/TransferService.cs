@@ -131,12 +131,12 @@ namespace BankingAppTeamB.Services
         {
             if (sourceCurrency.Equals(targetCurrency, StringComparison.OrdinalIgnoreCase))
             {
-                return new FxPreview { Rate = 1, ConvertedAmount = amount };
+                return new FxPreview { ExchangeRate = 1, ConvertedAmount = amount };
             }
 
             if (exchangeService == null)
             {
-                return new FxPreview { Rate = 1, ConvertedAmount = amount };
+                return new FxPreview { ExchangeRate = 1, ConvertedAmount = amount };
             }
 
             var rates = exchangeService.GetLiveRates();
@@ -144,13 +144,13 @@ namespace BankingAppTeamB.Services
 
             if (!rates.ContainsKey(pair))
             {
-                return new FxPreview { Rate = 1, ConvertedAmount = amount };
+                return new FxPreview { ExchangeRate = 1, ConvertedAmount = amount };
             }
 
             decimal rate = rates[pair];
             return new FxPreview
             {
-                Rate = rate,
+                ExchangeRate = rate,
                 ConvertedAmount = Math.Round(amount * rate, 2)
             };
         }

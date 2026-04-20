@@ -1,7 +1,5 @@
 using BankingAppTeamB.Models.DTOs;
-using BankingAppTeamB.Services;
 using BankingAppTeamB.ViewModels;
-using BankingAppTeamB.Repositories;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Controls;
 using BankingAppTeamB.Configuration;
@@ -20,19 +18,19 @@ namespace BankingAppTeamB.Views
             this.DataContext = ViewModel;
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs navigationEventArgs)
         {
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(navigationEventArgs);
 
             ViewModel.LoadAccounts();
 
-            if (e.Parameter is TransferDto dto)
+            if (navigationEventArgs.Parameter is TransferDto transferDto)
             {
-                ViewModel.RecipientName = dto.RecipientName;
-                ViewModel.RecipientIBAN = dto.RecipientIBAN;
-                ViewModel.Amount = dto.Amount;
-                ViewModel.Currency = dto.Currency;
-                ViewModel.TwoFAToken = dto.TwoFAToken;
+                ViewModel.RecipientName = transferDto.RecipientName;
+                ViewModel.RecipientIBAN = transferDto.RecipientIBAN;
+                ViewModel.Amount = transferDto.Amount;
+                ViewModel.Currency = transferDto.Currency;
+                ViewModel.TwoFAToken = transferDto.TwoFAToken;
             }
         }
     }

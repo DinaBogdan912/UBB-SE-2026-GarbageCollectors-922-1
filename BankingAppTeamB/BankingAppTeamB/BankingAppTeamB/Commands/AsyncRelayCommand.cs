@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace BankingAppTeamB.Commands
 {
     public class AsyncRelayCommand : ICommand
     {
-        private readonly Func<object?, Task> execute;
+        private readonly Func<object?, Task> executeAsyncAction;
         private bool isExecuting;
 
         public event EventHandler? CanExecuteChanged;
 
-        public AsyncRelayCommand(Func<object?, Task> execute)
+        public AsyncRelayCommand(Func<object?, Task> executeAsyncAction)
         {
-            this.execute = execute;
+            this.executeAsyncAction = executeAsyncAction;
         }
 
         public bool CanExecute(object? parameter) => !isExecuting;
@@ -32,7 +29,7 @@ namespace BankingAppTeamB.Commands
             RaiseCanExecuteChanged();
             try
             {
-                await execute(parameter);
+                await executeAsyncAction(parameter);
             }
             finally
             {

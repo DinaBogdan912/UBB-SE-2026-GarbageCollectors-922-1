@@ -8,12 +8,14 @@ namespace BankingAppTeamB.Repositories;
 
 public class ExchangeRepository : IExchangeRepository
 {
-    public ExchangeTransaction Add(ExchangeTransaction t)
-    {
-        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
-        conn.Open();
+    private const bool TriggeredAlertState = true;
 
-        var query = @"
+    public ExchangeTransaction Add(ExchangeTransaction exchangeTransaction)
+    {
+        using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
+        connection.Open();
+
+        var insertExchangeTransactionSqlQuery = @"
                 INSERT INTO ExchangeTransaction
                 (UserId, SourceAccountId, TargetAccountId, SourceCurrency, TargetCurrency,
                  SourceAmount, TargetAmount, ExchangeRate, Commission, Status, CreatedAt)
@@ -22,45 +24,45 @@ public class ExchangeRepository : IExchangeRepository
                 (@UserId, @SourceAccountId, @TargetAccountId, @SourceCurrency, @TargetCurrency,
                  @SourceAmount, @TargetAmount, @Rate, @Commission, @Status, @CreatedAt)";
 
-        using var cmd = new SqlCommand(query, conn);
+        using var command = new SqlCommand(insertExchangeTransactionSqlQuery, connection);
 
-        cmd.Parameters.AddWithValue("@UserId", t.UserId);
-        cmd.Parameters.AddWithValue("@SourceAccountId", t.SourceAccountId);
-        cmd.Parameters.AddWithValue("@TargetAccountId", t.TargetAccountId);
-        cmd.Parameters.AddWithValue("@SourceCurrency", t.SourceCurrency);
-        cmd.Parameters.AddWithValue("@TargetCurrency", t.TargetCurrency);
-        cmd.Parameters.AddWithValue("@SourceAmount", t.SourceAmount);
-        cmd.Parameters.AddWithValue("@TargetAmount", t.TargetAmount);
-        cmd.Parameters.AddWithValue("@Rate", t.ExchangeRate);
-        cmd.Parameters.AddWithValue("@Commission", t.Commission);
-        cmd.Parameters.AddWithValue("@Status", t.Status);
-        cmd.Parameters.AddWithValue("@CreatedAt", t.CreatedAt);
+        command.Parameters.AddWithValue("@UserId", exchangeTransaction.UserId);
+        command.Parameters.AddWithValue("@SourceAccountId", exchangeTransaction.SourceAccountId);
+        command.Parameters.AddWithValue("@TargetAccountId", exchangeTransaction.TargetAccountId);
+        command.Parameters.AddWithValue("@SourceCurrency", exchangeTransaction.SourceCurrency);
+        command.Parameters.AddWithValue("@TargetCurrency", exchangeTransaction.TargetCurrency);
+        command.Parameters.AddWithValue("@SourceAmount", exchangeTransaction.SourceAmount);
+        command.Parameters.AddWithValue("@TargetAmount", exchangeTransaction.TargetAmount);
+        command.Parameters.AddWithValue("@Rate", exchangeTransaction.ExchangeRate);
+        command.Parameters.AddWithValue("@Commission", exchangeTransaction.Commission);
+        command.Parameters.AddWithValue("@Status", exchangeTransaction.Status);
+        command.Parameters.AddWithValue("@CreatedAt", exchangeTransaction.CreatedAt);
 
-        t.Id = (int)cmd.ExecuteScalar();
+        exchangeTransaction.Id = (int)command.ExecuteScalar();
 
-        return t;
+        return exchangeTransaction;
     }
 
     public List<ExchangeTransaction> GetByUserId(int userId)
     {
-        var list = new List<ExchangeTransaction>();
+        var exchangeTransactions = new List<ExchangeTransaction>();
 
-        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
-        conn.Open();
+        using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
+        connection.Open();
 
-        var query = @"
+        var selectExchangeTransactionsByUserSqlQuery = @"
         SELECT * FROM ExchangeTransaction
         WHERE UserId = @UserId
         ORDER BY CreatedAt DESC";
 
-        using var cmd = new SqlCommand(query, conn);
-        cmd.Parameters.AddWithValue("@UserId", userId);
+        using var command = new SqlCommand(selectExchangeTransactionsByUserSqlQuery, connection);
+        command.Parameters.AddWithValue("@UserId", userId);
 
-        using var reader = cmd.ExecuteReader();
+        using var reader = command.ExecuteReader();
 
         while (reader.Read())
         {
-            list.Add(new ExchangeTransaction
+            exchangeTransactions.Add(new ExchangeTransaction
             {
                 Id = (int)reader["Id"],
                 UserId = (int)reader["UserId"],
@@ -75,35 +77,35 @@ public class ExchangeRepository : IExchangeRepository
             });
         }
 
-        return list;
+        return exchangeTransactions;
     }
 
     public List<RateAlert> GetAlertsByUser(int userId, bool? isTriggered = null)
     {
-        var list = new List<RateAlert>();
-        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
-        conn.Open();
+        var rateAlerts = new List<RateAlert>();
+        using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
+        connection.Open();
 
-        var query = @"
+        var selectRateAlertsByUserSqlQuery = @"
         SELECT * FROM RateAlert
         WHERE UserId = @UserId
         AND (@IsTriggered IS NULL OR IsTriggered = @IsTriggered)";
 
-        using var cmd = new SqlCommand(query, conn);
-        cmd.Parameters.AddWithValue("@UserId", userId);
-        cmd.Parameters.AddWithValue("@IsTriggered", (object?)isTriggered ?? DBNull.Value);
+        using var command = new SqlCommand(selectRateAlertsByUserSqlQuery, connection);
+        command.Parameters.AddWithValue("@UserId", userId);
+        command.Parameters.AddWithValue("@IsTriggered", (object?)isTriggered ?? DBNull.Value);
 
-        using var reader = cmd.ExecuteReader();
+        using var reader = command.ExecuteReader();
 
         while (reader.Read())
         {
-            list.Add(MapAlert(reader));
+            rateAlerts.Add(MapRateAlert(reader));
         }
 
-        return list;
+        return rateAlerts;
     }
 
-    private RateAlert MapAlert(SqlDataReader reader)
+    private RateAlert MapRateAlert(SqlDataReader reader)
     {
         return new RateAlert
         {
@@ -120,71 +122,72 @@ public class ExchangeRepository : IExchangeRepository
 
     public List<RateAlert> GetAllAlerts(bool? isTriggered = null)
     {
-        var list = new List<RateAlert>();
-        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
-        conn.Open();
+        var rateAlerts = new List<RateAlert>();
+        using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
+        connection.Open();
 
-        var query = "SELECT * FROM RateAlert WHERE @IsTriggered IS NULL OR IsTriggered = @IsTriggered";
+        var selectAllRateAlertsSqlQuery = "SELECT * FROM RateAlert WHERE @IsTriggered IS NULL OR IsTriggered = @IsTriggered";
 
-        using var cmd = new SqlCommand(query, conn);
-        cmd.Parameters.AddWithValue("@IsTriggered", (object?)isTriggered ?? DBNull.Value);
-        using var reader = cmd.ExecuteReader();
+        using var command = new SqlCommand(selectAllRateAlertsSqlQuery, connection);
+        command.Parameters.AddWithValue("@IsTriggered", (object?)isTriggered ?? DBNull.Value);
+        using var reader = command.ExecuteReader();
 
         while (reader.Read())
         {
-            list.Add(MapAlert(reader));
+            rateAlerts.Add(MapRateAlert(reader));
         }
 
-        return list;
+        return rateAlerts;
     }
 
-    public RateAlert AddAlert(RateAlert alert)
+    public RateAlert AddAlert(RateAlert rateAlert)
     {
-        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
-        conn.Open();
+        using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
+        connection.Open();
 
-        var query = @"
+        var insertRateAlertSqlQuery = @"
         INSERT INTO RateAlert
         (UserId, BaseCurrency, TargetCurrency, TargetRate, isTriggered, isBuyAlert, CreatedAt)
         OUTPUT INSERTED.Id
         VALUES (@UserId, @Base, @Target, @Rate, @IsTriggered, @IsBuyAlert, @CreatedAt)";
 
-        using var cmd = new SqlCommand(query, conn);
+        using var command = new SqlCommand(insertRateAlertSqlQuery, connection);
 
-        cmd.Parameters.AddWithValue("@UserId", alert.UserId);
-        cmd.Parameters.AddWithValue("@Base", alert.BaseCurrency);
-        cmd.Parameters.AddWithValue("@Target", alert.TargetCurrency);
-        cmd.Parameters.AddWithValue("@Rate", alert.TargetRate);
-        cmd.Parameters.AddWithValue("@IsTriggered", alert.IsTriggered);
-        cmd.Parameters.AddWithValue("@CreatedAt", alert.CreatedAt);
-        cmd.Parameters.AddWithValue("@IsBuyAlert", alert.IsBuyAlert);
+        command.Parameters.AddWithValue("@UserId", rateAlert.UserId);
+        command.Parameters.AddWithValue("@Base", rateAlert.BaseCurrency);
+        command.Parameters.AddWithValue("@Target", rateAlert.TargetCurrency);
+        command.Parameters.AddWithValue("@Rate", rateAlert.TargetRate);
+        command.Parameters.AddWithValue("@IsTriggered", rateAlert.IsTriggered);
+        command.Parameters.AddWithValue("@CreatedAt", rateAlert.CreatedAt);
+        command.Parameters.AddWithValue("@IsBuyAlert", rateAlert.IsBuyAlert);
 
-        alert.Id = (int)cmd.ExecuteScalar();
+        rateAlert.Id = (int)command.ExecuteScalar();
 
-        return alert;
+        return rateAlert;
     }
 
-    public void DeleteAlert(int id)
+    public void DeleteAlert(int rateAlertId)
     {
-        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
-        conn.Open();
+        using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
+        connection.Open();
 
-        var cmd = new SqlCommand("DELETE FROM RateAlert WHERE Id = @id", conn);
+        using var command = new SqlCommand("DELETE FROM RateAlert WHERE Id = @Id", connection);
 
-        cmd.Parameters.AddWithValue("@id", id);
-        cmd.ExecuteNonQuery();
+        command.Parameters.AddWithValue("@Id", rateAlertId);
+        command.ExecuteNonQuery();
     }
 
-    public void MarkAlertTriggered(int id)
+    public void MarkAlertTriggered(int rateAlertId)
     {
-        using var conn = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
-        conn.Open();
+        using var connection = new SqlConnection(ConnectionConfigHelper.GetConnectionString());
+        connection.Open();
 
-        var cmd = new SqlCommand(
-            "UPDATE RateAlert SET IsTriggered = 1 WHERE Id = @Id", conn);
+        using var command = new SqlCommand(
+            "UPDATE RateAlert SET IsTriggered = @IsTriggered WHERE Id = @Id", connection);
 
-        cmd.Parameters.AddWithValue("@Id", id);
+        command.Parameters.AddWithValue("@Id", rateAlertId);
+        command.Parameters.AddWithValue("@IsTriggered", TriggeredAlertState);
 
-        cmd.ExecuteNonQuery();
+        command.ExecuteNonQuery();
     }
 }

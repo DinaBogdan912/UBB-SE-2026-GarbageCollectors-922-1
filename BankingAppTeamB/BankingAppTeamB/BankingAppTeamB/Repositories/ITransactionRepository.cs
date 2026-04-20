@@ -5,8 +5,8 @@ namespace BankingAppTeamB.Repositories
 {
     public interface ITransactionRepository
     {
-        void Add(Transaction t);
-        Transaction GetById(int id);
-        List<Transaction> GetByUserId(int uid);
+        void Add(Transaction transaction);
+        Transaction GetById(int transactionId);
+        List<Transaction> GetByUserId(int userId);
     }
 }

@@ -7,10 +7,10 @@ namespace BankingAppTeamB.Repositories
     public interface IRecurringPaymentRepository
     {
         RecurringPayment Add(RecurringPayment recurringPayment);
-        RecurringPayment? GetById(int id);
+        RecurringPayment? GetById(int recurringPaymentId);
         List<RecurringPayment> GetByUserId(int userId);
-        List<RecurringPayment> GetDueBefore(DateTime datetime);
+        List<RecurringPayment> GetDueBefore(DateTime dueBeforeDateTime);
         void Update(RecurringPayment recurringPayment);
-        void Delete(int id);
+        void Delete(int recurringPaymentId);
     }
 }

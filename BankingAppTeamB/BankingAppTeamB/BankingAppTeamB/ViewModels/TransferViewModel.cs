@@ -11,6 +11,19 @@ using BankingAppTeamB.ViewModels;
 
 public class TransferViewModel : ViewModelBase
 {
+    private const int AccountSelectionStep = 1;
+    private const int RecipientDetailsStep = 2;
+    private const int AmountDetailsStep = 3;
+    private const int TwoFactorAuthenticationStep = 4;
+    private const int ReviewAndConfirmationStep = 5;
+    private const int TransferCompletedStep = 6;
+    private const int TransferErrorStep = 7;
+    private const int MinimumTwoFactorToken = 100000;
+    private const int MaximumTwoFactorTokenExclusive = 1000000;
+    private const decimal ZeroAmount = 0m;
+    private const decimal IdentityExchangeRate = 1m;
+    private const string DefaultTransferCurrency = "EUR";
+
     private readonly ITransferService transferService;
 
     public TransferViewModel(ITransferService transferService)
@@ -18,9 +31,9 @@ public class TransferViewModel : ViewModelBase
         this.transferService = transferService ?? throw new ArgumentNullException(nameof(transferService));
 
         Accounts = new ObservableCollection<Account>();
-        CurrentStep = 1;
+        CurrentStep = AccountSelectionStep;
 
-        Currency = "EUR";
+        Currency = DefaultTransferCurrency;
         AmountText = string.Empty;
 
         NextStepCommand = new RelayCommand(unusedParameter => ExecuteNextStep());
@@ -217,40 +230,40 @@ public class TransferViewModel : ViewModelBase
 
     private string GenerateTwoFAToken()
     {
-        var rnd = new Random();
-        return rnd.Next(100000, 999999).ToString();
+        var random = new Random();
+        return random.Next(MinimumTwoFactorToken, MaximumTwoFactorTokenExclusive).ToString();
     }
 
     private void ExecuteNextStep()
     {
         ErrorMessage = string.Empty;
 
-        if (CurrentStep == 2 && !IsIBANValid)
+        if (CurrentStep == RecipientDetailsStep && !IsIBANValid)
         {
             ErrorMessage = "Invalid IBAN format.";
-            CurrentStep = 7;
+            CurrentStep = TransferErrorStep;
             return;
         }
 
-        if (CurrentStep == 3)
+        if (CurrentStep == AmountDetailsStep)
         {
-            if (Amount <= 0)
+            if (Amount <= ZeroAmount)
             {
                 ErrorMessage = "The amount must be greater than 0.";
-                CurrentStep = 7;
+                CurrentStep = TransferErrorStep;
                 return;
             }
 
-            CurrentStep = Requires2FA ? 4 : 5;
+            CurrentStep = Requires2FA ? TwoFactorAuthenticationStep : ReviewAndConfirmationStep;
             return;
         }
 
-        if (CurrentStep == 4)
+        if (CurrentStep == TwoFactorAuthenticationStep)
         {
             if (!Is2FAConfirmed)
             {
                 ErrorMessage = "You must confirm the 2FA step.";
-                CurrentStep = 7;
+                CurrentStep = TransferErrorStep;
                 return;
             }
 
@@ -259,7 +272,7 @@ public class TransferViewModel : ViewModelBase
                 TwoFAToken = GenerateTwoFAToken();
             }
 
-            CurrentStep = 5;
+            CurrentStep = ReviewAndConfirmationStep;
             return;
         }
 
@@ -294,12 +307,12 @@ public class TransferViewModel : ViewModelBase
                 ? $"TXN-{result.CreatedAt:yyyyMMdd}-{result.TransactionId:D4}"
                 : result.Id.ToString();
 
-            CurrentStep = 6;
+            CurrentStep = TransferCompletedStep;
         }
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
-            CurrentStep = 7;
+            CurrentStep = TransferErrorStep;
         }
     }
 
@@ -314,8 +327,8 @@ public class TransferViewModel : ViewModelBase
         RecipientIBAN = string.Empty;
         IsIBANValid = false;
         BankName = string.Empty;
-        Amount = 0;
-        Currency = "EUR";
+        Amount = ZeroAmount;
+        Currency = DefaultTransferCurrency;
         FxPreviewText = string.Empty;
         TwoFAToken = string.Empty;
         Requires2FA = false;
@@ -324,7 +337,7 @@ public class TransferViewModel : ViewModelBase
         ErrorMessage = string.Empty;
         AmountText = string.Empty;
 
-        CurrentStep = 1;
+        CurrentStep = AccountSelectionStep;
     }
 
     private void UpdateIBANValidation(string iban)
@@ -364,14 +377,14 @@ public class TransferViewModel : ViewModelBase
                 Currency,
                 Amount);
 
-            if (preview.Rate == 1)
+            if (preview.ExchangeRate == IdentityExchangeRate)
             {
                 FxPreviewText = $"{Amount:F2} {Currency}";
             }
             else
             {
                 FxPreviewText =
-                    $"{Amount:F2} {SelectedAccount.Currency} → {preview.ConvertedAmount:F2} {Currency} (rate: {preview.Rate:F4})";
+                    $"{Amount:F2} {SelectedAccount.Currency} → {preview.ConvertedAmount:F2} {Currency} (rate: {preview.ExchangeRate:F4})";
             }
         }
         catch

@@ -8,10 +8,10 @@ public static class ConnectionConfigHelper
 {
     public static string GetConnectionString()
     {
-        var config = new ConfigurationBuilder()
+        var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();
 
-        return config.GetConnectionString("BankingApp");
+        return configuration.GetConnectionString("BankingApp");
     }
 }
