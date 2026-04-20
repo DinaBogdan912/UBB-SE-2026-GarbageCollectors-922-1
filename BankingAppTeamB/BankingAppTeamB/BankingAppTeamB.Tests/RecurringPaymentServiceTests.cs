@@ -26,7 +26,7 @@ public class RecurringPaymentServiceTests
     private const int ThreeMonthsIncrement = 3;
     private const int OneYearIncrement = 1;
 
-    private readonly DateTime _baseReferenceDate = new DateTime(2026, 4, 20, 12, 0, 0, DateTimeKind.Utc);
+    private readonly DateTime baseReferenceDate = new DateTime(2026, 4, 20, 12, 0, 0, DateTimeKind.Utc);
 
     [Fact]
     public void ComputeNextRunDate_WhenFrequencyIsDaily_ReturnsNextDay()
@@ -35,10 +35,10 @@ public class RecurringPaymentServiceTests
         var mockRecurringPaymentRepository = new Mock<IRecurringPaymentRepository>();
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
-        var expectedNextRunDate = _baseReferenceDate.AddDays(OneDayIncrement);
+        var expectedNextRunDate = baseReferenceDate.AddDays(OneDayIncrement);
 
         // Act
-        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Daily, _baseReferenceDate);
+        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Daily, baseReferenceDate);
 
         // Assert
         actualNextRunDate.Should().Be(expectedNextRunDate);
@@ -51,10 +51,10 @@ public class RecurringPaymentServiceTests
         var mockRecurringPaymentRepository = new Mock<IRecurringPaymentRepository>();
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
-        var expectedNextRunDate = _baseReferenceDate.AddDays(OneWeekIncrementInDays);
+        var expectedNextRunDate = baseReferenceDate.AddDays(OneWeekIncrementInDays);
 
         // Act
-        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Weekly, _baseReferenceDate);
+        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Weekly, baseReferenceDate);
 
         // Assert
         actualNextRunDate.Should().Be(expectedNextRunDate);
@@ -67,10 +67,10 @@ public class RecurringPaymentServiceTests
         var mockRecurringPaymentRepository = new Mock<IRecurringPaymentRepository>();
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
-        var expectedNextRunDate = _baseReferenceDate.AddDays(TwoWeeksIncrementInDays);
+        var expectedNextRunDate = baseReferenceDate.AddDays(TwoWeeksIncrementInDays);
 
         // Act
-        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.BiWeekly, _baseReferenceDate);
+        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.BiWeekly, baseReferenceDate);
 
         // Assert
         actualNextRunDate.Should().Be(expectedNextRunDate);
@@ -83,10 +83,10 @@ public class RecurringPaymentServiceTests
         var mockRecurringPaymentRepository = new Mock<IRecurringPaymentRepository>();
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
-        var expectedNextRunDate = _baseReferenceDate.AddMonths(OneMonthIncrement);
+        var expectedNextRunDate = baseReferenceDate.AddMonths(OneMonthIncrement);
 
         // Act
-        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Monthly, _baseReferenceDate);
+        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Monthly, baseReferenceDate);
 
         // Assert
         actualNextRunDate.Should().Be(expectedNextRunDate);
@@ -99,10 +99,10 @@ public class RecurringPaymentServiceTests
         var mockRecurringPaymentRepository = new Mock<IRecurringPaymentRepository>();
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
-        var expectedNextRunDate = _baseReferenceDate.AddMonths(ThreeMonthsIncrement);
+        var expectedNextRunDate = baseReferenceDate.AddMonths(ThreeMonthsIncrement);
 
         // Act
-        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Quarterly, _baseReferenceDate);
+        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Quarterly, baseReferenceDate);
 
         // Assert
         actualNextRunDate.Should().Be(expectedNextRunDate);
@@ -115,10 +115,10 @@ public class RecurringPaymentServiceTests
         var mockRecurringPaymentRepository = new Mock<IRecurringPaymentRepository>();
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
-        var expectedNextRunDate = _baseReferenceDate.AddYears(OneYearIncrement);
+        var expectedNextRunDate = baseReferenceDate.AddYears(OneYearIncrement);
 
         // Act
-        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Yearly, _baseReferenceDate);
+        var actualNextRunDate = recurringPaymentService.ComputeNextRunDate(RecurringFrequency.Yearly, baseReferenceDate);
 
         // Assert
         actualNextRunDate.Should().Be(expectedNextRunDate);
@@ -134,7 +134,7 @@ public class RecurringPaymentServiceTests
         var invalidFrequency = (RecurringFrequency)999;
 
         // Act
-        Action computeNextRunDateAction = () => recurringPaymentService.ComputeNextRunDate(invalidFrequency, _baseReferenceDate);
+        Action computeNextRunDateAction = () => recurringPaymentService.ComputeNextRunDate(invalidFrequency, baseReferenceDate);
 
         // Assert
         computeNextRunDateAction.Should().Throw<ArgumentOutOfRangeException>();
@@ -156,11 +156,11 @@ public class RecurringPaymentServiceTests
             Amount = DefaultPaymentAmount,
             IsPayInFull = false,
             Frequency = RecurringFrequency.Monthly,
-            StartDate = _baseReferenceDate,
+            StartDate = baseReferenceDate,
             EndDate = null
         };
 
-        var expectedNextRunDate = _baseReferenceDate.AddMonths(OneMonthIncrement);
+        var expectedNextRunDate = baseReferenceDate.AddMonths(OneMonthIncrement);
         var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
         mockRecurringPaymentRepository
@@ -178,7 +178,7 @@ public class RecurringPaymentServiceTests
         createdRecurringPayment.Amount.Should().Be(DefaultPaymentAmount);
         createdRecurringPayment.IsPayInFull.Should().BeFalse();
         createdRecurringPayment.Frequency.Should().Be(RecurringFrequency.Monthly);
-        createdRecurringPayment.StartDate.Should().Be(_baseReferenceDate);
+        createdRecurringPayment.StartDate.Should().Be(baseReferenceDate);
         createdRecurringPayment.EndDate.Should().BeNull();
         createdRecurringPayment.NextExecutionDate.Should().Be(expectedNextRunDate);
         createdRecurringPayment.Status.Should().Be(PaymentStatus.Active);
@@ -339,7 +339,7 @@ public class RecurringPaymentServiceTests
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
 
-        var pastExecutionDate = _baseReferenceDate.AddDays(-1);
+        var pastExecutionDate = baseReferenceDate.AddDays(-1);
         var expectedNextExecutionDate = pastExecutionDate.AddMonths(OneMonthIncrement);
 
         var dueRecurringPayment = new RecurringPayment
@@ -385,7 +385,7 @@ public class RecurringPaymentServiceTests
         var mockBillPaymentService = new Mock<IBillPaymentService>();
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
 
-        var pastExecutionDate = _baseReferenceDate.AddDays(-1);
+        var pastExecutionDate = baseReferenceDate.AddDays(-1);
 
         var dueRecurringPayment = new RecurringPayment
         {
