@@ -66,9 +66,9 @@ namespace BankingAppTeamB.Services
             billPaymentRepository.SaveBiller(savedBiller);
         }
 
-        public void RemoveSavedBiller(int id)
+        public void RemoveSavedBiller(int savedBillerId)
         {
-            billPaymentRepository.DeleteSavedBiller(id);
+            billPaymentRepository.DeleteSavedBiller(savedBillerId);
         }
 
         public bool Requires2FA(decimal amount)
@@ -82,21 +82,21 @@ namespace BankingAppTeamB.Services
             string uniqueSuffix = Guid.NewGuid().ToString("N")[..receiptSuffixLength].ToUpper();
             return $"RCP-{DateTime.UtcNow:yyyyMMdd}-{uniqueSuffix}";
         }
-        public BillPayment PayBill(BillPaymentDto dto)
+        public BillPayment PayBill(BillPaymentDto billPaymentDto)
         {
-            var biller = billPaymentRepository.GetBillerById(dto.BillerId);
+            var biller = billPaymentRepository.GetBillerById(billPaymentDto.BillerId);
             if (biller == null)
             {
-                throw new InvalidOperationException($"Biller with ID {dto.BillerId} does not exist.");
+                throw new InvalidOperationException($"Biller with ID {billPaymentDto.BillerId} does not exist.");
             }
 
-            decimal fee = CalculateFee(dto.Amount);
+            decimal fee = CalculateFee(billPaymentDto.Amount);
 
             var context = new PipelineContext
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                Amount = dto.Amount,
+                UserId = billPaymentDto.UserId,
+                SourceAccountId = billPaymentDto.SourceAccountId,
+                Amount = billPaymentDto.Amount,
                 Currency = "RON",
                 Type = "BillPayment",
                 Fee = fee,
@@ -105,16 +105,16 @@ namespace BankingAppTeamB.Services
                 RelatedEntityId = 0
             };
 
-            var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
+            var transaction = transactionPipelineService.RunPipeline(context, billPaymentDto.TwoFAToken);
 
             var billPayment = new BillPayment
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                BillerId = dto.BillerId,
+                UserId = billPaymentDto.UserId,
+                SourceAccountId = billPaymentDto.SourceAccountId,
+                BillerId = billPaymentDto.BillerId,
                 TransactionId = transaction.Id,
-                BillerReference = dto.BillerReference,
-                Amount = dto.Amount,
+                BillerReference = billPaymentDto.BillerReference,
+                Amount = billPaymentDto.Amount,
                 Fee = fee,
                 ReceiptNumber = GenerateReceiptNumber(),
                 Status = PaymentStatus.Completed,

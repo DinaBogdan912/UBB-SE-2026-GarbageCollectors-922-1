@@ -66,9 +66,9 @@ namespace BankingAppTeamB.Services
             beneficiaryRepository.Update(beneficiary);
         }
 
-        public void Delete(int id)
+        public void Delete(int beneficiaryId)
         {
-            beneficiaryRepository.Delete(id);
+            beneficiaryRepository.Delete(beneficiaryId);
         }
 
         public TransferDto BuildTransferDtoFrom(Beneficiary beneficiary, int sourceAccountId, int userId)

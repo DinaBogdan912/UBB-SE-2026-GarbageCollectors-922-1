@@ -41,19 +41,19 @@ namespace BankingAppTeamB.Services
             };
         }
 
-        public RecurringPayment Create(RecurringPaymentDto dto)
+        public RecurringPayment Create(RecurringPaymentDto recurringPaymentDto)
         {
             var recurringPayment = new RecurringPayment
             {
-                UserId = dto.UserId,
-                BillerId = dto.BillerId,
-                SourceAccountId = dto.SourceAccountId,
-                Amount = dto.Amount,
-                IsPayInFull = dto.IsPayInFull,
-                Frequency = dto.Frequency,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                NextExecutionDate = ComputeNextRunDate(dto.Frequency, dto.StartDate),
+                UserId = recurringPaymentDto.UserId,
+                BillerId = recurringPaymentDto.BillerId,
+                SourceAccountId = recurringPaymentDto.SourceAccountId,
+                Amount = recurringPaymentDto.Amount,
+                IsPayInFull = recurringPaymentDto.IsPayInFull,
+                Frequency = recurringPaymentDto.Frequency,
+                StartDate = recurringPaymentDto.StartDate,
+                EndDate = recurringPaymentDto.EndDate,
+                NextExecutionDate = ComputeNextRunDate(recurringPaymentDto.Frequency, recurringPaymentDto.StartDate),
                 Status = PaymentStatus.Active,
                 CreatedAt = DateTime.UtcNow
             };
@@ -66,36 +66,36 @@ namespace BankingAppTeamB.Services
             return recurringPaymentRepository.GetByUserId(userId);
         }
 
-        public void Pause(int id)
+        public void Pause(int recurringPaymentId)
         {
-            var payment = recurringPaymentRepository.GetById(id);
+            var payment = recurringPaymentRepository.GetById(recurringPaymentId);
             if (payment == null)
             {
-                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+                throw new InvalidOperationException($"Recurring payment with ID {recurringPaymentId} does not exist.");
             }
 
             payment.Status = PaymentStatus.Paused;
             recurringPaymentRepository.Update(payment);
         }
 
-        public void Resume(int id)
+        public void Resume(int recurringPaymentId)
         {
-            var payment = recurringPaymentRepository.GetById(id);
+            var payment = recurringPaymentRepository.GetById(recurringPaymentId);
             if (payment == null)
             {
-                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+                throw new InvalidOperationException($"Recurring payment with ID {recurringPaymentId} does not exist.");
             }
 
             payment.Status = PaymentStatus.Active;
             recurringPaymentRepository.Update(payment);
         }
 
-        public void Cancel(int id)
+        public void Cancel(int recurringPaymentId)
         {
-            var payment = recurringPaymentRepository.GetById(id);
+            var payment = recurringPaymentRepository.GetById(recurringPaymentId);
             if (payment == null)
             {
-                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+                throw new InvalidOperationException($"Recurring payment with ID {recurringPaymentId} does not exist.");
             }
 
             payment.Status = PaymentStatus.Cancelled;
@@ -112,7 +112,7 @@ namespace BankingAppTeamB.Services
             {
                 try
                 {
-                    var dto = new BillPaymentDto
+                    var billPaymentDto = new BillPaymentDto
                     {
                         UserId = payment.UserId,
                         SourceAccountId = payment.SourceAccountId,
@@ -122,7 +122,7 @@ namespace BankingAppTeamB.Services
                         IsPayInFull = payment.IsPayInFull
                     };
 
-                    billPaymentService.PayBill(dto);
+                    billPaymentService.PayBill(billPaymentDto);
 
                     payment.NextExecutionDate = ComputeNextRunDate(payment.Frequency, payment.NextExecutionDate);
                     recurringPaymentRepository.Update(payment);
