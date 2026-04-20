@@ -18,7 +18,7 @@ public class RecurringPaymentServiceTests
     private const int DefaultBillerId = 10;
     private const int DefaultSourceAccountId = 100;
     private const decimal DefaultPaymentAmount = 150.50m;
-    
+
     private const int OneDayIncrement = 1;
     private const int OneWeekIncrementInDays = 7;
     private const int TwoWeeksIncrementInDays = 14;
@@ -231,7 +231,7 @@ public class RecurringPaymentServiceTests
         // Assert
         pausePaymentAction.Should().Throw<InvalidOperationException>()
             .WithMessage($"Recurring payment with ID {InvalidRecurringPaymentId} does not exist.");
-        
+
         mockRecurringPaymentRepository.Verify(repository => repository.Update(It.IsAny<RecurringPayment>()), Times.Never);
     }
 
@@ -279,7 +279,7 @@ public class RecurringPaymentServiceTests
         // Assert
         resumePaymentAction.Should().Throw<InvalidOperationException>()
             .WithMessage($"Recurring payment with ID {InvalidRecurringPaymentId} does not exist.");
-        
+
         mockRecurringPaymentRepository.Verify(repository => repository.Update(It.IsAny<RecurringPayment>()), Times.Never);
     }
 
@@ -327,7 +327,7 @@ public class RecurringPaymentServiceTests
         // Assert
         cancelPaymentAction.Should().Throw<InvalidOperationException>()
             .WithMessage($"Recurring payment with ID {InvalidRecurringPaymentId} does not exist.");
-        
+
         mockRecurringPaymentRepository.Verify(repository => repository.Update(It.IsAny<RecurringPayment>()), Times.Never);
     }
 
@@ -341,7 +341,7 @@ public class RecurringPaymentServiceTests
 
         var pastExecutionDate = _baseReferenceDate.AddDays(-1);
         var expectedNextExecutionDate = pastExecutionDate.AddMonths(OneMonthIncrement);
-        
+
         var dueRecurringPayment = new RecurringPayment
         {
             Id = ValidRecurringPaymentId,
@@ -365,7 +365,7 @@ public class RecurringPaymentServiceTests
         recurringPaymentService.ProcessDuePayments();
 
         // Assert
-        mockBillPaymentService.Verify(service => service.PayBill(It.Is<BillPaymentDto>(billPaymentDataTransferObject => 
+        mockBillPaymentService.Verify(service => service.PayBill(It.Is<BillPaymentDto>(billPaymentDataTransferObject =>
             billPaymentDataTransferObject.UserId == DefaultUserId &&
             billPaymentDataTransferObject.SourceAccountId == DefaultSourceAccountId &&
             billPaymentDataTransferObject.BillerId == DefaultBillerId &&
@@ -386,7 +386,7 @@ public class RecurringPaymentServiceTests
         var recurringPaymentService = new RecurringPaymentService(mockRecurringPaymentRepository.Object, mockBillPaymentService.Object);
 
         var pastExecutionDate = _baseReferenceDate.AddDays(-1);
-        
+
         var dueRecurringPayment = new RecurringPayment
         {
             Id = ValidRecurringPaymentId,

@@ -172,13 +172,11 @@ public class BillPaymentServiceTests
         service.SaveBiller(DefaultUserId, DefaultBillerId, BillerNickname, BillerReference);
 
         // Assert
-        mockRepository.Verify(r => r.SaveBiller(It.Is<SavedBiller>(sb => 
-            sb.UserId == DefaultUserId &&
+        mockRepository.Verify(r => r.SaveBiller(It.Is<SavedBiller>(sb => sb.UserId == DefaultUserId &&
             sb.BillerId == DefaultBillerId &&
             sb.Nickname == BillerNickname &&
             sb.DefaultReference == BillerReference &&
-            (DateTime.UtcNow - sb.CreatedAt) < expectedToleranceForCreationTime
-        )), Times.Once);
+            (DateTime.UtcNow - sb.CreatedAt) < expectedToleranceForCreationTime)), Times.Once);
     }
 
     [Fact]
@@ -234,7 +232,6 @@ public class BillPaymentServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
         var dto = new BillPaymentDto { BillerId = DefaultBillerId };
-        
         mockRepository.Setup(r => r.GetBillerById(DefaultBillerId)).Returns((Biller)null);
 
         // Act
@@ -252,9 +249,8 @@ public class BillPaymentServiceTests
         var mockRepository = new Mock<IBillPaymentRepository>();
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var service = new BillPaymentService(mockRepository.Object, mockPipelineService.Object);
-        
-        var dto = new BillPaymentDto 
-        { 
+        var dto = new BillPaymentDto
+        {
             UserId = DefaultUserId,
             SourceAccountId = DefaultSourceAccountId,
             BillerId = DefaultBillerId,
@@ -262,16 +258,13 @@ public class BillPaymentServiceTests
             BillerReference = BillerReference,
             TwoFAToken = ValidTwoFaToken
         };
-        
         var biller = new Biller { Id = DefaultBillerId, Name = BillerName };
         var transaction = new Transaction { Id = 123 };
-        
         mockRepository.Setup(r => r.GetBillerById(DefaultBillerId)).Returns(biller);
         mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), ValidTwoFaToken)).Returns(transaction);
-        
         var expectedBillPayment = new BillPayment
         {
-            Id = 456 ,
+            Id = 456,
             BillerReference = BillerReference,
             ReceiptNumber = "some-receipt"
         };
@@ -282,8 +275,7 @@ public class BillPaymentServiceTests
 
         // Assert
         result.Should().Be(expectedBillPayment);
-        
-        mockRepository.Verify(r => r.Add(It.Is<BillPayment>(bp => 
+        mockRepository.Verify(r => r.Add(It.Is<BillPayment>(bp =>
             bp.UserId == DefaultUserId &&
             bp.SourceAccountId == DefaultSourceAccountId &&
             bp.BillerId == DefaultBillerId &&
@@ -292,7 +284,6 @@ public class BillPaymentServiceTests
             bp.Amount == LargePaymentAmount &&
             bp.Fee == StandardPaymentFee &&
             bp.Status == PaymentStatus.Completed &&
-            bp.ReceiptNumber.StartsWith("RCP-")
-        )), Times.Once);
+            bp.ReceiptNumber.StartsWith("RCP-"))), Times.Once);
     }
 }

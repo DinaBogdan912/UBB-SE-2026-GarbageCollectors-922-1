@@ -89,7 +89,7 @@ namespace BankingAppTeamB.Services
 
         public void Resume(int recurringPaymentId)
         {
-            var payment = GetRequiredRecurringPayment(id);
+            var payment = GetRequiredRecurringPayment(recurringPaymentId);
 
             payment.Status = PaymentStatus.Active;
             recurringPaymentRepository.Update(payment);
@@ -97,7 +97,7 @@ namespace BankingAppTeamB.Services
 
         public void Cancel(int recurringPaymentId)
         {
-            var payment = GetRequiredRecurringPayment(id);
+            var payment = GetRequiredRecurringPayment(recurringPaymentId);
 
             payment.Status = PaymentStatus.Cancelled;
             recurringPaymentRepository.Update(payment);

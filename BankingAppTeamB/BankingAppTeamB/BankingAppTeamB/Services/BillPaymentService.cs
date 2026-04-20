@@ -104,9 +104,9 @@ namespace BankingAppTeamB.Services
 
             var context = new PipelineContext
             {
-                UserId = billPaymentDto.UserId,
-                SourceAccountId = billPaymentDto.SourceAccountId,
-                Amount = billPaymentDto.Amount,
+                UserId = dto.UserId,
+                SourceAccountId = dto.SourceAccountId,
+                Amount = dto.Amount,
                 Currency = "RON",
                 Type = "BillPayment",
                 Fee = fee,
@@ -115,16 +115,16 @@ namespace BankingAppTeamB.Services
                 RelatedEntityId = 0
             };
 
-            var transaction = transactionPipelineService.RunPipeline(context, billPaymentDto.TwoFAToken);
+            var transaction = transactionPipelineService.RunPipeline(context, dto.TwoFAToken);
 
             var billPayment = new BillPayment
             {
-                UserId = billPaymentDto.UserId,
-                SourceAccountId = billPaymentDto.SourceAccountId,
-                BillerId = billPaymentDto.BillerId,
+                UserId = dto.UserId,
+                SourceAccountId = dto.SourceAccountId,
+                BillerId = dto.BillerId,
                 TransactionId = transaction.Id,
-                BillerReference = billPaymentDto.BillerReference,
-                Amount = billPaymentDto.Amount,
+                BillerReference = dto.BillerReference,
+                Amount = dto.Amount,
                 Fee = fee,
                 ReceiptNumber = GenerateReceiptNumber(),
                 Status = PaymentStatus.Completed,

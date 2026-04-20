@@ -69,7 +69,7 @@ namespace BankingAppTeamB.Repositories
                     }
                 }
             }
-            throw new KeyNotFoundException($"Transaction with ID {id} was not found.");
+            throw new KeyNotFoundException($"Transaction with ID {transactionId} was not found.");
         }
 
         public List<Transaction> GetByUserId(int userId)

@@ -255,16 +255,13 @@ public class TransactionPipelineServiceTests
         var mockTransactionRepository = new Mock<ITransactionRepository>();
         var mockAccountService = new Mock<IAccountService>();
         var expectedBalance = 500m;
-        
         mockAccountService.Setup(s => s.IsAccountValid(DefaultSourceAccountId)).Returns(true);
         mockAccountService.Setup(s => s.GetBalance(DefaultSourceAccountId)).Returns(expectedBalance);
-        
         var service = new TransactionPipelineService(mockTransactionRepository.Object, mockAccountService.Object);
-        
-        var context = new PipelineContext 
-        { 
-            Amount = ValidAmount, 
-            Currency = ValidCurrency, 
+        var context = new PipelineContext
+        {
+            Amount = ValidAmount,
+            Currency = ValidCurrency,
             SourceAccountId = DefaultSourceAccountId,
             Fee = FeeAmount,
             CounterpartyName = DefaultCounterparty,
@@ -272,7 +269,7 @@ public class TransactionPipelineServiceTests
             RelatedEntityType = RelatedEntityType,
             RelatedEntityId = RelatedEntityId
         };
-        
+
         var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
         // Act

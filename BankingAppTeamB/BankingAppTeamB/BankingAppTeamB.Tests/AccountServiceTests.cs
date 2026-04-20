@@ -74,7 +74,6 @@ public class AccountServiceTests
         // Arrange
         var mockUserSessionService = new Mock<IUserSessionService>();
         var accountService = new AccountService(mockUserSessionService.Object);
-        
         var accountWithInsufficientFunds = new Account
         {
             Id = ValidAccountId,
@@ -98,7 +97,6 @@ public class AccountServiceTests
         // Arrange
         var mockUserSessionService = new Mock<IUserSessionService>();
         var accountService = new AccountService(mockUserSessionService.Object);
-        
         var validAccount = new Account
         {
             Id = ValidAccountId,
@@ -170,7 +168,6 @@ public class AccountServiceTests
         // Arrange
         var mockUserSessionService = new Mock<IUserSessionService>();
         var accountService = new AccountService(mockUserSessionService.Object);
-        
         var validAccount = new Account
         {
             Id = ValidAccountId,
@@ -194,7 +191,6 @@ public class AccountServiceTests
         // Arrange
         var mockUserSessionService = new Mock<IUserSessionService>();
         var accountService = new AccountService(mockUserSessionService.Object);
-        
         var validAccount = new Account
         {
             Id = ValidAccountId
@@ -233,7 +229,6 @@ public class AccountServiceTests
         // Arrange
         var mockUserSessionService = new Mock<IUserSessionService>();
         var accountService = new AccountService(mockUserSessionService.Object);
-        
         var validAccount = new Account
         {
             Id = ValidAccountId,

@@ -58,7 +58,7 @@ namespace BankingAppTeamB.Repositories
                     }
                 }
             }
-            throw new KeyNotFoundException($"Beneficiary with ID {id} was not found.");
+            throw new KeyNotFoundException($"Beneficiary with ID {beneficiaryId} was not found.");
         }
 
         public List<Beneficiary> GetByUserId(int userId)

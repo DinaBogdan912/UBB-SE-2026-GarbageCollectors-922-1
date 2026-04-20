@@ -23,7 +23,7 @@ public class ExchangeServiceTests
     private const string BaseCurrency = "EUR";
     private const string TargetCurrency = "USD";
     private const decimal SeedExchangeRate = 1.15m;
-    
+
     [Fact]
     public void GetLiveRates_WhenCalled_ReturnsRatesDictionary()
     {
@@ -110,7 +110,7 @@ public class ExchangeServiceTests
         result.CurrencyPair.Should().Be($"{BaseCurrency}/{TargetCurrency}");
         result.Rate.Should().Be(SeedExchangeRate);
         result.LockedAt.Should().BeCloseTo(DateTime.Now, expectedToleranceForLockTime);
-        
+
         service.IsRateLockValid(DefaultUserId).Should().BeTrue();
     }
 
@@ -189,7 +189,7 @@ public class ExchangeServiceTests
         var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
         var dto = new ExchangeDto
         {
-            UserId = DefaultUserId, 
+            UserId = DefaultUserId,
             SourceCurrency = BaseCurrency,
             TargetCurrency = TargetCurrency
         };
@@ -210,9 +210,9 @@ public class ExchangeServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
         var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
-        
+
         service.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
-        
+
         var dto = new ExchangeDto
         {
             UserId = DefaultUserId,
@@ -222,10 +222,10 @@ public class ExchangeServiceTests
             TargetCurrency = TargetCurrency,
             SourceAmount = LargeExchangeAmount
         };
-        
+
         var transaction = new Transaction { Id = 123 };
         mockPipelineService.Setup(s => s.RunPipeline(It.IsAny<PipelineContext>(), null)).Returns(transaction);
-        
+
         var expectedToleranceForCreationTime = TimeSpan.FromSeconds(2);
 
         // Act
@@ -244,11 +244,11 @@ public class ExchangeServiceTests
         result.Commission.Should().Be(ExpectedLargeCommission);
         result.Status.Should().Be(TransferStatus.Completed);
         result.CreatedAt.Should().BeCloseTo(DateTime.Now, expectedToleranceForCreationTime);
-        
+
         mockPipelineService.Verify(s => s.RunPipeline(It.IsAny<PipelineContext>(), null), Times.Once);
         mockAccountService.Verify(s => s.CreditAccount(DefaultTargetAccountId, result.TargetAmount), Times.Once);
         mockExchangeRepository.Verify(r => r.Add(It.IsAny<ExchangeTransaction>()), Times.Once);
-        
+
         // Lock should be cleared after execution
         service.IsRateLockValid(DefaultUserId).Should().BeFalse();
     }
@@ -261,7 +261,7 @@ public class ExchangeServiceTests
         var mockPipelineService = new Mock<ITransactionPipelineService>();
         var mockAccountService = new Mock<IAccountService>();
         var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
-        
+
         service.LockRate(DefaultUserId, BaseCurrency, TargetCurrency);
 
         // Act
@@ -299,7 +299,7 @@ public class ExchangeServiceTests
         var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
 
         // Act
-        Action createAction = () => service.CreateAlert(DefaultUserId, "", TargetCurrency, SeedExchangeRate, false);
+        Action createAction = () => service.CreateAlert(DefaultUserId, string.Empty, TargetCurrency, SeedExchangeRate, false);
 
         // Assert
         createAction.Should().Throw<ArgumentException>().WithMessage("Source currency cannot be null or empty.");
@@ -315,7 +315,7 @@ public class ExchangeServiceTests
         var service = new ExchangeService(mockExchangeRepository.Object, mockPipelineService.Object, mockAccountService.Object);
 
         // Act
-        Action createAction = () => service.CreateAlert(DefaultUserId, BaseCurrency, "", SeedExchangeRate, false);
+        Action createAction = () => service.CreateAlert(DefaultUserId, BaseCurrency, string.Empty, SeedExchangeRate, false);
 
         // Assert
         createAction.Should().Throw<ArgumentException>().WithMessage("Target currency cannot be null or empty.");
@@ -369,13 +369,12 @@ public class ExchangeServiceTests
 
         // Assert
         result.Should().Be(expectedAlert);
-        mockExchangeRepository.Verify(r => r.AddAlert(It.Is<RateAlert>(a => 
+        mockExchangeRepository.Verify(r => r.AddAlert(It.Is<RateAlert>(a =>
             a.UserId == DefaultUserId &&
             a.BaseCurrency == BaseCurrency &&
             a.TargetCurrency == TargetCurrency &&
             a.TargetRate == SeedExchangeRate &&
-            a.IsBuyAlert == false
-        )), Times.Once);
+            a.IsBuyAlert == false)), Times.Once);
     }
 
     [Fact]

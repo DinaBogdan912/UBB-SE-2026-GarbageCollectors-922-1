@@ -146,7 +146,7 @@ namespace BankingAppTeamB.Repositories
                     }
                 }
             }
-            throw new KeyNotFoundException($"Biller with ID {id} was not found.");
+            throw new KeyNotFoundException($"Biller with ID {billerId} was not found.");
         }
 
         public List<SavedBiller> GetSavedBillers(int userId)

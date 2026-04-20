@@ -62,7 +62,7 @@ namespace BankingAppTeamB.Repositories
                     }
                 }
             }
-            throw new KeyNotFoundException($"Recurring payment with ID {id} was not found.");
+            throw new KeyNotFoundException($"Recurring payment with ID {recurringPaymentId} was not found.");
         }
 
         public List<RecurringPayment> GetByUserId(int userId)
