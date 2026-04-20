@@ -7,7 +7,7 @@ namespace BankingAppTeamB.Tests.Services
 {
     public class AccountServiceTests
     {
-        private AccountService CreateSut() => new();
+        private static AccountService CreateSut() => new();
 
         [Theory]
         [InlineData(0)]
@@ -15,7 +15,9 @@ namespace BankingAppTeamB.Tests.Services
         public void DebitAccount_WithZeroOrNegativeAmount_ThrowsArgumentOutOfRangeException(decimal amount)
         {
             var sut = CreateSut();
+
             Action act = () => sut.DebitAccount(1, amount);
+
             act.Should().Throw<ArgumentOutOfRangeException>().WithMessage("*Amount must be > 0.*");
         }
 
@@ -23,7 +25,9 @@ namespace BankingAppTeamB.Tests.Services
         public void DebitAccount_WithInvalidAccountId_ThrowsArgumentException()
         {
             var sut = CreateSut();
+
             Action act = () => sut.DebitAccount(999, 100);
+
             act.Should().Throw<ArgumentException>().WithMessage("*Account not found.*");
         }
 
@@ -31,7 +35,9 @@ namespace BankingAppTeamB.Tests.Services
         public void DebitAccount_WithInsufficientFunds_ThrowsInvalidOperationException()
         {
             var sut = CreateSut();
-            Action act = () => sut.DebitAccount(1, 10000); // Balance is 5000
+
+            Action act = () => sut.DebitAccount(1, 10000);
+
             act.Should().Throw<InvalidOperationException>().WithMessage("Insufficient funds.");
         }
 
@@ -39,7 +45,9 @@ namespace BankingAppTeamB.Tests.Services
         public void DebitAccount_WithValidParameters_DoesNotThrow()
         {
             var sut = CreateSut();
+
             Action act = () => sut.DebitAccount(1, 100);
+
             act.Should().NotThrow();
         }
 
@@ -49,7 +57,9 @@ namespace BankingAppTeamB.Tests.Services
         public void CreditAccount_WithZeroOrNegativeAmount_ThrowsArgumentOutOfRangeException(decimal amount)
         {
             var sut = CreateSut();
+
             Action act = () => sut.CreditAccount(1, amount);
+
             act.Should().Throw<ArgumentOutOfRangeException>().WithMessage("*Amount must be > 0.*");
         }
 
@@ -57,7 +67,9 @@ namespace BankingAppTeamB.Tests.Services
         public void CreditAccount_WithInvalidAccountId_ThrowsArgumentException()
         {
             var sut = CreateSut();
+
             Action act = () => sut.CreditAccount(999, 100);
+
             act.Should().Throw<ArgumentException>().WithMessage("*Account not found.*");
         }
 
@@ -65,7 +77,9 @@ namespace BankingAppTeamB.Tests.Services
         public void CreditAccount_WithValidParameters_DoesNotThrow()
         {
             var sut = CreateSut();
+
             Action act = () => sut.CreditAccount(1, 100);
+
             act.Should().NotThrow();
         }
 
@@ -73,14 +87,20 @@ namespace BankingAppTeamB.Tests.Services
         public void IsAccountValid_ReturnsTrue()
         {
             var sut = CreateSut();
-            sut.IsAccountValid(1).Should().BeTrue();
+
+            var isValid = sut.IsAccountValid(1);
+
+            isValid.Should().BeTrue();
         }
 
         [Fact]
         public void GetBalance_ReturnsStubBalance()
         {
             var sut = CreateSut();
-            sut.GetBalance(1).Should().Be(50m);
+
+            var balance = sut.GetBalance(1);
+
+            balance.Should().Be(50m);
         }
     }
 }

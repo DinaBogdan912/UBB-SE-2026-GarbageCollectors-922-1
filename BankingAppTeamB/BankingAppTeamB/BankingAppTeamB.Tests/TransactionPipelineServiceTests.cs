@@ -1,4 +1,4 @@
-﻿using BankingAppTeamB.Mocks;
+using BankingAppTeamB.Mocks;
 using BankingAppTeamB.Models;
 using BankingAppTeamB.Repositories;
 using BankingAppTeamB.Services;
@@ -11,13 +11,13 @@ namespace BankingAppTeamB.Tests.Services
 {
     public class TransactionPipelineServiceTests
     {
-        private readonly Mock<ITransactionRepository> _transactionRepoMock = new();
+        private readonly Mock<ITransactionRepository> _transactionRepositoryMock = new();
         private readonly Mock<IAccountService> _accountServiceMock = new();
         private readonly TransactionPipelineService _sut;
 
         public TransactionPipelineServiceTests()
         {
-            _sut = new TransactionPipelineService(_transactionRepoMock.Object, _accountServiceMock.Object);
+            _sut = new TransactionPipelineService(_transactionRepositoryMock.Object, _accountServiceMock.Object);
         }
 
         private static PipelineContext ValidContext(decimal amount = 100m, decimal fee = 2m, string currency = "USD")
@@ -37,15 +37,18 @@ namespace BankingAppTeamB.Tests.Services
         public void Validate_Fails_WhenAmountIsZero()
         {
             var result = _sut.Validate(ValidContext(amount: 0));
+
             result.IsValid.Should().BeFalse();
         }
 
         [Fact]
         public void Validate_Fails_WhenCurrencyIsNull()
         {
-            var ctx = ValidContext();
-            ctx.Currency = null!;
-            var result = _sut.Validate(ctx);
+            var context = ValidContext();
+            context.Currency = null!;
+
+            var result = _sut.Validate(context);
+
             result.IsValid.Should().BeFalse();
         }
 
@@ -53,16 +56,17 @@ namespace BankingAppTeamB.Tests.Services
         public void Validate_Fails_WhenCurrencyLengthNot3()
         {
             var result = _sut.Validate(ValidContext(currency: "US"));
+
             result.IsValid.Should().BeFalse();
         }
 
         [Fact]
         public void Validate_Fails_WhenSourceAccountInvalid()
         {
-            var ctx = ValidContext();
-            _accountServiceMock.Setup(a => a.IsAccountValid(ctx.SourceAccountId)).Returns(false);
+            var context = ValidContext();
+            _accountServiceMock.Setup(accountService => accountService.IsAccountValid(context.SourceAccountId)).Returns(false);
 
-            var result = _sut.Validate(ctx);
+            var result = _sut.Validate(context);
 
             result.IsValid.Should().BeFalse();
         }
@@ -70,10 +74,10 @@ namespace BankingAppTeamB.Tests.Services
         [Fact]
         public void Validate_Succeeds_WhenInputValid()
         {
-            var ctx = ValidContext();
-            _accountServiceMock.Setup(a => a.IsAccountValid(ctx.SourceAccountId)).Returns(true);
+            var context = ValidContext();
+            _accountServiceMock.Setup(accountService => accountService.IsAccountValid(context.SourceAccountId)).Returns(true);
 
-            var result = _sut.Validate(ctx);
+            var result = _sut.Validate(context);
 
             result.IsValid.Should().BeTrue();
         }
@@ -82,6 +86,7 @@ namespace BankingAppTeamB.Tests.Services
         public void Authorize_Fails_WhenAmountAtLeast1000_AndTokenMissing()
         {
             var result = _sut.Authorize(ValidContext(amount: 1000m), null);
+
             result.IsAuthorized.Should().BeFalse();
         }
 
@@ -89,6 +94,7 @@ namespace BankingAppTeamB.Tests.Services
         public void Authorize_Succeeds_WhenAmountAtLeast1000_WithToken()
         {
             var result = _sut.Authorize(ValidContext(amount: 1000m), "123456");
+
             result.IsAuthorized.Should().BeTrue();
         }
 
@@ -96,6 +102,7 @@ namespace BankingAppTeamB.Tests.Services
         public void Authorize_Succeeds_WhenAmountBelow1000_WithoutToken()
         {
             var result = _sut.Authorize(ValidContext(amount: 999.99m), null);
+
             result.IsAuthorized.Should().BeTrue();
         }
 
@@ -103,23 +110,24 @@ namespace BankingAppTeamB.Tests.Services
         public void Execute_Succeeds_WhenDebitWorks()
         {
             var result = _sut.Execute(ValidContext(amount: 200m, fee: 5m));
+
             result.IsSuccess.Should().BeTrue();
         }
 
         [Fact]
         public void Execute_Debits_AmountPlusFee()
         {
-            var ctx = ValidContext(amount: 200m, fee: 5m);
+            var context = ValidContext(amount: 200m, fee: 5m);
 
-            _sut.Execute(ctx);
+            _sut.Execute(context);
 
-            _accountServiceMock.Verify(a => a.DebitAccount(ctx.SourceAccountId, 205m), Times.Once);
+            _accountServiceMock.Verify(accountService => accountService.DebitAccount(context.SourceAccountId, 205m), Times.Once);
         }
 
         [Fact]
         public void Execute_Fails_WhenDebitThrows()
         {
-            _accountServiceMock.Setup(a => a.DebitAccount(It.IsAny<int>(), It.IsAny<decimal>()))
+            _accountServiceMock.Setup(accountService => accountService.DebitAccount(It.IsAny<int>(), It.IsAny<decimal>()))
                 .Throws(new Exception("Insufficient funds"));
 
             var result = _sut.Execute(ValidContext());
@@ -130,27 +138,28 @@ namespace BankingAppTeamB.Tests.Services
         [Fact]
         public void LogTransaction_CallsRepositoryAdd()
         {
-            var tx = new Transaction();
+            var transaction = new Transaction();
 
-            _sut.LogTransaction(tx);
+            _sut.LogTransaction(transaction);
 
-            _transactionRepoMock.Verify(r => r.Add(tx), Times.Once);
+            _transactionRepositoryMock.Verify(repository => repository.Add(transaction), Times.Once);
         }
 
         [Fact]
         public void RunPipeline_Throws_WhenValidationFails()
         {
             Action act = () => _sut.RunPipeline(ValidContext(amount: 0));
+
             act.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
         public void RunPipeline_Throws_WhenAuthorizationFails()
         {
-            var ctx = ValidContext(amount: 1000m);
-            _accountServiceMock.Setup(a => a.IsAccountValid(ctx.SourceAccountId)).Returns(true);
+            var context = ValidContext(amount: 1000m);
+            _accountServiceMock.Setup(accountService => accountService.IsAccountValid(context.SourceAccountId)).Returns(true);
 
-            Action act = () => _sut.RunPipeline(ctx, null);
+            Action act = () => _sut.RunPipeline(context, null);
 
             act.Should().Throw<InvalidOperationException>();
         }
@@ -158,12 +167,12 @@ namespace BankingAppTeamB.Tests.Services
         [Fact]
         public void RunPipeline_Throws_WhenExecutionFails()
         {
-            var ctx = ValidContext();
-            _accountServiceMock.Setup(a => a.IsAccountValid(ctx.SourceAccountId)).Returns(true);
-            _accountServiceMock.Setup(a => a.DebitAccount(It.IsAny<int>(), It.IsAny<decimal>()))
+            var context = ValidContext();
+            _accountServiceMock.Setup(accountService => accountService.IsAccountValid(context.SourceAccountId)).Returns(true);
+            _accountServiceMock.Setup(accountService => accountService.DebitAccount(It.IsAny<int>(), It.IsAny<decimal>()))
                 .Throws(new Exception("Debit backend down"));
 
-            Action act = () => _sut.RunPipeline(ctx);
+            Action act = () => _sut.RunPipeline(context);
 
             act.Should().Throw<InvalidOperationException>();
         }
@@ -171,11 +180,11 @@ namespace BankingAppTeamB.Tests.Services
         [Fact]
         public void RunPipeline_Succeeds_WhenAllStepsPass()
         {
-            var ctx = ValidContext();
-            _accountServiceMock.Setup(a => a.IsAccountValid(ctx.SourceAccountId)).Returns(true);
-            _accountServiceMock.Setup(a => a.GetBalance(ctx.SourceAccountId)).Returns(5000m);
+            var context = ValidContext();
+            _accountServiceMock.Setup(accountService => accountService.IsAccountValid(context.SourceAccountId)).Returns(true);
+            _accountServiceMock.Setup(accountService => accountService.GetBalance(context.SourceAccountId)).Returns(5000m);
 
-            var result = _sut.RunPipeline(ctx);
+            var result = _sut.RunPipeline(context);
 
             result.Should().NotBeNull();
         }
@@ -183,19 +192,20 @@ namespace BankingAppTeamB.Tests.Services
         [Fact]
         public void RunPipeline_LogsTransaction_WhenAllStepsPass()
         {
-            var ctx = ValidContext();
-            _accountServiceMock.Setup(a => a.IsAccountValid(ctx.SourceAccountId)).Returns(true);
-            _accountServiceMock.Setup(a => a.GetBalance(ctx.SourceAccountId)).Returns(5000m);
+            var context = ValidContext();
+            _accountServiceMock.Setup(accountService => accountService.IsAccountValid(context.SourceAccountId)).Returns(true);
+            _accountServiceMock.Setup(accountService => accountService.GetBalance(context.SourceAccountId)).Returns(5000m);
 
-            _sut.RunPipeline(ctx);
+            _sut.RunPipeline(context);
 
-            _transactionRepoMock.Verify(r => r.Add(It.IsAny<Transaction>()), Times.Once);
+            _transactionRepositoryMock.Verify(repository => repository.Add(It.IsAny<Transaction>()), Times.Once);
         }
 
         [Fact]
         public void GetAccountService_ReturnsInjectedService()
         {
             var result = _sut.GetAccountService();
+
             result.Should().BeSameAs(_accountServiceMock.Object);
         }
     }
