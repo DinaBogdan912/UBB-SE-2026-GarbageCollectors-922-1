@@ -21,7 +21,7 @@ namespace BankingAppTeamB
                 return;
             }
 
-            NavigationViewItem? selectedNavigationItem = args.SelectedItem as NavigationViewItem;
+            NavigationViewItem? selectedNavigationItem = selectionChangedEventArgs.SelectedItem as NavigationViewItem;
             if (selectedNavigationItem == null)
             {
                 return;
