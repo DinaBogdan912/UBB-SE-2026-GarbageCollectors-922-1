@@ -350,7 +350,7 @@ public class FXViewModel : ViewModelBase
         }
     }
 
-    private void LockRate(object? something)
+    private void LockRate(object? unusedParameter)
     {
         try
         {

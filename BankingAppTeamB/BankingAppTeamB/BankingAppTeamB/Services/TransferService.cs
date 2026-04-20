@@ -8,9 +8,8 @@ namespace BankingAppTeamB.Services
 {
     public class TransferService : ITransferService
     {
-        private const int MinimumIbanLength = 15;
-        private const int MaximumIbanLength = 34;
-        private const int TwoFaAmountThreshold = 1000;
+        private const int IbanCountryCodeLength = 2;
+        private const decimal TwoFaAmountThreshold = 1000m;
 
         private readonly ITransferRepository transferRepository;
         private readonly IBeneficiaryRepository beneficiaryRepository;
@@ -69,7 +68,6 @@ namespace BankingAppTeamB.Services
 
             transferRepository.Add(transfer);
 
-            // newly added
             var beneficiaries = beneficiaryRepository.GetByUserId(dto.UserId);
             var match = beneficiaries.Find(beneficiary => beneficiary.IBAN == dto.RecipientIBAN);
             if (match != null)
@@ -79,43 +77,23 @@ namespace BankingAppTeamB.Services
                 match.LastTransferDate = DateTime.UtcNow;
                 beneficiaryRepository.Update(match);
             }
-            // end of newly added
+
             return transfer;
         }
 
         public bool ValidateIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban))
-            {
-                return false;
-            }
-
-            if (iban.Length < MinimumIbanLength || iban.Length > MaximumIbanLength)
-            {
-                return false;
-            }
-
-            if (!char.IsLetter(iban[0]) || !char.IsLetter(iban[1]))
-            {
-                return false;
-            }
-
-            if (!char.IsDigit(iban[2]) || !char.IsDigit(iban[3]))
-            {
-                return false;
-            }
-
-            return true;
+            return IbanValidator.Validate(iban);
         }
 
         public string GetBankNameFromIBAN(string iban)
         {
-            if (string.IsNullOrWhiteSpace(iban) || iban.Length < 2)
+            if (string.IsNullOrWhiteSpace(iban) || iban.Length < IbanCountryCodeLength)
             {
                 return "Unknown Bank";
             }
 
-            string countryCode = iban.Substring(0, 2).ToUpper();
+            string countryCode = iban.Substring(0, IbanCountryCodeLength).ToUpper();
             return countryCode switch
             {
                 "RO" => "Romanian Bank",

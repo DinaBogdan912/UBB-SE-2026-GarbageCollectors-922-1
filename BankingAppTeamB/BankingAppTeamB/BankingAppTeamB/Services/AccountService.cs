@@ -1,14 +1,19 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using BankingAppTeamB.Mocks;
 using BankingAppTeamB.Models;
-using BankingAppTeamB.Mocks;
 
 namespace BankingAppTeamB.Services
 {
     public class AccountService : IAccountService
     {
-        private const int StubAccountBalance = 50;
+        private readonly IUserSessionService userSessionService;
+
+        public AccountService(IUserSessionService userSessionService)
+        {
+            this.userSessionService = userSessionService;
+        }
+
         public void DebitAccount(int accountId, decimal amount)
         {
             if (amount <= 0)
@@ -16,8 +21,8 @@ namespace BankingAppTeamB.Services
                 throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be > 0.");
             }
 
-            var accounts = UserSession.GetAccounts();
-            var account = accounts.SingleOrDefault(account => account.Id == accountId);
+            List<Account> accounts = userSessionService.GetAccounts();
+            Account? account = accounts.SingleOrDefault(account => account.Id == accountId);
 
             if (account == null)
             {
@@ -31,6 +36,7 @@ namespace BankingAppTeamB.Services
 
             account.Balance -= amount;
         }
+
         public void CreditAccount(int accountId, decimal amount)
         {
             if (amount <= 0)
@@ -38,8 +44,8 @@ namespace BankingAppTeamB.Services
                 throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be > 0.");
             }
 
-            var accounts = UserSession.GetAccounts();
-            var account = accounts.SingleOrDefault(account => account.Id == accountId);
+            List<Account> accounts = userSessionService.GetAccounts();
+            Account? account = accounts.SingleOrDefault(account => account.Id == accountId);
 
             if (account == null)
             {
@@ -49,18 +55,17 @@ namespace BankingAppTeamB.Services
             account.Balance += amount;
         }
 
-        public AccountService()
+        public bool IsAccountValid(int accountId)
         {
+            List<Account> accounts = userSessionService.GetAccounts();
+            return accounts.Any(account => account.Id == accountId);
         }
 
-        public bool IsAccountValid(int id)
+        public decimal GetBalance(int accountId)
         {
-            return true;
-        }
-
-        public decimal GetBalance(int id)
-        {
-            return StubAccountBalance;
+            List<Account> accounts = userSessionService.GetAccounts();
+            Account? account = accounts.SingleOrDefault(account => account.Id == accountId);
+            return account?.Balance ?? 0m;
         }
     }
 }

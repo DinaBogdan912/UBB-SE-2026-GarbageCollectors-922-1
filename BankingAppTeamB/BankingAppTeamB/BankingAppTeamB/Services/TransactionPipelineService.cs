@@ -9,19 +9,15 @@ namespace BankingAppTeamB.Services
         private const int ExpectedCurrencyCodeLength = 3;
         private const int TwoFaAmountThreshold = 1000;
 
-        private readonly ITransactionRepository transactionRepo;
+        private readonly ITransactionRepository transactionRepository;
         private readonly IAccountService accountService;
 
-        public TransactionPipelineService(ITransactionRepository transactionRepo, IAccountService accountService)
+        public TransactionPipelineService(ITransactionRepository transactionRepository, IAccountService accountService)
         {
-            this.transactionRepo = transactionRepo;
+            this.transactionRepository = transactionRepository;
             this.accountService = accountService;
         }
 
-        // public TransactionPipelineService(ITransactionRepository transactionRepo)
-        // {
-        //     this.transactionRepo = transactionRepo;
-        // }
         public ValidationResult Validate(PipelineContext ctx)
         {
             if (ctx.Amount <= 0)
@@ -36,7 +32,6 @@ namespace BankingAppTeamB.Services
 
             if (!accountService.IsAccountValid(ctx.SourceAccountId))
             {
-                // if (!AccountService.IsAccountValid(ctx.SourceAccountId))
                 return ValidationResult.Failure("Source account is invalid or does not exist.");
             }
 
@@ -63,7 +58,6 @@ namespace BankingAppTeamB.Services
             {
                 decimal totalDebit = ctx.Amount + ctx.Fee;
                 accountService.DebitAccount(ctx.SourceAccountId, totalDebit);
-                // AccountService.DebitAccount(ctx.SourceAccountId, totalDebit);
                 return ExecutionResult.Success();
             }
             catch (Exception ex)
@@ -72,10 +66,10 @@ namespace BankingAppTeamB.Services
             }
         }
 
-        public Transaction LogTransaction(Transaction tx)
+        public Transaction LogTransaction(Transaction transaction)
         {
-            transactionRepo.Add(tx);
-            return tx;
+            transactionRepository.Add(transaction);
+            return transaction;
         }
 
         public Transaction RunPipeline(PipelineContext ctx, string? twoFAToken = null)
@@ -111,7 +105,6 @@ namespace BankingAppTeamB.Services
                 Amount = ctx.Amount,
                 Currency = ctx.Currency,
                 BalanceAfter = accountService.GetBalance(ctx.SourceAccountId),
-                // BalanceAfter = AccountService.GetBalance(ctx.SourceAccountId),
                 CounterpartyName = ctx.CounterpartyName,
                 Fee = ctx.Fee,
                 Status = "Completed",

@@ -11,6 +11,9 @@ namespace BankingAppTeamB.Services
     {
         private const decimal CommissionRate = 0.005m;
         private const decimal MinimumCommission = 0.50m;
+        private const int ExchangeRatePrecisionDecimals = 2;
+        private const int BaseCurrencyComponentIndex = 0;
+        private const int TargetCurrencyComponentIndex = 1;
 
         private readonly IExchangeRepository exchangeRepository;
         private readonly ITransactionPipelineService transactionPipelineService;
@@ -54,8 +57,8 @@ namespace BankingAppTeamB.Services
             foreach (string currencyPair in keys)
             {
                 string[] currencyComponents = currencyPair.Split('/');
-                string inverseKey = $"{currencyComponents[1]}/{currencyComponents[0]}";
-                rates[inverseKey] = Math.Round(1 / rates[currencyPair], 2);
+                string inverseKey = $"{currencyComponents[TargetCurrencyComponentIndex]}/{currencyComponents[BaseCurrencyComponentIndex]}";
+                rates[inverseKey] = Math.Round(1 / rates[currencyPair], ExchangeRatePrecisionDecimals);
             }
 
             cachedRates = rates;
@@ -63,33 +66,33 @@ namespace BankingAppTeamB.Services
             return cachedRates;
         }
 
-        public decimal GetRate(string from, string to)
+        public decimal GetRate(string sourceCurrency, string targetCurrency)
         {
             Dictionary<string, decimal> rates = GetLiveRates();
-            string key = $"{from}/{to}";
+            string key = $"{sourceCurrency}/{targetCurrency}";
 
             if (rates.ContainsKey(key))
             {
                 return rates[key];
             }
 
-            string inverseKey = $"{to}/{from}";
+            string inverseKey = $"{targetCurrency}/{sourceCurrency}";
             if (rates.ContainsKey(inverseKey))
             {
-                return Math.Round(1 / rates[inverseKey], 2);
+                return Math.Round(1 / rates[inverseKey], ExchangeRatePrecisionDecimals);
             }
 
-            throw new Exception($"Rate not found for pair {from}/{to}");
+            throw new Exception($"Rate not found for pair {sourceCurrency}/{targetCurrency}");
         }
 
-        public LockedRate LockRate(int userId, string from, string to)
+        public LockedRate LockRate(int userId, string sourceCurrency, string targetCurrency)
         {
-            decimal rate = GetRate(from, to);
+            decimal rate = GetRate(sourceCurrency, targetCurrency);
 
             LockedRate lockedRate = new LockedRate
             {
                 UserId = userId,
-                CurrencyPair = $"{from}/{to}",
+                CurrencyPair = $"{sourceCurrency}/{targetCurrency}",
                 Rate = rate,
                 LockedAt = DateTime.Now
             };
@@ -180,19 +183,19 @@ namespace BankingAppTeamB.Services
             return exchangeRepository.GetAlertsByUser(userId, isTriggered: false);
         }
 
-        public RateAlert CreateAlert(int userId, string source, string target, decimal rate, bool isBuyAlert)
+        public RateAlert CreateAlert(int userId, string sourceCurrency, string targetCurrency, decimal rate, bool isBuyAlert)
         {
-            if (string.IsNullOrEmpty(source))
+            if (string.IsNullOrEmpty(sourceCurrency))
             {
                 throw new ArgumentException("Source currency cannot be null or empty.");
             }
 
-            if (string.IsNullOrEmpty(target))
+            if (string.IsNullOrEmpty(targetCurrency))
             {
                 throw new ArgumentException("Target currency cannot be null or empty.");
             }
 
-            if (source.Equals(target))
+            if (sourceCurrency.Equals(targetCurrency))
             {
                 throw new ArgumentException("Source currency cannot be the same as target currency.");
             }
@@ -202,7 +205,7 @@ namespace BankingAppTeamB.Services
                 throw new ArgumentException("Rate cannot be zero or negative.");
             }
 
-            RateAlert rateAlert = new RateAlert(userId, source, target, rate, isBuyAlert);
+            RateAlert rateAlert = new RateAlert(userId, sourceCurrency, targetCurrency, rate, isBuyAlert);
             return exchangeRepository.AddAlert(rateAlert);
         }
 
@@ -217,8 +220,8 @@ namespace BankingAppTeamB.Services
 
             foreach (var alert in activeAlerts)
             {
-                var currentRate = Math.Round(GetRate(alert.BaseCurrency, alert.TargetCurrency), 2);
-                var targetRate = Math.Round(alert.TargetRate, 2);
+                var currentRate = Math.Round(GetRate(alert.BaseCurrency, alert.TargetCurrency), ExchangeRatePrecisionDecimals);
+                var targetRate = Math.Round(alert.TargetRate, ExchangeRatePrecisionDecimals);
 
                 if (alert.IsBuyAlert)
                 {

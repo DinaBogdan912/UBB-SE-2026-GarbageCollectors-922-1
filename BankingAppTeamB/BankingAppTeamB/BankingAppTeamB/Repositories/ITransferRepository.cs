@@ -5,9 +5,9 @@ namespace BankingAppTeamB.Repositories
 {
     public interface ITransferRepository
     {
-        void Add(Transfer t);
+        void Add(Transfer transfer);
         Transfer GetById(int id);
-        List<Transfer> GetByUserId(int uid);
-        void UpdateStatus(int id, string s);
+        List<Transfer> GetByUserId(int userId);
+        void UpdateStatus(int id, string newStatus);
     }
 }

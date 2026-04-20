@@ -12,7 +12,7 @@ namespace BankingAppTeamB.Services
         BillPayment PayBill(BillPaymentDto dto);
         void RemoveSavedBiller(int id);
         bool Requires2FA(decimal amount);
-        void SaveBiller(int userId, int billerId, string? nickname, string? defaultRef);
+        void SaveBiller(int userId, int billerId, string? nickname, string? defaultReference);
         List<Biller> SearchBillers(string query);
         List<Biller> SearchBillers(string query, string? category);
     }

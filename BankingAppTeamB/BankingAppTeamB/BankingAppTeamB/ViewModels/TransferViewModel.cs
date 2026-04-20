@@ -215,10 +215,13 @@ public class TransferViewModel : ViewModelBase
         }
     }
 
+    private const int TwoFaTokenMinValue = 100000;
+    private const int TwoFaTokenMaxValue = 999999;
+
     private string GenerateTwoFAToken()
     {
         var rnd = new Random();
-        return rnd.Next(100000, 999999).ToString();
+        return rnd.Next(TwoFaTokenMinValue, TwoFaTokenMaxValue).ToString();
     }
 
     private void ExecuteNextStep()
