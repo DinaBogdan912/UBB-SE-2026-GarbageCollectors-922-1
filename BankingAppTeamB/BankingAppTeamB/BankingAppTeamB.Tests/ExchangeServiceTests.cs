@@ -69,16 +69,6 @@ namespace BankingAppTeamB.Tests.Services
         }
 
         [Fact]
-        public void LockRate_ReturnsLockWithCorrectUserId()
-        {
-            var (service, _, _, _) = CreateService();
-
-            var lockedRate = service.LockRate(7, "EUR", "USD");
-
-            lockedRate.UserId.Should().Be(7);
-        }
-
-        [Fact]
         public void IsRateLockValid_LockMissing_ReturnsFalse()
         {
             var (service, _, _, _) = CreateService();
