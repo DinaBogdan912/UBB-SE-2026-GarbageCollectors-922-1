@@ -82,13 +82,23 @@ namespace BankingAppTeamB.Services
             string uniqueSuffix = Guid.NewGuid().ToString("N")[..receiptSuffixLength].ToUpper();
             return $"RCP-{DateTime.UtcNow:yyyyMMdd}-{uniqueSuffix}";
         }
+
+        private Biller GetRequiredBiller(int billerId)
+        {
+            try
+            {
+                return billPaymentRepository.GetBillerById(billerId)
+                    ?? throw new InvalidOperationException($"Biller with ID {billerId} does not exist.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new InvalidOperationException($"Biller with ID {billerId} does not exist.", ex);
+            }
+        }
+
         public BillPayment PayBill(BillPaymentDto dto)
         {
-            var biller = billPaymentRepository.GetBillerById(dto.BillerId);
-            if (biller == null)
-            {
-                throw new InvalidOperationException($"Biller with ID {dto.BillerId} does not exist.");
-            }
+            var biller = GetRequiredBiller(dto.BillerId);
 
             decimal fee = CalculateFee(dto.Amount);
 
