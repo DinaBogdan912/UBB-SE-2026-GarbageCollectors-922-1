@@ -27,6 +27,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\BankingAppTeamB\BankingAppTeamB.csproj" />
+	  <ProjectReference Include="..\BankingAppTeamB\BankingAppTeamB.csproj">
+		<AdditionalProperties>WindowsAppSDKSelfContained=false</AdditionalProperties>
+	  </ProjectReference>
 	</ItemGroup>
 </Project>

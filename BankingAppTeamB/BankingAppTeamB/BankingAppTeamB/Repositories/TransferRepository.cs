@@ -72,7 +72,7 @@ namespace BankingAppTeamB.Repositories
                 }
             }
 
-            return null;
+            throw new KeyNotFoundException($"Transfer with ID {id} was not found.");
         }
 
         public List<Transfer> GetByUserId(int userId)

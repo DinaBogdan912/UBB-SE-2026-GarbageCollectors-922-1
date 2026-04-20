@@ -66,13 +66,22 @@ namespace BankingAppTeamB.Services
             return recurringPaymentRepository.GetByUserId(userId);
         }
 
+        private RecurringPayment GetRequiredRecurringPayment(int id)
+        {
+            try
+            {
+                return recurringPaymentRepository.GetById(id)
+                    ?? throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.", ex);
+            }
+        }
+
         public void Pause(int id)
         {
-            var payment = recurringPaymentRepository.GetById(id);
-            if (payment == null)
-            {
-                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
-            }
+            var payment = GetRequiredRecurringPayment(id);
 
             payment.Status = PaymentStatus.Paused;
             recurringPaymentRepository.Update(payment);
@@ -80,11 +89,7 @@ namespace BankingAppTeamB.Services
 
         public void Resume(int id)
         {
-            var payment = recurringPaymentRepository.GetById(id);
-            if (payment == null)
-            {
-                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
-            }
+            var payment = GetRequiredRecurringPayment(id);
 
             payment.Status = PaymentStatus.Active;
             recurringPaymentRepository.Update(payment);
@@ -92,11 +97,7 @@ namespace BankingAppTeamB.Services
 
         public void Cancel(int id)
         {
-            var payment = recurringPaymentRepository.GetById(id);
-            if (payment == null)
-            {
-                throw new InvalidOperationException($"Recurring payment with ID {id} does not exist.");
-            }
+            var payment = GetRequiredRecurringPayment(id);
 
             payment.Status = PaymentStatus.Cancelled;
             recurringPaymentRepository.Update(payment);
