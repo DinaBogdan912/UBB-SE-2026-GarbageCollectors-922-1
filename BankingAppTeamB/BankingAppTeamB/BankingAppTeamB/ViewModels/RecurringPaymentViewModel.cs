@@ -14,6 +14,9 @@ namespace BankingAppTeamB.ViewModels
 {
     public class RecurringPaymentViewModel : ViewModelBase
     {
+        private const int NoBillerSelected = 0;
+        private const decimal NoAmount = 0m;
+
         private readonly IRecurringPaymentService recurringPaymentService;
         private readonly IBillPaymentService billPaymentService;
 
@@ -50,8 +53,8 @@ namespace BankingAppTeamB.ViewModels
             };
 
             selectedPayment = null;
-            selectedBillerId = 0;
-            amount = 0;
+            selectedBillerId = NoBillerSelected;
+            amount = NoAmount;
             frequency = RecurringFrequency.Weekly;
             startDate = DateTime.Today;
             endDate = null;
@@ -153,7 +156,7 @@ namespace BankingAppTeamB.ViewModels
             {
                 if (SetProperty(ref selectedBiller, value))
                 {
-                    SelectedBillerId = value?.Id ?? 0;
+                    SelectedBillerId = value?.Id ?? NoBillerSelected;
                 }
             }
         }
@@ -178,11 +181,11 @@ namespace BankingAppTeamB.ViewModels
                 var payments = await Task.Run(() =>
                     recurringPaymentService.GetByUser(ServiceLocator.UserSessionService.CurrentUserId));
 
-                var billers = await Task.Run(() =>
+                var availableBillers = await Task.Run(() =>
                     billPaymentService.GetBillerDirectory(null));
 
                 Payments = new ObservableCollection<RecurringPayment>(payments);
-                Billers = new ObservableCollection<Biller>(billers);
+                Billers = new ObservableCollection<Biller>(availableBillers);
             }
             catch (Exception ex)
             {
@@ -228,7 +231,7 @@ namespace BankingAppTeamB.ViewModels
                     return;
                 }
 
-                if (Amount <= 0)
+                if (Amount <= NoAmount)
                 {
                     ErrorMessage = "Please enter a valid amount.";
                     return;
@@ -352,9 +355,9 @@ namespace BankingAppTeamB.ViewModels
         {
             SelectedPayment = null;
             SelectedBiller = null;
-            SelectedBillerId = 0;
+            SelectedBillerId = NoBillerSelected;
             SelectedAccount = null;
-            Amount = 0;
+            Amount = NoAmount;
             Frequency = RecurringFrequency.Weekly;
             StartDate = DateTime.Today;
             EndDate = null;

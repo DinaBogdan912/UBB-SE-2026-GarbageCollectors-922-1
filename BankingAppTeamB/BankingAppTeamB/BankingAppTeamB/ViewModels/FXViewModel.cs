@@ -14,6 +14,14 @@ namespace BankingAppTeamB.ViewModels;
 
 public class FXViewModel : ViewModelBase
 {
+    private const int InitialStep = 1;
+    private const int LockedRateStep = 4;
+    private const int ExchangeResultStep = 5;
+    private const int ZeroAmount = 0;
+    private const decimal NoCommission = 0m;
+    private const decimal EqualCurrencyRate = 1m;
+    private const int CountdownTickSeconds = 1;
+
     private readonly IExchangeService exchangeService;
 
     private int currentStep;
@@ -229,7 +237,7 @@ public class FXViewModel : ViewModelBase
 
         ErrorMessage = string.Empty;
 
-        CurrentStep = 1;
+        CurrentStep = InitialStep;
         AmountText = string.Empty;
     }
 
@@ -274,7 +282,7 @@ public class FXViewModel : ViewModelBase
 
             TransactionRef = $"TX-{result.Id}";
 
-            CurrentStep = 5;
+            CurrentStep = ExchangeResultStep;
         }
         catch (Exception ex)
         {
@@ -334,8 +342,8 @@ public class FXViewModel : ViewModelBase
             // Same currency shortcut
             if (SourceCurrency == TargetCurrency)
             {
-                LiveRate = 1;
-                Commission = 0;
+                LiveRate = EqualCurrencyRate;
+                Commission = NoCommission;
                 TargetAmount = Amount;
                 return;
             }
@@ -350,7 +358,11 @@ public class FXViewModel : ViewModelBase
         }
     }
 
+<<<<<<< FilipB-refactor-tests-repo-model
+    private void LockRate(object? commandParameter)
+=======
     private void LockRate(object? unusedParameter)
+>>>>>>> main
     {
         try
         {
@@ -358,7 +370,7 @@ public class FXViewModel : ViewModelBase
 
             lockedRate = exchangeService.LockRate(ServiceLocator.UserSessionService.CurrentUserId, SourceCurrency, TargetCurrency);
 
-            CurrentStep = 4;
+            CurrentStep = LockedRateStep;
 
             StartCountdownTimer();
         }
@@ -379,14 +391,14 @@ public class FXViewModel : ViewModelBase
 
         timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(1)
+            Interval = TimeSpan.FromSeconds(CountdownTickSeconds)
         };
 
         timer.Tick += (timerSender, timerEventArgs) =>
         {
-            SecondsRemaining = lockedRate.SecondsRemaining();
+            SecondsRemaining = lockedRate.GetSecondsRemaining();
 
-            if (SecondsRemaining <= 0)
+            if (SecondsRemaining <= ZeroAmount)
             {
                 timer.Stop();
                 IsRateExpired = true;

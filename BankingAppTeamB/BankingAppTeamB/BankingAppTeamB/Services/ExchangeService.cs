@@ -34,7 +34,6 @@ namespace BankingAppTeamB.Services
             this.accountService = accountService;
         }
 
-        // TODO: Replace hardcoded seed rates with live API call (FR-FX-001)
         private static Dictionary<string, decimal> GetSeedExchangeRates() => new ()
         {
             { "EUR/USD", 1.15m },
@@ -122,43 +121,43 @@ namespace BankingAppTeamB.Services
             return (sourceAmount * rate) - commission;
         }
 
-        public ExchangeTransaction ExecuteExchange(ExchangeDto dto)
+        public ExchangeTransaction ExecuteExchange(ExchangeDto exchangeDto)
         {
-            if (!IsRateLockValid(dto.UserId))
+            if (!IsRateLockValid(exchangeDto.UserId))
             {
                 throw new Exception("No valid rate lock found or the 3-second window has expired.");
             }
 
-            LockedRate lockedRateEntry = lockedRates[dto.UserId];
+            LockedRate lockedRateEntry = lockedRates[exchangeDto.UserId];
 
-            decimal commission = CalculateCommission(dto.SourceAmount);
-            decimal targetAmount = CalculateTargetAmount(dto.SourceAmount, lockedRateEntry.Rate);
+            decimal commission = CalculateCommission(exchangeDto.SourceAmount);
+            decimal targetAmount = CalculateTargetAmount(exchangeDto.SourceAmount, lockedRateEntry.Rate);
 
             PipelineContext context = new PipelineContext
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                Amount = dto.SourceAmount,
-                Currency = dto.SourceCurrency,
+                UserId = exchangeDto.UserId,
+                SourceAccountId = exchangeDto.SourceAccountId,
+                Amount = exchangeDto.SourceAmount,
+                Currency = exchangeDto.SourceCurrency,
                 Type = "Exchange",
                 Fee = 0,
-                CounterpartyName = $"Exchange to {dto.TargetCurrency}",
+                CounterpartyName = $"Exchange to {exchangeDto.TargetCurrency}",
                 RelatedEntityType = "Exchange",
                 RelatedEntityId = 0
             };
 
             Transaction transactionLog = transactionPipelineService.RunPipeline(context);
-            accountService.CreditAccount(dto.TargetAccountId, targetAmount);
+            accountService.CreditAccount(exchangeDto.TargetAccountId, targetAmount);
 
             ExchangeTransaction exchangeTransaction = new ExchangeTransaction
             {
-                UserId = dto.UserId,
-                SourceAccountId = dto.SourceAccountId,
-                TargetAccountId = dto.TargetAccountId,
+                UserId = exchangeDto.UserId,
+                SourceAccountId = exchangeDto.SourceAccountId,
+                TargetAccountId = exchangeDto.TargetAccountId,
                 TransactionId = transactionLog.Id,
-                SourceCurrency = dto.SourceCurrency,
-                TargetCurrency = dto.TargetCurrency,
-                SourceAmount = dto.SourceAmount,
+                SourceCurrency = exchangeDto.SourceCurrency,
+                TargetCurrency = exchangeDto.TargetCurrency,
+                SourceAmount = exchangeDto.SourceAmount,
                 TargetAmount = targetAmount,
                 ExchangeRate = lockedRateEntry.Rate,
                 Commission = commission,
@@ -168,7 +167,7 @@ namespace BankingAppTeamB.Services
             };
 
             exchangeRepository.Add(exchangeTransaction);
-            lockedRates.Remove(dto.UserId);
+            lockedRates.Remove(exchangeDto.UserId);
 
             return exchangeTransaction;
         }
@@ -209,9 +208,9 @@ namespace BankingAppTeamB.Services
             return exchangeRepository.AddAlert(rateAlert);
         }
 
-        public void DeleteAlert(int id)
+        public void DeleteAlert(int alertId)
         {
-            exchangeRepository.DeleteAlert(id);
+            exchangeRepository.DeleteAlert(alertId);
         }
 
         public void CheckRateAlerts()

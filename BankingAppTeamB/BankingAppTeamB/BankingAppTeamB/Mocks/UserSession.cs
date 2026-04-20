@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using BankingAppTeamB.Models;
 
@@ -10,7 +7,9 @@ namespace BankingAppTeamB.Mocks
 {
     public static class UserSession
     {
-        public static int CurrentUserId = 1;
+        private const int DefaultCurrentUserId = 1;
+
+        public static int CurrentUserId = DefaultCurrentUserId;
         public static string CurrentUserName = "Ion Popescu";
 
         public static List<Account> GetAccounts() =>

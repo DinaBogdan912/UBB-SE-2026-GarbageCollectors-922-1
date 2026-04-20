@@ -14,20 +14,20 @@ namespace BankingAppTeamB
             NavigationService.Frame = MainFrame;
         }
 
-        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void NavView_SelectionChanged(NavigationView navigationView, NavigationViewSelectionChangedEventArgs selectionChangedEventArgs)
         {
             if (NavigationService.Frame == null)
             {
                 return;
             }
 
-            var item = args.SelectedItem as NavigationViewItem;
-            if (item == null)
+            var selectedNavigationItem = selectionChangedEventArgs.SelectedItem as NavigationViewItem;
+            if (selectedNavigationItem == null)
             {
                 return;
             }
 
-            switch (item.Tag?.ToString())
+            switch (selectedNavigationItem.Tag?.ToString())
             {
                 case NavigationTags.Transfer: NavigationService.NavigateTo<TransferPage>(); break;
                 case NavigationTags.Beneficiaries: NavigationService.NavigateTo<BeneficiariesPage>(); break;

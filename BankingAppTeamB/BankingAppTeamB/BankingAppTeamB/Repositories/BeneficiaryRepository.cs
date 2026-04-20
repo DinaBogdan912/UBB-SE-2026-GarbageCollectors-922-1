@@ -8,9 +8,9 @@ namespace BankingAppTeamB.Repositories
 {
     public class BeneficiaryRepository : IBeneficiaryRepository
     {
-        public void Add(Beneficiary b)
+        public void Add(Beneficiary beneficiary)
         {
-            string sql = @"
+            string sqlQuery = @"
                 INSERT INTO Beneficiaries
                     (UserId, Name, IBAN, BankName, LastTransferDate,
                      TotalAmountSent, TransferCount, CreatedAt)
@@ -22,32 +22,32 @@ namespace BankingAppTeamB.Repositories
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@UserId", b.UserId));
-                    command.Parameters.Add(new SqlParameter("@Name", b.Name));
-                    command.Parameters.Add(new SqlParameter("@IBAN", b.IBAN));
-                    command.Parameters.Add(new SqlParameter("@BankName", (object?)b.BankName ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@LastTransferDate", (object?)b.LastTransferDate ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@TotalAmountSent", b.TotalAmountSent));
-                    command.Parameters.Add(new SqlParameter("@TransferCount", b.TransferCount));
-                    command.Parameters.Add(new SqlParameter("@CreatedAt", b.CreatedAt));
+                    command.Parameters.Add(new SqlParameter("@UserId", beneficiary.UserId));
+                    command.Parameters.Add(new SqlParameter("@Name", beneficiary.Name));
+                    command.Parameters.Add(new SqlParameter("@IBAN", beneficiary.IBAN));
+                    command.Parameters.Add(new SqlParameter("@BankName", (object?)beneficiary.BankName ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@LastTransferDate", (object?)beneficiary.LastTransferDate ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@TotalAmountSent", beneficiary.TotalAmountSent));
+                    command.Parameters.Add(new SqlParameter("@TransferCount", beneficiary.TransferCount));
+                    command.Parameters.Add(new SqlParameter("@CreatedAt", beneficiary.CreatedAt));
 
-                    b.Id = (int)command.ExecuteScalar();
+                    beneficiary.Id = (int)command.ExecuteScalar();
                 }
             }
         }
 
-        public Beneficiary GetById(int id)
+        public Beneficiary GetById(int beneficiaryId)
         {
-            string sql = "SELECT * FROM Beneficiaries WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM Beneficiaries WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", beneficiaryId));
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -61,33 +61,33 @@ namespace BankingAppTeamB.Repositories
             throw new KeyNotFoundException($"Beneficiary with ID {id} was not found.");
         }
 
-        public List<Beneficiary> GetByUserId(int uid)
+        public List<Beneficiary> GetByUserId(int userId)
         {
-            string sql = "SELECT * FROM Beneficiaries WHERE UserId = @UserId ORDER BY Name ASC";
-            var results = new List<Beneficiary>();
+            string sqlQuery = "SELECT * FROM Beneficiaries WHERE UserId = @UserId ORDER BY Name ASC";
+            var beneficiaries = new List<Beneficiary>();
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@UserId", uid));
+                    command.Parameters.Add(new SqlParameter("@UserId", userId));
 
                     using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            results.Add(MapBeneficiary(reader));
+                            beneficiaries.Add(MapBeneficiary(reader));
                         }
                     }
                 }
             }
-            return results;
+            return beneficiaries;
         }
 
-        public void Update(Beneficiary b)
+        public void Update(Beneficiary beneficiary)
         {
-            string sql = @"
+            string sqlQuery = @"
                 UPDATE Beneficiaries SET
                     Name                = @Name,
                     IBAN                = @IBAN,
@@ -100,47 +100,48 @@ namespace BankingAppTeamB.Repositories
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Name", b.Name));
-                    command.Parameters.Add(new SqlParameter("@IBAN", b.IBAN));
-                    command.Parameters.Add(new SqlParameter("@BankName", (object?)b.BankName ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@LastTransferDate", (object?)b.LastTransferDate ?? DBNull.Value));
-                    command.Parameters.Add(new SqlParameter("@TotalAmountSent", b.TotalAmountSent));
-                    command.Parameters.Add(new SqlParameter("@TransferCount", b.TransferCount));
-                    command.Parameters.Add(new SqlParameter("@Id", b.Id));
+                    command.Parameters.Add(new SqlParameter("@Name", beneficiary.Name));
+                    command.Parameters.Add(new SqlParameter("@IBAN", beneficiary.IBAN));
+                    command.Parameters.Add(new SqlParameter("@BankName", (object?)beneficiary.BankName ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@LastTransferDate", (object?)beneficiary.LastTransferDate ?? DBNull.Value));
+                    command.Parameters.Add(new SqlParameter("@TotalAmountSent", beneficiary.TotalAmountSent));
+                    command.Parameters.Add(new SqlParameter("@TransferCount", beneficiary.TransferCount));
+                    command.Parameters.Add(new SqlParameter("@Id", beneficiary.Id));
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        public void Delete(int id)
+        public void Delete(int beneficiaryId)
         {
-            string sql = "DELETE FROM Beneficiaries WHERE Id = @Id";
+            string sqlQuery = "DELETE FROM Beneficiaries WHERE Id = @Id";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new SqlParameter("@Id", beneficiaryId));
                     command.ExecuteNonQuery();
                 }
             }
         }
 
-        public bool ExistsByIBAN(int uid, string iban)
+        public bool ExistsByIBAN(int userId, string iban)
         {
-            string sql = "SELECT COUNT(1) FROM Beneficiaries WHERE UserId = @UserId AND IBAN = @IBAN";
+            const int noRecordsFound = 0;
+            string sqlQuery = "SELECT COUNT(1) FROM Beneficiaries WHERE UserId = @UserId AND IBAN = @IBAN";
 
             using (var connection = AppDatabase.GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new SqlCommand(sqlQuery, connection))
                 {
-                    command.Parameters.Add(new SqlParameter("@UserId", uid));
+                    command.Parameters.Add(new SqlParameter("@UserId", userId));
                     command.Parameters.Add(new SqlParameter("@IBAN", iban));
-                    return (int)command.ExecuteScalar() > 0;
+                    return (int)command.ExecuteScalar() > noRecordsFound;
                 }
             }
         }

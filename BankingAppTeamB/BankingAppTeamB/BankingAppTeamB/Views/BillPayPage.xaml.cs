@@ -10,6 +10,8 @@ namespace BankingAppTeamB.Views
 {
     public sealed partial class BillPayPage : Page
     {
+        private const decimal ZeroAmount = 0m;
+
         public BillPayViewModel ViewModel { get; }
 
         public BillPayPage()
@@ -19,9 +21,9 @@ namespace BankingAppTeamB.Views
             DataContext = ViewModel;
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs navigationEventArgs)
         {
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(navigationEventArgs);
             await ViewModel.LoadAsync();
         }
 
@@ -62,7 +64,7 @@ namespace BankingAppTeamB.Views
             }
             else
             {
-                ViewModel.Amount = 0;
+                ViewModel.Amount = ZeroAmount;
             }
         }
     }
